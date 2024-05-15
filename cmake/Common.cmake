@@ -18,15 +18,16 @@ macro(no_in_source_builds_guard)
   if (PROJECT_IS_TOP_LEVEL AND (CMAKE_CURRENT_LIST_DIR STREQUAL CMAKE_BINARY_DIR))
     message(FATAL_ERROR
       "\n"
-      "In-source builds are not allowed.\n"
-      "Instead, provide a path to build tree like so:\n"
+      "In-source builds are not allowed. Instead, provide a path to build tree like so:\n"
       "cmake -B <binary-directory>\n"
       "Or use presets with an out-of-source build configuration like so:\n"
       "cmake --preset <preset-name>\n"
       "To remove files you accidentally created execute:\n"
-      "Linux: rm -rf CMakeFiles CMakeCache.txt\n"
+      "NOTE: be careful if you had you own directory and files with same names! Use your version control system to restore your data.\n"
+      "Linux: rm -rf CMakeFiles CMakeCache.txt cmake_install.cmake\n"
       # TODO: check that this command works well in Windows
-      "Windows: rmdir CMakeFiles /s /q && del /q CMakeCache.txt\n"
+      "Windows: rmdir CMakeFiles /s /q && del /q CMakeCache.txt cmake_install.cmake\n"
+      "NOTE: Build generator files may also remain, that is, 'Makefile', 'build.ninja' and so forth.\n"
     )
   endif()
 endmacro()
