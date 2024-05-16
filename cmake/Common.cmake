@@ -13,7 +13,11 @@ function(after_project_guard)
 endfunction()
 
 
-# Prevent in-source builds; prefer to start each listfile with this macro
+#[=============================================================================[
+  Prevent in-source builds. Prefer to start each listfile with this macro.
+  Although, if this project is included as a subproject, the outer project
+  is allowed to build wherever it wants.
+#]=============================================================================]
 macro(no_in_source_builds_guard)
   if (PROJECT_IS_TOP_LEVEL AND (CMAKE_CURRENT_LIST_DIR STREQUAL CMAKE_BINARY_DIR))
     message(FATAL_ERROR
