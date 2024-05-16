@@ -17,6 +17,7 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/Common.cmake")
 no_in_source_builds_guard()
 
 include_project_module(BuildOptions)
+include_project_module(CompilerOptions)
 
 include_project_module(Externals)
 
