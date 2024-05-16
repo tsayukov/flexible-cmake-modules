@@ -15,3 +15,13 @@ project(my-header-only-library
 # related to the project.
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/Common.cmake")
 no_in_source_builds_guard()
+
+include_project_module(BuildOptions)
+
+# TODO: add_library and friends
+
+include_project_module(Docs)
+include_project_module(DeveloperMode)
+
+# TODO: set package name?
+include_project_module(InstallRules)
