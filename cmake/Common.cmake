@@ -1,6 +1,43 @@
 include_guard(GLOBAL)
 
 
+#[=============================================================================[
+  This macro must be called at the end of the current listfile.
+  It checks if the `project()` command is already called, prevents in-source
+  builds inside the 'cmake' directory, and initialize some common variables.
+#]=============================================================================]
+macro(init_common)
+  # This guard should be at the beginning
+  after_project_guard()
+
+  #[===========================================================================[
+    The `PROJECT_IS_TOP_LEVEL` is set by `project()` in CMake 3.21+.
+    Otherwise, the custom version of that variable is used that works
+    in the same way as described in the `PROJECT_IS_TOP_LEVEL` documentation.
+    See: https://cmake.org/cmake/help/latest/variable/PROJECT_IS_TOP_LEVEL.html
+  #]===========================================================================]
+  if (CMAKE_VERSION LESS 3.21)
+    string(COMPARE EQUAL
+      "${CMAKE_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}"
+      PROJECT_IS_TOP_LEVEL
+    )
+  endif()
+
+  #[===========================================================================[
+    The `PROJECT_NAME_UPPER` variable is using to set other global variables.
+    Let's say we have a project called 'my-project' and we'd like to set
+    variables such as `MY_PROJECT_ENABLE_TESTING`. Then we can write more
+    generalized code using `${PROJECT_NAME_UPPER}_ENABLE_TESTING` instead.
+  #]===========================================================================]
+  string(TOUPPER ${PROJECT_NAME} PROJECT_NAME_UPPER)
+  string(REGEX REPLACE "[- ]" "_" PROJECT_NAME_UPPER ${PROJECT_NAME_UPPER})
+  mark_as_advanced(CLEAR PROJECT_NAME_UPPER)
+
+  # And this guard should be at the end
+  no_in_source_builds_guard()
+endmacro()
+
+
 # Prevent including any listfiles before the `project()` command
 function(after_project_guard)
   if (NOT (PROJECT_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR))
@@ -49,19 +86,4 @@ macro(include_project_module module)
 endmacro()
 
 
-#[=============================================================================[
-  The `PROJECT_IS_TOP_LEVEL` is set by `project()` in CMake 3.21+.
-  Otherwise, the custom version of that variable is used that works in the same
-  way as described in the `PROJECT_IS_TOP_LEVEL` documentation.
-  See: https://cmake.org/cmake/help/latest/variable/PROJECT_IS_TOP_LEVEL.html
-#]=============================================================================]
-if (CMAKE_VERSION LESS 3.21)
-  string(COMPARE EQUAL
-    "${CMAKE_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}"
-    PROJECT_IS_TOP_LEVEL
-  )
-endif()
-
-
-after_project_guard()
-no_in_source_builds_guard()
+init_common()
