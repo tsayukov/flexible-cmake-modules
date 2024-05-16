@@ -18,6 +18,8 @@ no_in_source_builds_guard()
 
 include_project_module(BuildOptions)
 
+include_project_module(Externals)
+
 # TODO: add_library and friends
 
 include_project_module(Docs)

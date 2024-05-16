@@ -33,6 +33,18 @@ macro(init_common)
   string(REGEX REPLACE "[- ]" "_" PROJECT_NAME_UPPER ${PROJECT_NAME_UPPER})
   mark_as_advanced(CLEAR PROJECT_NAME_UPPER)
 
+  #[===========================================================================[
+    Allow to install all external dependencies locally (e.g. using
+    `FetchContent`, or `ExternalProject` and downloading external sources into
+    the binary directory), except to those that is not allowed explicitly
+    by setting `${PROJECT_NAME_UPPER}_INSTALL_<dependency-name>_LOCALLY`.
+    `<dependency-name>` is just a name using by the `find_package()` command.
+  #]===========================================================================]
+  option(${PROJECT_NAME_UPPER}_INSTALL_EXTERNALS_LOCALLY
+    "Install external dependencies locally"
+    OFF
+  )
+
   # And this guard should be at the end
   no_in_source_builds_guard()
 endmacro()
@@ -84,6 +96,25 @@ endmacro()
 macro(include_project_module module)
   include("${PROJECT_SOURCE_DIR}/cmake/${module}.cmake")
 endmacro()
+
+
+# Check if `dependency_name` can be installed locally
+function(can_install_locally dependency_name)
+  if (DEFINED ${PROJECT_NAME_UPPER}_INSTALL_${dependency_name}_LOCALLY)
+    set(allowed ${${PROJECT_NAME_UPPER}_INSTALL_${dependency_name}_LOCALLY})
+  else()
+    set(allowed ${${PROJECT_NAME_UPPER}_INSTALL_EXTERNALS_LOCALLY})
+  endif()
+  
+  if (NOT allowed)
+    message(FATAL_ERROR
+      "\n"
+      "'${dependency_name}' is not allowed to install locally.\n"
+      "Pass `-D${PROJECT_NAME_UPPER}_INSTALL_${dependency_name}_LOCALLY=ON` if you want otherwise.\n"
+      "Passing `-D${PROJECT_NAME_UPPER}_INSTALL_EXTERNALS_LOCALLY=ON` allows that for all of the external dependencies, except for those that are already set to `OFF`.\n"
+    )
+  endif()
+endfunction()
 
 
 init_common()
