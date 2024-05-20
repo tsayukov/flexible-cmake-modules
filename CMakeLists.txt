@@ -9,10 +9,12 @@ project(my-header-only-library
   LANGUAGES CXX
 )
 
-# This listfile provides common macros and functions
-# and must be included in this way first after the `project()` command.
-# After that, use the `include_project_module` macro to include other listfiles
-# related to the project.
+#[=============================================================================[
+  This listfile provides common macros, functions, and variables
+  and must be included in this way first after the `project()` command.
+  After that, use the `include_project_module` macro to include other listfiles
+  related to the project.
+#]=============================================================================]
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/Common.cmake")
 no_in_source_builds_guard()
 
