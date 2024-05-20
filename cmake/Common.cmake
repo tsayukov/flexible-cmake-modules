@@ -105,7 +105,7 @@ function(can_install_locally dependency_name)
   else()
     set(allowed ${${PROJECT_NAME_UPPER}_INSTALL_EXTERNALS_LOCALLY})
   endif()
-  
+
   if (NOT allowed)
     message(FATAL_ERROR
       "\n"
@@ -115,6 +115,14 @@ function(can_install_locally dependency_name)
     )
   endif()
 endfunction()
+
+
+# Enable the rest of a listfile if the project variable is set
+macro(enable_if_project_variable_is_set suffix)
+  if (NOT ${PROJECT_NAME_UPPER}_${suffix})
+    return()
+  endif()
+endmacro()
 
 
 init_common()

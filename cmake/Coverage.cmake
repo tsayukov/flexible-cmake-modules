@@ -2,8 +2,6 @@ include_guard(GLOBAL)
 after_project_guard()
 
 
-if (NOT ${PROJECT_NAME_UPPER}_ENABLE_COVERAGE)
-  return()
-endif()
+enable_if_project_variable_is_set(ENABLE_COVERAGE)
 
 # TODO: implement
