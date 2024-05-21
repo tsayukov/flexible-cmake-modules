@@ -124,4 +124,18 @@ macro(enable_if_project_variable_is_set suffix)
 endmacro()
 
 
+# `print` macros for debugging purposes
+macro(print text)
+  message(STATUS "-- ${text}")
+endmacro()
+
+macro(print_var variable)
+  message(STATUS "-- ${variable} = ${${variable}}")
+endmacro()
+
+macro(print_var_with variable hint)
+  message(STATUS "-- ${hint}: ${variable} = ${${variable}}")
+endmacro()
+
+
 init_common()
