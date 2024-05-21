@@ -31,7 +31,6 @@ macro(init_common)
   #]===========================================================================]
   string(TOUPPER ${PROJECT_NAME} PROJECT_NAME_UPPER)
   string(REGEX REPLACE "[- ]" "_" PROJECT_NAME_UPPER ${PROJECT_NAME_UPPER})
-  mark_as_advanced(CLEAR PROJECT_NAME_UPPER)
 
   #[===========================================================================[
     Allow to install all external dependencies locally (e.g. using
