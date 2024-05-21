@@ -1,12 +1,13 @@
 include_guard(GLOBAL)
 after_project_guard()
+cxx_standard_guard()
 
 
 enable_if_project_variable_is_set(ENABLE_TESTING)
 
 enable_testing()
 
-# TODO: need to force the standard to C++14 here? e.g. by some `cxx_standard_guard`?
+use_cxx_standard_at_least(14)
 
 #[=============================================================================[
   TODO(?): specify other testing library if you want so.

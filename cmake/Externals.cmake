@@ -1,12 +1,13 @@
 include_guard(GLOBAL)
 after_project_guard()
+cxx_standard_guard()
 
 
 #[=============================================================================[
   TODO(?) Put configurations of your external dependencies here.
- 
+
   NOTE: these dependencies are not related to library development.
- 
+
   1. Prefer to get any dependencies by the `find_package()` command first.
   2. If it failed, then use the `FetchContent` module.
   2a. It would be nice if you let users decide whether they want to use

@@ -1,4 +1,4 @@
-# TODO(?): specify the CMake minimum version
+# TODO(?): specify the CMake minimum version at least 3.14
 cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 
 # TODO(?): specify your basic project properties
@@ -20,6 +20,11 @@ no_in_source_builds_guard()
 
 include_project_module(BuildOptions)
 include_project_module(CompilerOptions)
+
+# TODO(?): set the required standard of the library
+use_cxx_standard_at_least(14)
+# TODO(?): disable or enable C++ extensions
+disable_cxx_extensions()
 
 include_project_module(Externals)
 
