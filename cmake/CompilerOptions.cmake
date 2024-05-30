@@ -2,4 +2,4 @@ include_guard(GLOBAL)
 after_project_guard()
 
 
-include_project_module(CxxStandard)
+include_project_module(cxx_compiler/Standard)
