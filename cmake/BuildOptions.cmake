@@ -13,6 +13,8 @@ macro(dev_option variable help_text)
   option(${variable} "${help_text}" ${${PROJECT_NAME_UPPER}_ENABLE_DEVELOPER_MODE})
 endmacro()
 
+# TODO(?): For small projects it is useless to enable `ccache`
+option(${PROJECT_NAME_UPPER}_ENABLE_CCACHE "Enable ccache" OFF)
 
 option(${PROJECT_NAME_UPPER}_ENABLE_DOCS "Enable creating documentation" OFF)
 
