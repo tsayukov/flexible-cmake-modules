@@ -7,14 +7,15 @@ enable_if_project_variable_is_set(ENABLE_TESTING)
 
 enable_testing()
 
-use_cxx_standard_at_least(14)
-
 #[=============================================================================[
   TODO(?): specify other testing library if you want so.
   Otherwise, you may also want to specify a particular version of GTest
   in the `find_package(GTest <version>)` command and use other URL
   in the `FetchContent_Declare()` command.
 #]=============================================================================]
+
+use_cxx_standard_at_least(14)
+
 find_package(GTest)
 if (NOT GTest_FOUND)
   can_install_locally(GTest)
