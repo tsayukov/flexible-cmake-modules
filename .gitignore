@@ -1,5 +1,5 @@
-# All dot files/directories in the root
-/.*
+# All dot directories in the root
+/.*/
 
 # CMake User Presets
 CMakeUserPresets.json
