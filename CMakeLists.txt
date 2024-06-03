@@ -30,7 +30,6 @@ include_project_module(Externals)
 
 # TODO: add_library and friends
 
-include_project_module(dependencies/Docs)
 include_project_module(DeveloperMode)
 
 # TODO: set package name?

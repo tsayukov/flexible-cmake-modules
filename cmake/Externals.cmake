@@ -3,6 +3,13 @@ after_project_guard()
 cxx_standard_guard()
 
 
+include_project_module(dependencies/Docs)
+add_docs_if_enabled(
+  TARGET docs FORMAT html
+  INPUTS include
+  OUTPUT docs
+)
+
 #[=============================================================================[
   TODO(?) Put configurations of your external dependencies here.
 
