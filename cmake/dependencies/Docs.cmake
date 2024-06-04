@@ -73,8 +73,29 @@ if (NOT Doxygen_FOUND)
   find_package(Doxygen REQUIRED)
 endif()
 
-# TODO: implement: pretty doxygen?
+
+find_path(DoxygenAwesome_SOURCE_DIR
+    doxygen-awesome.css
+  PATH_SUFFIXES
+    share/doxygen-awesome-css
+)
+mark_as_advanced(CLEAR DoxygenAwesome_SOURCE_DIR)
+if (NOT DoxygenAwesome_SOURCE_DIR)
+  can_install_locally(DoxygenAwesome)
+  include(FetchContent)
+  FetchContent_Declare(DoxygenAwesome
+    GIT_REPOSITORY https://github.com/jothepro/doxygen-awesome-css
+    GIT_TAG 40e9b25b6174dd3b472d8868f63323a870dfeeb8 # v2.3.3
+  )
+  FetchContent_MakeAvailable(DoxygenAwesome)
+endif()
+
 
 # Build related configuration options
 # See: https://www.doxygen.nl/manual/config.html#cfg_extract_all
 set(DOXYGEN_EXTRACT_ALL YES)
+set(DOXYGEN_GENERATE_TREEVIEW YES)
+set(DOXYGEN_HAVE_DOT YES)
+set(DOXYGEN_DOT_IMAGE_FORMAT svg)
+set(DOXYGEN_DOT_TRANSPARENT YES)
+set(DOXYGEN_HTML_EXTRA_STYLESHEET "${DoxygenAwesome_SOURCE_DIR}/doxygen-awesome.css")
