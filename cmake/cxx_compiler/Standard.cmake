@@ -4,14 +4,12 @@ after_project_guard()
 
 #[=============================================================================[
   Check if `CMAKE_CXX_STANDARD` is set to at least `standard` and in the very
-  first call define the `${project_name_lower}_cxx_standard` target as
-  an interface library with the corresponding standard which other targets can
-  link against. The variable `cxx_standard` is set to a name of this target for
-  the sake of brevity. The `${cxx_standard}` should be treated as the least
-  supported standard of this library.
-  The first time this macro should be called in the root listfile to define the
-  `${cxx_standard}`. Use its next calls to check if some dependency's
-  requirement is not greater than the `${cxx_standard}`.
+  first call define the `${cxx_standard}` target as an interface library with
+  the corresponding standard which other targets can link against.
+  The `${cxx_standard}` should be treated as the least supported standard of
+  this library. The first time this macro should be called in the root listfile
+  to define the `${cxx_standard}`. Use its next calls to check if some
+  dependency's requirement is not greater than the `${cxx_standard}`.
 #]=============================================================================]
 macro(use_cxx_standard_at_least standard)
   if (NOT CMAKE_CXX_STANDARD)
@@ -20,14 +18,13 @@ macro(use_cxx_standard_at_least standard)
 
   cmake_cxx_standard_is_not_less_than(${standard})
 
-  if (NOT TARGET ${project_name_lower}_cxx_standard)
-    add_library(${project_name_lower}_cxx_standard INTERFACE)
-    target_compile_features(${project_name_lower}_cxx_standard
+  if (NOT TARGET ${cxx_standard})
+    add_project_library(cxx_standard INTERFACE)
+    target_compile_features(${cxx_standard}
       INTERFACE
         cxx_std_${CMAKE_CXX_STANDARD}
     )
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
-    set(cxx_standard ${project_name_lower}_cxx_standard)
   endif()
 endmacro()
 
@@ -53,12 +50,12 @@ function(cmake_cxx_standard_is_not_less_than value)
 endfunction()
 
 
-# Raise an error if the `cxx_standard` target is not defined
+# Raise an error if the `${cxx_standard}` target is not defined
 macro(cxx_standard_guard)
-  if (NOT TARGET ${project_name_lower}_cxx_standard)
+  if (NOT TARGET ${cxx_standard})
     message(FATAL_ERROR
       "\n"
-      "The `${project_name_lower}_cxx_standard` target must be defined.\n"
+      "The `${cxx_standard}` target must be defined.\n"
       "Hint: call the `use_cxx_standard_at_least(<standard>)` command in the root listfile of the current library before this code has been processed.\n"
     )
   endif()
@@ -66,7 +63,7 @@ endmacro()
 
 
 macro(enable_cxx_extensions)
-  set_target_properties(${project_name_lower}_cxx_standard
+  set_target_properties(${cxx_standard}
     PROPERTIES
       CXX_EXTENSIONS ON
   )
@@ -75,7 +72,7 @@ endmacro()
 
 
 macro(disable_cxx_extensions)
-  set_target_properties(${project_name_lower}_cxx_standard
+  set_target_properties(${cxx_standard}
     PROPERTIES
       CXX_EXTENSIONS OFF
   )

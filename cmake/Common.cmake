@@ -3,7 +3,7 @@ include_guard(GLOBAL)
 
 #[=============================================================================[
   This macro must be called at the end of the current listfile.
-  It checks if the `project()` command is already called, prevents in-source
+  It checks if the `project` command is already called, prevents in-source
   builds inside the 'cmake' directory, and initialize some common variables.
 #]=============================================================================]
 macro(init_common)
@@ -11,7 +11,7 @@ macro(init_common)
   after_project_guard()
 
   #[===========================================================================[
-    The `PROJECT_IS_TOP_LEVEL` is set by `project()` in CMake 3.21+.
+    The `PROJECT_IS_TOP_LEVEL` is set by `project` in CMake 3.21+.
     Otherwise, the custom version of that variable is used that works
     in the same way as described in the `PROJECT_IS_TOP_LEVEL` documentation.
     See: https://cmake.org/cmake/help/latest/variable/PROJECT_IS_TOP_LEVEL.html
@@ -41,7 +41,7 @@ macro(init_common)
     `FetchContent`, or `ExternalProject` and downloading external sources into
     the binary directory), except to those that is not allowed explicitly
     by setting `${PROJECT_NAME_UPPER}_INSTALL_<dependency-name>_LOCALLY`.
-    `<dependency-name>` is just a name using by the `find_package()` command.
+    `<dependency-name>` is just a name using by the `find_package` command.
   #]===========================================================================]
   option(${PROJECT_NAME_UPPER}_INSTALL_EXTERNALS_LOCALLY
     "Install external dependencies locally"
@@ -56,13 +56,13 @@ macro(init_common)
 endmacro()
 
 
-# Prevent including any listfiles before the `project()` command
+# Prevent including any listfiles before the `project` command
 function(after_project_guard)
   if (NOT (PROJECT_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR))
     get_filename_component(file_name "${CMAKE_CURRENT_LIST_FILE}" NAME)
     message(FATAL_ERROR
       "\n"
-      "'${file_name}' must be included in the current listfile after the `project()` command.\n"
+      "'${file_name}' must be included in the current listfile after the `project` command.\n"
     )
   endif()
 endfunction()
@@ -164,8 +164,8 @@ endfunction()
 
 
 #[=============================================================================[
-  Run the `execute_process()` command with prepended `message`.
-  All parameters of the `execute_process()` command are passed after `message`.
+  Run the `execute_process` command with prepended `message`.
+  All parameters of the `execute_process` command are passed after `message`.
   If the executing process fails, then an error occurs. In any case, the end of
   the process is signaled by the same `message` with the addition of either
   "done" or "failed".
@@ -181,6 +181,20 @@ function(execute_process_with_check message)
     message(FATAL_ERROR "${message} - failed")
   endif()
 endfunction()
+
+
+#[=============================================================================[
+  Add a library target called `${project_name_lower}_${target_alias}`, but also
+  set a variable `${target_alias}` to the target name to use this variable as
+  a short alias. The main goal of this macro is to prevent name clashes between
+  targets if this project will be used as an embedded project, e.g. using the
+  `add_subdirectory` command. All parameters of the `add_library` command are
+  passed after `target_alias`.
+#]=============================================================================]
+macro(add_project_library target_alias)
+  set(${target_alias} ${project_name_lower}_${target_alias})
+  add_library(${${target_alias}} ${ARGN})
+endmacro()
 
 
 # `print` macros for debugging purposes
