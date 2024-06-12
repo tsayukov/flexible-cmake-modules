@@ -11,7 +11,7 @@ macro(init_common)
   after_project_guard()
 
   #[===========================================================================[
-    The `PROJECT_IS_TOP_LEVEL` is set by `project` in CMake 3.21+.
+    The `PROJECT_IS_TOP_LEVEL` is set by the `project` command in CMake 3.21+.
     Otherwise, the custom version of that variable is used that works
     in the same way as described in the `PROJECT_IS_TOP_LEVEL` documentation.
     See: https://cmake.org/cmake/help/latest/variable/PROJECT_IS_TOP_LEVEL.html
@@ -50,6 +50,12 @@ macro(init_common)
 
   # A place where external dependencies are installed locally
   set(${PROJECT_NAME_UPPER}_LOCAL_DEPENDENCIES_ROOT "${PROJECT_SOURCE_DIR}/.deps")
+
+  #[===========================================================================[
+    Modules that should be located using the `${CMAKE_MODULE_PATH}` list, e.g.
+    `Find<package>.cmake` to use the `find_package(<package>)` command.
+  #]===========================================================================]
+  list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules")
 
   # And this guard should be at the end
   no_in_source_builds_guard()
