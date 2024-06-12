@@ -14,7 +14,7 @@ set(CXX_WARNING_OPTIONS
   # See: https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-pedantic-1
   -Wpedantic
 
-  # Specific options, as well as those that is not included in Clang by default
+  # Specific options, as well as those that is not included in Clang by default:
 
   -Wcast-align
   -Wcast-function-type
@@ -47,7 +47,14 @@ set(CXX_ERROR_OPTIONS
   # See: https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-pedantic-errors-1
   -pedantic-errors
 
-  # Suppress specific errors
+  # Suppress specific errors:
 
   -Wno-error=non-virtual-dtor
+)
+
+set(CXX_DIAGNOSTIC_OPTIONS
+  # -fno-elide-type
+  -fdiagnostics-show-template-tree
+
+  $<$<CXX_COMPILER_ID:GNU>-fdiagnostics-color>
 )

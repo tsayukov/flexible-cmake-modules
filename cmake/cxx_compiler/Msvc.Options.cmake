@@ -43,7 +43,35 @@ set(CXX_WARNING_OPTIONS
 set(CXX_ERROR_OPTIONS
   # Treats all compiler warnings as errors.
   /WX
+)
 
-  # Specify standards conformance mode to the compiler
+set(CXX_LANGUAGE_OPTIONS
+  # See: https://learn.microsoft.com/en-us/cpp/build/reference/compiler-options-listed-by-category#language
+
+  # Specify standards conformance mode to the compiler.
   /permissive-
+
+  # Enable updated `__cplusplus` macro
+  /Zc:__cplusplus
+
+  # Enable `enum` type deduction; previously, the Microsoft compiler always used `int`.
+  /Zc:enumTypes
+
+  # Enable extern constexpr variables.
+  /Zc:externConstexpr
+
+  # Functions declared `inline` must have a definition available in the same translation unit if they're used.
+  /Zc:inline
+
+  # Enable preprocessor conformance mode.
+  /Zc:preprocessor
+
+  # Assume operator new throws; skip checks for a null pointer return.
+  /Zc:throwingNew
+)
+
+set(CXX_DIAGNOSTIC_OPTIONS
+  # See: https://learn.microsoft.com/en-us/cpp/build/reference/compiler-options-listed-by-category#diagnostics
+
+  /diagnostics:caret
 )
