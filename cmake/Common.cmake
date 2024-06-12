@@ -32,6 +32,10 @@ macro(init_common)
   string(TOUPPER ${PROJECT_NAME} PROJECT_NAME_UPPER)
   string(REGEX REPLACE "[- ]" "_" PROJECT_NAME_UPPER ${PROJECT_NAME_UPPER})
 
+  # The lowercase variant, e.g. for common targets to prevent target clashes
+  string(TOLOWER ${PROJECT_NAME} project_name_lower)
+  string(REGEX REPLACE "[- ]" "_" project_name_lower ${project_name_lower})
+
   #[===========================================================================[
     Allow to install all external dependencies locally (e.g. using
     `FetchContent`, or `ExternalProject` and downloading external sources into
