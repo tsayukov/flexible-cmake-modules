@@ -10,7 +10,7 @@ enable_testing()
 #[=============================================================================[
   TODO(?): specify other testing library if you want so.
   Otherwise, you may also want to specify a particular version of GTest
-  in the `find_package(GTest <version>)` command and use other URL
+  in the `find_package(GTest <version>)` command and use other GIT_TAG
   in the `FetchContent_Declare()` command.
 #]=============================================================================]
 
@@ -19,16 +19,16 @@ use_cxx_standard_at_least(14)
 find_package(GTest)
 if (NOT GTest_FOUND)
   can_install_locally(GTest)
+
   include(FetchContent)
   FetchContent_Declare(
     GTest
-    URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
+    GIT_REPOSITORY https://github.com/google/googletest
+    GIT_TAG f8d7d77c06936315286eb55f8de22cd23c188571 # v1.14.0
   )
 
-  if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
-    # Prevent overriding the parent project's compiler/linker settings
-    set(gtest_force_shared_crt ON)
-  endif()
+  # Prevent overriding the parent project's compiler/linker settings
+  set(gtest_force_shared_crt ON)
 
   set(INSTALL_GTEST OFF)
 
