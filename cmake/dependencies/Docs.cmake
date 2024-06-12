@@ -41,39 +41,7 @@ endfunction()
 
 enable_if_project_variable_is_set(ENABLE_DOCS)
 
-set_local_root_for(Doxygen)
-find_package(Doxygen)
-if (NOT Doxygen_FOUND)
-  can_install_locally(Doxygen)
-  include(FetchContent)
-  FetchContent_Declare(Doxygen
-    GIT_REPOSITORY https://github.com/doxygen/doxygen
-    GIT_TAG 9b424b03c9833626cd435af22a444888fbbb192d # Release_1_11_0
-  )
-  populate_package_locally(Doxygen)
-
-  # Requires Python, FLEX, BISON
-  execute_process_with_check("Configure Doxygen locally"
-    COMMAND "${CMAKE_COMMAND}"
-      -G "${CMAKE_GENERATOR}"
-      -DCMAKE_INSTALL_PREFIX='${Doxygen_ROOT}'
-      -B "${doxygen_BINARY_DIR}"
-      -S "${doxygen_SOURCE_DIR}"
-    WORKING_DIRECTORY "${doxygen_SOURCE_DIR}"
-  )
-
-  execute_process_with_check("Build and install Doxygen locally"
-    COMMAND "${CMAKE_COMMAND}"
-      --build "${doxygen_BINARY_DIR}"
-      --config Release
-      --target install
-    WORKING_DIRECTORY "${doxygen_SOURCE_DIR}"
-  )
-
-  find_package(Doxygen REQUIRED)
-endif()
-
-
+find_package(Doxygen REQUIRED)
 find_path(DoxygenAwesome_SOURCE_DIR
     doxygen-awesome.css
   PATH_SUFFIXES
