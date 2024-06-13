@@ -16,7 +16,7 @@ macro(init_common)
     in the same way as described in the `PROJECT_IS_TOP_LEVEL` documentation.
     See: https://cmake.org/cmake/help/latest/variable/PROJECT_IS_TOP_LEVEL.html
   #]===========================================================================]
-  if (CMAKE_VERSION LESS 3.21)
+  if (CMAKE_VERSION LESS "3.21")
     string(COMPARE EQUAL
       "${CMAKE_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}"
       PROJECT_IS_TOP_LEVEL
@@ -181,7 +181,7 @@ function(execute_process_with_check message)
 
   execute_process(${ARGN} RESULT_VARIABLE result)
 
-  if (${result} EQUAL 0)
+  if (${result} EQUAL "0")
     message(STATUS "${message} - done")
   else()
     message(FATAL_ERROR "${message} - failed")

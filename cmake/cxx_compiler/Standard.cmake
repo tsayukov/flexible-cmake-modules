@@ -18,7 +18,7 @@ macro(use_cxx_standard_at_least standard)
 
   cmake_cxx_standard_is_not_less_than(${standard})
 
-  if (NOT TARGET ${cxx_standard})
+  if (NOT TARGET "${cxx_standard}")
     add_project_library(cxx_standard INTERFACE)
     target_compile_features(${cxx_standard}
       INTERFACE
@@ -34,10 +34,10 @@ function(cmake_cxx_standard_is_not_less_than value)
   set(lhs ${CMAKE_CXX_STANDARD})
   set(rhs ${value})
 
-  if (lhs EQUAL 98)
+  if (lhs EQUAL "98")
     set(lhs 9)
   endif()
-  if (rhs EQUAL 98)
+  if (rhs EQUAL "98")
     set(rhs 9)
   endif()
 
@@ -52,7 +52,7 @@ endfunction()
 
 # Raise an error if the `${cxx_standard}` target is not defined
 macro(cxx_standard_guard)
-  if (NOT TARGET ${cxx_standard})
+  if (NOT TARGET "${cxx_standard}")
     message(FATAL_ERROR
       "\n"
       "The `${cxx_standard}` target must be defined.\n"
