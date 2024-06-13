@@ -53,8 +53,12 @@ set(CXX_ERROR_OPTIONS
 )
 
 set(CXX_DIAGNOSTIC_OPTIONS
+  # See: https://gcc.gnu.org/onlinedocs/gcc/Diagnostic-Message-Formatting-Options.html
+
   # -fno-elide-type
   -fdiagnostics-show-template-tree
-
-  $<$<CXX_COMPILER_ID:GNU>-fdiagnostics-color>
 )
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  # For GNU compiler; Clang does diagnostics in color by default
+  list(APPEND CXX_DIAGNOSTIC_OPTIONS -fdiagnostics-color)
+endif()
