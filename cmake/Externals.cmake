@@ -7,7 +7,7 @@ include_project_module(dependencies/Docs)
 add_docs_if_enabled(
   TARGET docs FORMAT html
   INPUTS include
-  OUTPUT docs
+  OUTPUT docs/html
 )
 
 #[=============================================================================[
