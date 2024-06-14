@@ -19,3 +19,12 @@ target_compile_options(${cxx_language_options} INTERFACE ${CXX_LANGUAGE_OPTIONS}
 
 add_project_library(cxx_diagnostic_options INTERFACE)
 target_compile_options(${cxx_diagnostic_options} INTERFACE ${CXX_DIAGNOSTIC_OPTIONS})
+
+add_project_library(cxx_options INTERFACE)
+target_link_libraries(${cxx_options}
+  INTERFACE
+    ${cxx_warning_options}
+    ${cxx_error_options}
+    ${cxx_language_options}
+    ${cxx_diagnostic_options}
+)
