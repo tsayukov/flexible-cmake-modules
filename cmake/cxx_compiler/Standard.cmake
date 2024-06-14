@@ -62,6 +62,8 @@ macro(cxx_standard_guard)
 endmacro()
 
 
+############################ C++ extensions toggle #############################
+
 macro(enable_cxx_extensions)
   set_target_properties(${cxx_standard}
     PROPERTIES
@@ -69,7 +71,6 @@ macro(enable_cxx_extensions)
   )
   set(CMAKE_CXX_EXTENSIONS ON)
 endmacro()
-
 
 macro(disable_cxx_extensions)
   set_target_properties(${cxx_standard}
