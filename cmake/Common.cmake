@@ -24,12 +24,14 @@ macro(init_common)
     )
   endif()
 
-  # Modules that should be located using the `${CMAKE_MODULE_PATH}` list, e.g.
-  # `Find<package>.cmake` to use the `find_package(<package>)` command.
-  list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules")
-
   # Init the project cached variables
   include_project_module(Variables)
+
+  # Include other Commons after Variables
+  include_project_module(config/Common)
+  include_project_module(cxx_compiler/Common)
+  include_project_module(dependencies/Common)
+  include_project_module(modules/Common)
 
   # And this guard should be at the end
   no_in_source_builds_guard()
@@ -270,27 +272,6 @@ function(add_project_header_only_library target_alias)
   target_include_directories(${target}
     ${warning_guard} INTERFACE "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/${include_dir}>"
   )
-endfunction()
-
-
-############################ Dependency management #############################
-
-# Check if `dependency_name` can be installed locally
-function(can_install_locally dependency_name)
-  if (DEFINED ${NAMESPACE_UPPER}_INSTALL_${dependency_name}_LOCALLY)
-    set(allowed ${${NAMESPACE_UPPER}_INSTALL_${dependency_name}_LOCALLY})
-  else()
-    set(allowed ${${NAMESPACE_UPPER}_INSTALL_EXTERNALS_LOCALLY})
-  endif()
-
-  if (NOT allowed)
-    message(FATAL_ERROR
-      "\n"
-      "'${dependency_name}' is not allowed to install locally.\n"
-      "Pass `-D${NAMESPACE_UPPER}_INSTALL_${dependency_name}_LOCALLY=ON` if you want otherwise.\n"
-      "Passing `-D${NAMESPACE_UPPER}_INSTALL_EXTERNALS_LOCALLY=ON` allows that for all of the external dependencies, except for those that are already set to `OFF`.\n"
-    )
-  endif()
 endfunction()
 
 
