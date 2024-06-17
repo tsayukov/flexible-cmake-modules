@@ -49,4 +49,6 @@ endif()
 
 ##################### Project non-boolean cached variables #####################
 
-# TODO(?): add yours here using the `project_cached_variable` command
+project_cached_variable(PACKAGE_NAME ${namespace_lower} STRING
+  "The package name used by the `find_package` command"
+)
