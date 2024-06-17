@@ -2,7 +2,8 @@ include_guard(GLOBAL)
 after_project_guard()
 
 
-# By default, it is `${PROJECT_NAME}` in lowercase letters with underscores.
+# By default, it is `${PROJECT_NAME}` in uppercase/lowercase letters with
+# underscores (for variables/targets accordingly).
 # Otherwise, call the `define_project_namespace(<namespace>)` command.
 define_project_namespace()
 
@@ -75,6 +76,24 @@ endif()
 
 ##################### Project non-boolean cached variables #####################
 
-project_cached_variable(PACKAGE_NAME ${namespace_lower} STRING
-  "The package name used by the `find_package` command"
-)
+if (ENABLE_INSTALL)
+  # Provides install directory variables as defined by the GNU Coding Standards.
+  # See: https://www.gnu.org/prep/standards/html_node/Directory-Variables.html
+  include(GNUInstallDirs)
+
+  project_cached_variable(PACKAGE_NAME
+    ${namespace_lower} STRING
+    "The package name used by the `find_package` command"
+  )
+
+  if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+    set(windows_prefix "${PACKAGE_NAME}/")
+  else()
+    set(unix_suffix "/${PACKAGE_NAME}")
+  endif()
+
+  project_cached_variable(INSTALL_CMAKE_DIR
+    "${windows_prefix}${CMAKE_INSTALL_DATAROOTDIR}${unix_suffix}/cmake" PATH
+    "Installation directory for CMake configuration files"
+  )
+endif()
