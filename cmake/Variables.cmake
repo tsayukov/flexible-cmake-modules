@@ -2,19 +2,19 @@ include_guard(GLOBAL)
 after_project_guard()
 
 
-#[=============================================================================[
-  Set a project option named `${name}` to `ON` if the developer mode is enable,
-  e.g. by passing `-D${PROJECT_NAME_UPPER}_ENABLE_DEVELOPER_MODE=ON`, where
-  `${PROJECT_NAME_UPPER}` is the project name written in uppercase with
-  underscores instead of dashes and whitespaces. Note, if the project option
-  `${name}` is already set, this macro has no effect.
-#]=============================================================================]
-macro(project_dev_option name help_text)
-  project_option(${name} "${help_text}" ${ENABLE_DEVELOPER_MODE})
-endmacro()
-
-
 ############################### Project options ################################
+
+#[=============================================================================[
+  Allow to install all external dependencies locally (e.g. using `FetchContent`,
+  or `ExternalProject` and downloading external sources into the binary
+  directory), except to those that is not allowed explicitly by setting
+  `${PROJECT_NAME_UPPER}_INSTALL_<dependency-name>_LOCALLY`.
+  `<dependency-name>` is just a name using by the `find_package` command.
+#]=============================================================================]
+project_option(INSTALL_EXTERNALS_LOCALLY
+  "Install external dependencies locally"
+  OFF
+)
 
 project_option(ENABLE_DEVELOPER_MODE "Enable developer mode" OFF)
 project_dev_option(ENABLE_TESTING "Enable testing")
