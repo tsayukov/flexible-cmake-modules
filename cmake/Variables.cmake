@@ -10,6 +10,24 @@ define_project_namespace()
 ############################### Project options ################################
 
 #[=============================================================================[
+  Prefer that the install rules are available if the project is on the top
+  level, e.g. a regular project clone, building, and installing or using
+  `ExternalProject`.
+  Otherwise, neither when using `add_subdirectory` nor when using `FetchContent`
+  is usually expected to generate install rules.
+#]=============================================================================]
+if (PROJECT_IS_TOP_LEVEL AND (NOT CMAKE_SKIP_INSTALL_RULES))
+  project_option(ENABLE_INSTALL "Enable the library installation" ON)
+elseif (ENABLE_INSTALL)
+  message(AUTHOR_WARNING
+    "\n"
+    "Installation is not expected when `PROJECT_IS_TOP_LEVEL` is set to `OFF` and `CMAKE_SKIP_INSTALL_RULES` is set to `ON`. But:\n"
+    "PROJECT_IS_TOP_LEVEL=${PROJECT_IS_TOP_LEVEL}\n"
+    "CMAKE_SKIP_INSTALL_RULES=${CMAKE_SKIP_INSTALL_RULES}\n"
+  )
+endif()
+
+#[=============================================================================[
   Allow to install all external dependencies locally (e.g. using `FetchContent`,
   or `ExternalProject` and downloading external sources into the binary
   directory), except to those that is not allowed explicitly by setting
@@ -22,6 +40,14 @@ project_option(INSTALL_EXTERNALS_LOCALLY
 )
 
 project_option(ENABLE_DEVELOPER_MODE "Enable developer mode" OFF)
+
+if ((NOT PROJECT_IS_TOP_LEVEL) AND ENABLE_DEVELOPER_MODE)
+  message(AUTHOR_WARNING
+    "Developer mode is intended for developers of \"${PROJECT_NAME}\".\n"
+  )
+endif()
+
+# Developer options
 project_dev_option(ENABLE_TESTING "Enable testing")
 project_dev_option(ENABLE_BENCHMARKING "Enable benchmarking")
 project_dev_option(ENABLE_COVERAGE "Enable code coverage testing")
