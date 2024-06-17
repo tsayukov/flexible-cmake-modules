@@ -2,6 +2,11 @@ include_guard(GLOBAL)
 after_project_guard()
 
 
+# By default, it is `${PROJECT_NAME}` in lowercase letters with underscores.
+# Otherwise, call the `define_project_namespace(<namespace>)` command.
+define_project_namespace()
+
+
 ############################### Project options ################################
 
 #[=============================================================================[
