@@ -92,6 +92,11 @@ if (ENABLE_INSTALL)
     set(unix_suffix "/${PACKAGE_NAME}")
   endif()
 
+  project_cached_variable(INSTALL_INCLUDE_DIR
+    "${windows_prefix}${CMAKE_INSTALL_INCLUDEDIR}" PATH
+    "Installation directory for public headers"
+  )
+
   project_cached_variable(INSTALL_CMAKE_DIR
     "${windows_prefix}${CMAKE_INSTALL_DATAROOTDIR}${unix_suffix}/cmake" PATH
     "Installation directory for CMake configuration files"

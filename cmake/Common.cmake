@@ -265,7 +265,6 @@ function(add_project_header_only_library target_alias)
   add_project_library(${target_alias} INTERFACE)
   set(target ${${target_alias}})
   set(${target_alias} ${target} PARENT_SCOPE)
-  set_project_target_property(${target} INCLUDE_DIR "${include_dir}")
 
   target_link_libraries(${target} INTERFACE ${cxx_standard})
 

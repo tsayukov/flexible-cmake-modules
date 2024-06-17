@@ -19,10 +19,9 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/Common.cmake")
 no_in_source_builds_guard()
 
 include_project_module(CompilerOptions)
-
 # TODO(?): set the required standard of the library
+#          disable or enable C++ extensions
 use_cxx_standard_at_least(14)
-# TODO(?): disable or enable C++ extensions
 disable_cxx_extensions()
 
 include_project_module(Externals)
@@ -30,6 +29,4 @@ include_project_module(Externals)
 add_project_header_only_library(my_header_only_library)
 
 include_project_module(DeveloperMode)
-
-# TODO: set package name?
 include_project_module(InstallRules)
