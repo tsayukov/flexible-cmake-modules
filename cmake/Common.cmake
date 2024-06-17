@@ -24,25 +24,11 @@ macro(init_common)
     )
   endif()
 
-  #[===========================================================================[
-    The `PROJECT_NAME_UPPER` variable is using to set other global variables.
-    Let's say we have a project called 'my-project' and we'd like to set
-    variables such as `MY_PROJECT_ENABLE_TESTING`. Then we can write more
-    generalized code using `${PROJECT_NAME_UPPER}_ENABLE_TESTING` instead.
-  #]===========================================================================]
-  string(TOUPPER ${PROJECT_NAME} PROJECT_NAME_UPPER)
-  string(REGEX REPLACE "[- ]" "_" PROJECT_NAME_UPPER ${PROJECT_NAME_UPPER})
-
-  # The lowercase variant, e.g. for common targets to prevent target clashes
-  string(TOLOWER ${PROJECT_NAME} project_name_lower)
-  string(REGEX REPLACE "[- ]" "_" project_name_lower ${project_name_lower})
-
-  #[===========================================================================[
-    Modules that should be located using the `${CMAKE_MODULE_PATH}` list, e.g.
-    `Find<package>.cmake` to use the `find_package(<package>)` command.
-  #]===========================================================================]
+  # Modules that should be located using the `${CMAKE_MODULE_PATH}` list, e.g.
+  # `Find<package>.cmake` to use the `find_package(<package>)` command.
   list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules")
 
+  # Init the project cached variables
   include_project_module(Variables)
 
   # And this guard should be at the end
@@ -88,6 +74,62 @@ endmacro()
 
 
 ##################### Project related functions and macros #####################
+# To prevent name clashes all project cached variables, targets, and properties
+# defined by functions and macros below have a prefix followed by underscore,
+# that is defined by the `define_project_namespace([<prefix>])` command.
+# It is recommended to name cached variables and properties in uppercase letters
+# with underscores. On the contrary, it is recommended to name targets in
+# lowercase letters with underscore. The prefix, aka namespace, format is
+# selected accordingly, in uppercase or lowercase letters with underscores.
+# In addition, it is defined a normal variable for each project cached variable
+# and target. For project cached variables, these variables are set to the value
+# of the corresponding project cached variable. For project targets, these
+# variables are set to the true target name.
+#
+# E.g. the `project_option(ENABLE_FEATURE "Enable a cool feature" ON)` command
+# is trying to set an option, aka boolean cached variable, named
+# `${NAMESPACE_UPPER}_ENABLE_FEATURE`. A short alias named `ENABLE_FEATURE` is
+# also defined and set to `ON`.
+#
+# E.g. the `add_project_library(my_library INTERFACE)` command defines
+# an interface library named `${namespace_lower}_my_library`. A short alias
+# named `my_library` is also defined and set to the true target name.
+# Typical usage: `target_compile_features(${my_library} INTERFACE cxx_std_20)`.
+#
+# The `EXPORT_NAME` property is also added to the target and set to `my_library`.
+# It is nessecary in order to use the `install(TARGETS ${my_library} ...)` and then
+# `install(EXPORT ... NAMESCAPE ${namespace_lower}::)` to export the target as
+# `${namespace_lower}::my_library`.
+#
+# An alias target named `${namespace_lower}::my_library` is also defined.
+# When a consuming project gets this project via the `find_package` command
+# it uses exported targets, e.g. `${namespace_lower}::my_library`, that defined
+# by the `install(EXPORT ... NAMESPACE ${namespace_lower}::)`. But if a consuming
+# project gets this project via the `FetchContent` module or `add_subdirectory`
+# command it has to use `my_library` until this project adds an alias defenition
+# via the `add_library(${namespace_lower}::my_library ALIAS ${my_library})`
+# command. Summing up, changing the method of getting this project won't cause
+# to change `target_link_libraries(<consuming_target> ... <namespace>::<target>)`
+# usage in any of these cases.
+################################################################################
+
+# Define the namespace, by default it is `${PROJECT_NAME}` in the appropriate
+# format
+function(define_project_namespace)
+  if (ARGC EQUAL "0")
+    set(namespace ${PROJECT_NAME})
+  else()
+    set(namespace ${ARGV0})
+  endif()
+
+  string(REGEX REPLACE "[- ]" "_" namespace ${namespace})
+
+  string(TOUPPER ${namespace} namespace)
+  set(NAMESPACE_UPPER ${namespace} PARENT_SCOPE)
+
+  string(TOLOWER ${namespace} namespace)
+  set(namespace_lower ${namespace} PARENT_SCOPE)
+endfunction()
 
 #[=============================================================================[
   Include the `${module}.cmake` file located in the `cmake` directory of
@@ -101,60 +143,65 @@ macro(include_project_module module)
 endmacro()
 
 # Enable the rest of a listfile if the project variable is set
-macro(enable_if_project_variable_is_set suffix)
-  if (NOT ${PROJECT_NAME_UPPER}_${suffix})
+macro(enable_if_project_variable_is_set SUFFIX)
+  if (NOT ${NAMESPACE_UPPER}_${SUFFIX})
     return()
   endif()
 endmacro()
 
 #[=============================================================================[
-  Set an option named `${PROJECT_NAME_UPPER}_${name}` if there is no such
-  normal or cached variable set before. This prefix `${PROJECT_NAME_UPPER}` is
-  added in order to prevent name clashes with outer project options. Other
+  Set a project option named `${NAMESPACE_UPPER}_${VARIABLES_ALIAS}` if there is
+  no such normal or cached variable set before (see CMP0077 for details). Other
   parameters of the `option` command are passed after the `name` parameter.
-  Also define a variable named `${name}` by assigning the option's boolean
-  value to this variable.
+  Use the short alias `${var_alias}` to get the option's value where `var_alias`
+  is `${VARIABLES_ALIAS}`.
 #]=============================================================================]
-macro(project_option name)
-  option(${PROJECT_NAME_UPPER}_${name} ${ARGN})
-  set(${name} ${${PROJECT_NAME_UPPER}_${name}})
+macro(project_option VARIABLES_ALIAS)
+  option(${NAMESPACE_UPPER}_${VARIABLES_ALIAS} ${ARGN})
+  set(${VARIABLES_ALIAS} ${${NAMESPACE_UPPER}_${VARIABLES_ALIAS}})
 endmacro()
 
 #[=============================================================================[
-  Set a project option named `${name}` to `ON` if the developer mode is enable,
-  e.g. by passing `-D${PROJECT_NAME_UPPER}_ENABLE_DEVELOPER_MODE=ON`, where
-  `${PROJECT_NAME_UPPER}` is the project name written in uppercase with
-  underscores instead of dashes and whitespaces. Note, if the project option
-  `${name}` is already set, this macro has no effect.
+  Set a project option named `${NAMESPACE_UPPER}_${VARIABLES_ALIAS}` to `ON`
+  if the developer mode is enable, e.g. by passing
+  `-D${NAMESPACE_UPPER}_ENABLE_DEVELOPER_MODE=ON`.
+  Note, if this project option is already set, this macro has no effect.
+  Use the short alias `${var_alias}` to get the option's value where `var_alias`
+  is `${VARIABLES_ALIAS}`.
 #]=============================================================================]
-macro(project_dev_option name help_text)
-  project_option(${name} "${help_text}" ${ENABLE_DEVELOPER_MODE})
+macro(project_dev_option VARIABLES_ALIAS help_text)
+  project_option(${VARIABLES_ALIAS} "${help_text}" ${ENABLE_DEVELOPER_MODE})
 endmacro()
 
 #[=============================================================================[
-  Add a library target called `${project_name_lower}_${target_alias}`, but also
-  set a variable `${target_alias}` to the target name to use this variable as
-  a short alias. The main goal of this macro is to prevent name clashes between
-  targets if this project will be used as an embedded project, e.g. using the
-  `add_subdirectory` command. All parameters of the `add_library` command are
-  passed after `target_alias`.
+  Set a project cached variable named `${NAMESPACE_UPPER}_${VARIABLES_ALIAS}`
+  if there is no such cached variable set before (see CMP0126 for details).
+  Use the short alias `${var_alias}` to get the cached variable's value where `var_alias`
+  is `${VARIABLES_ALIAS}`.
 #]=============================================================================]
+macro(project_cached_variable VARIABLES_ALIAS value type docstring)
+  set(${NAMESPACE_UPPER}_${VARIABLES_ALIAS} ${value} CACHE ${type}
+    "${docstring}" ${ARGN}
+  )
+  set(${VARIABLES_ALIAS} ${${NAMESPACE_UPPER}_${VARIABLES_ALIAS}})
+endmacro()
+
+# Add a project library target called `${namespace_lower}_${target_alias}`.
+# All parameters of the `add_library` command are passed after `target_alias`.
 macro(add_project_library target_alias)
-  set(${target_alias} ${project_name_lower}_${target_alias})
+  set(${target_alias} ${namespace_lower}_${target_alias})
   add_library(${${target_alias}} ${ARGN})
+  add_library(${namespace_lower}::${target_alias} ALIAS ${${target_alias}})
+  set_target_properties(${${target_alias}} PROPERTIES EXPORT_NAME ${target_alias})
 endmacro()
 
-#[=============================================================================[
-  Add an executable target called `${project_name_lower}_${target_alias}`, but
-  also set a variable `${target_alias}` to the target name to use this variable
-  as a short alias. The main goal of this macro is to prevent name clashes between
-  targets if this project will be used as an embedded project, e.g. using the
-  `add_subdirectory` command. All parameters of the `add_executable` command are
-  passed after `target_alias`.
-#]=============================================================================]
+# Add an executable target called `${namespace_lower}_${target_alias}`.
+# All parameters of the `add_executable` command are passed after `target_alias`.
 macro(add_project_executable target_alias)
-  set(${target_alias} ${project_name_lower}_${target_alias})
+  set(${target_alias} ${namespace_lower}_${target_alias})
   add_executable(${${target_alias}} ${ARGN})
+  add_executable(${namespace_lower}::${target_alias} ALIAS ${${target_alias}})
+  set_target_properties(${${target_alias}} PROPERTIES EXPORT_NAME ${target_alias})
 endmacro()
 
 
@@ -162,18 +209,18 @@ endmacro()
 
 # Check if `dependency_name` can be installed locally
 function(can_install_locally dependency_name)
-  if (DEFINED ${PROJECT_NAME_UPPER}_INSTALL_${dependency_name}_LOCALLY)
-    set(allowed ${${PROJECT_NAME_UPPER}_INSTALL_${dependency_name}_LOCALLY})
+  if (DEFINED ${NAMESPACE_UPPER}_INSTALL_${dependency_name}_LOCALLY)
+    set(allowed ${${NAMESPACE_UPPER}_INSTALL_${dependency_name}_LOCALLY})
   else()
-    set(allowed ${${PROJECT_NAME_UPPER}_INSTALL_EXTERNALS_LOCALLY})
+    set(allowed ${${NAMESPACE_UPPER}_INSTALL_EXTERNALS_LOCALLY})
   endif()
 
   if (NOT allowed)
     message(FATAL_ERROR
       "\n"
       "'${dependency_name}' is not allowed to install locally.\n"
-      "Pass `-D${PROJECT_NAME_UPPER}_INSTALL_${dependency_name}_LOCALLY=ON` if you want otherwise.\n"
-      "Passing `-D${PROJECT_NAME_UPPER}_INSTALL_EXTERNALS_LOCALLY=ON` allows that for all of the external dependencies, except for those that are already set to `OFF`.\n"
+      "Pass `-D${NAMESPACE_UPPER}_INSTALL_${dependency_name}_LOCALLY=ON` if you want otherwise.\n"
+      "Passing `-D${NAMESPACE_UPPER}_INSTALL_EXTERNALS_LOCALLY=ON` allows that for all of the external dependencies, except for those that are already set to `OFF`.\n"
     )
   endif()
 endfunction()
@@ -193,5 +240,7 @@ macro(print_var_with variable hint)
   message(STATUS "--> ${hint}: ${variable} = \"${${variable}}\"")
 endmacro()
 
+
+########################### The end of the listfile ############################
 
 init_common()
