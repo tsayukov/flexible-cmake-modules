@@ -27,7 +27,7 @@ disable_cxx_extensions()
 
 include_project_module(Externals)
 
-# TODO: add_library and friends
+add_project_header_only_library(my_header_only_library)
 
 include_project_module(DeveloperMode)
 

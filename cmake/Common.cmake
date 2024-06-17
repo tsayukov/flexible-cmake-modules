@@ -204,6 +204,74 @@ macro(add_project_executable target_alias)
   set_target_properties(${${target_alias}} PROPERTIES EXPORT_NAME ${target_alias})
 endmacro()
 
+macro(get_project_target_property variable target project_property)
+  get_target_property("${variable}" ${target} ${NAMESPACE_UPPER}_${project_property})
+endmacro()
+
+macro(set_project_target_property target project_property value)
+  set_target_properties(${target}
+    PROPERTIES
+      ${NAMESPACE_UPPER}_${project_property} "${value}"
+  )
+endmacro()
+
+#[=============================================================================[
+  Add a header only library as a project interface library.
+
+    add_project_header_only_library(
+      <target_alias> [WARNING_GUARD]
+      [INCLUDE_DIR <include_dir>]
+    )
+
+  <include_dir> is the target's include directory. It is `include` by default
+  and should be relative to `${PROJECT_SOURCE_DIR}` or be a subdirectory of
+  `${PROJECT_SOURCE_DIR}`.
+
+  `WARNING_GUARD` enables treating the target's include directory as system
+  via passing the `SYSTEM` option to the `target_include_directories` command.
+  By default, it is controlled by the `${ENABLE_TREATING_INCLUDES_AS_SYSTEM}`
+  project option.
+#]=============================================================================]
+function(add_project_header_only_library target_alias)
+  set(options WARNING_GUARD)
+  set(one_value_keywords INCLUDE_DIR)
+  set(multi_value_keywords "")
+  cmake_parse_arguments(PARSE_ARGV 1 "args"
+    "${options}"
+    "${one_value_keywords}"
+    "${multi_value_keywords}"
+  )
+
+  if (args_WARNING_GUARD OR ENABLE_TREATING_INCLUDES_AS_SYSTEM)
+    set(warning_guard "SYSTEM")
+  endif()
+
+  if (NOT args_INCLUDE_DIR)
+    set(args_INCLUDE_DIR "include")
+  endif()
+
+  if (IS_ABSOLUTE "${args_INCLUDE_DIR}")
+    file(RELATIVE_PATH include_dir "${PROJECT_SOURCE_DIR}" "${args_INCLUDE_DIR}")
+  elseif (EXISTS "${PROJECT_SOURCE_DIR}/${args_INCLUDE_DIR}")
+    set(include_dir "${args_INCLUDE_DIR}")
+  else()
+    message(FATAL_ERROR
+      "\"${args_INCLUDE_DIR}\" is not relative to \"${PROJECT_SOURCE_DIR}\".\n"
+    )
+  endif()
+
+  add_project_library(${target_alias} INTERFACE)
+  set(target ${${target_alias}})
+  set(${target_alias} ${target} PARENT_SCOPE)
+  set_project_target_property(${target} INCLUDE_DIR "${include_dir}")
+
+  target_link_libraries(${target} INTERFACE ${cxx_standard})
+
+  target_include_directories(${target}
+    ${warning_guard} INTERFACE "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/${include_dir}>"
+  )
+endfunction()
+
 
 ############################ Dependency management #############################
 
