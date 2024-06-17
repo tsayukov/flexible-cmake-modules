@@ -36,10 +36,7 @@ project_option(ENABLE_CCACHE "Enable ccache" OFF)
 #]=============================================================================]
 if (NOT PROJECT_IS_TOP_LEVEL)
   project_option(ENABLE_TREATING_INCLUDES_AS_SYSTEM
-    "Use the `SYSTEM` option for the project's includes; compilers may disable warnings"
+    "Use the `SYSTEM` option for the project's includes, compilers may disable warnings"
     ON
   )
-  if (ENABLE_TREATING_INCLUDES_AS_SYSTEM)
-    set(warning_guard SYSTEM)
-  endif()
 endif()
