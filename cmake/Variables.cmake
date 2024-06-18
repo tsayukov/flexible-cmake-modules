@@ -97,3 +97,10 @@ if (ENABLE_INSTALL)
     "Installation directory for CMake configuration files"
   )
 endif(ENABLE_INSTALL)
+
+
+############################ Variable init guard ###############################
+
+macro(variable_init_guard)
+  # Do nothing, jist check if this macro exists
+endmacro()
