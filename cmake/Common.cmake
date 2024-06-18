@@ -274,6 +274,18 @@ function(add_project_header_only_library target_alias)
 endfunction()
 
 
+################################ Miscellaneous #################################
+
+# Exclusive OR
+macro(xor lhs rhs)
+  if (((NOT "${lhs}") AND "${rhs}") OR ("${lhs}" AND (NOT "${rhs}")))
+    set(xor_result ON)
+  else()
+    set(xor_result OFF)
+  endif()
+endmacro()
+
+
 #################### `print` macros for debugging purposes #####################
 
 macro(print text)
