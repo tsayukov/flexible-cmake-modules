@@ -332,6 +332,58 @@ function(add_project_header_only_library target_alias)
   )
 endfunction()
 
+#[=============================================================================[
+  Install public headers from `<include_dir>` and `${PACKAGE_NAME}Targets.cmake`
+  file with exported `<targets>` that are supposed to be interface libraries.
+
+    install_header_only_library(
+      TARGETS <targets>...
+      [INCLUDE_DIR <include_dir>]
+    )
+
+  By default, `<include_dir>` is `"${PROJECT_SOURCE_DIR}/include"`.
+
+  See: https://cmake.org/cmake/help/latest/command/install.html
+#]=============================================================================]
+function(install_header_only_library)
+  set(options "")
+  set(one_value_keywords INCLUDE_DIR)
+  set(multi_value_keywords TARGETS)
+  cmake_parse_arguments(PARSE_ARGV 0 "args"
+    "${options}"
+    "${one_value_keywords}"
+    "${multi_value_keywords}"
+  )
+
+  if (NOT args_INCLUDE_DIR)
+    set(args_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include")
+  endif()
+
+  set(export_target_name "${PACKAGE_NAME}Targets")
+
+  list(APPEND args_TARGETS ${cxx_standard})
+
+  install(TARGETS
+      ${args_TARGETS}
+    EXPORT "${export_target_name}"
+    INCLUDES DESTINATION "${INSTALL_INCLUDE_DIR}"
+  )
+
+  install(EXPORT
+      "${export_target_name}"
+    NAMESPACE ${namespace_lower}::
+    DESTINATION "${INSTALL_CMAKE_DIR}"
+  )
+
+  install(DIRECTORY
+      "${args_INCLUDE_DIR}/"
+    DESTINATION "${INSTALL_INCLUDE_DIR}"
+    FILES_MATCHING
+      PATTERN "*.h"
+      PATTERN "*.hpp"
+  )
+endfunction()
+
 
 ################################ Miscellaneous #################################
 
