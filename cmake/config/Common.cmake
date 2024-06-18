@@ -3,6 +3,9 @@ after_project_guard()
 no_in_source_builds_guard()
 
 
+enable_if_project_variable_is_set(ENABLE_INSTALL)
+
+
 # Helper functions for creating config files that can be included by other
 # projects to find and use a package.
 # See: https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html
@@ -18,7 +21,7 @@ include(CMakePackageConfigHelpers)
       [NO_SET_AND_CHECK_MACRO]
       [NO_CHECK_REQUIRED_COMPONENTS_MACRO]
       [VERSION <major.minor.patch>]
-      [COMPATIBILITY <version_compatibility>]
+      COMPATIBILITY <version_compatibility>
       [ARCH_INDEPENDENT]
     )
 
@@ -32,7 +35,10 @@ include(CMakePackageConfigHelpers)
 
   `VERSION` is `${PROJECT_VERSION}` by default.
 
-  `COMPATIBILITY` is `SameMajorVersion` by default.
+  `COMPATIBILITY` is either `AnyNewerVersion`, or `SameMajorVersion`, or
+  `SameMinorVersion`, or `ExactVersion`.
+
+  Set `ARCH_INDEPENDENT` for header-only libraries.
 #]=============================================================================]
 function(install_cmake_configs)
   set(options
@@ -75,10 +81,6 @@ function(install_cmake_configs)
 
   if (NOT args_VERSION)
     set(args_VERSION "${PROJECT_VERSION}")
-  endif()
-
-  if (NOT args_COMPATIBILITY)
-    set(args_COMPATIBILITY "SameMajorVersion")
   endif()
 
   if (args_ARCH_INDEPENDENT)
