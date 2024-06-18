@@ -17,16 +17,14 @@ define_project_namespace()
   Otherwise, neither when using `add_subdirectory` nor when using `FetchContent`
   is usually expected to generate install rules.
 #]=============================================================================]
-if (PROJECT_IS_TOP_LEVEL AND (NOT CMAKE_SKIP_INSTALL_RULES))
-  project_option(ENABLE_INSTALL "Enable the library installation" ON)
-elseif (ENABLE_INSTALL)
-  message(AUTHOR_WARNING
+project_option(ENABLE_INSTALL "Enable the library installation" ON
+  IF (PROJECT_IS_TOP_LEVEL AND (NOT CMAKE_SKIP_INSTALL_RULES))
+  AUTHOR_WARNING
     "\n"
     "Installation is not expected when `PROJECT_IS_TOP_LEVEL` is set to `OFF` and `CMAKE_SKIP_INSTALL_RULES` is set to `ON`. But:\n"
     "PROJECT_IS_TOP_LEVEL=${PROJECT_IS_TOP_LEVEL}\n"
     "CMAKE_SKIP_INSTALL_RULES=${CMAKE_SKIP_INSTALL_RULES}\n"
-  )
-endif()
+)
 
 #[=============================================================================[
   Allow to install all external dependencies locally (e.g. using `FetchContent`,
@@ -40,13 +38,11 @@ project_option(INSTALL_EXTERNALS_LOCALLY
   OFF
 )
 
-project_option(ENABLE_DEVELOPER_MODE "Enable developer mode" OFF)
-
-if ((NOT PROJECT_IS_TOP_LEVEL) AND ENABLE_DEVELOPER_MODE)
-  message(AUTHOR_WARNING
+project_option(ENABLE_DEVELOPER_MODE "Enable developer mode" OFF
+  WEAK IF (NOT PROJECT_IS_TOP_LEVEL)
+  AUTHOR_WARNING
     "Developer mode is intended for developers of \"${PROJECT_NAME}\".\n"
-  )
-endif()
+)
 
 # Developer options
 project_dev_option(ENABLE_TESTING "Enable testing")
@@ -66,12 +62,11 @@ project_option(ENABLE_CCACHE "Enable ccache" OFF)
   effects such as suppressing warnings or skipping the contained headers in
   dependency calculations (see compiler documentation).
 #]=============================================================================]
-if (NOT PROJECT_IS_TOP_LEVEL)
-  project_option(ENABLE_TREATING_INCLUDES_AS_SYSTEM
-    "Use the `SYSTEM` option for the project's includes, compilers may disable warnings"
-    ON
-  )
-endif()
+project_option(ENABLE_TREATING_INCLUDES_AS_SYSTEM
+  "Use the `SYSTEM` option for the project's includes, compilers may disable warnings"
+  ON
+  IF (NOT PROJECT_IS_TOP_LEVEL)
+)
 
 
 ##################### Project non-boolean cached variables #####################
@@ -101,4 +96,4 @@ if (ENABLE_INSTALL)
     "${windows_prefix}${CMAKE_INSTALL_DATAROOTDIR}${unix_suffix}/cmake" PATH
     "Installation directory for CMake configuration files"
   )
-endif()
+endif(ENABLE_INSTALL)
