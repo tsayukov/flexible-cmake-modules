@@ -94,6 +94,13 @@ if (ENABLE_INSTALL)
     "${windows_prefix}${CMAKE_INSTALL_DATAROOTDIR}${unix_suffix}/cmake" PATH
     "Installation directory for CMake configuration files"
   )
+
+  if (ENABLE_DOCS)
+    project_cached_variable(INSTALL_DOC_DIR
+      "${windows_prefix}${CMAKE_INSTALL_DATAROOTDIR}/doc${unix_suffix}" PATH
+      "Installation directory for documentation"
+    )
+  endif()
 endif(ENABLE_INSTALL)
 
 
