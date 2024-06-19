@@ -29,4 +29,4 @@ include_project_module(Externals)
 add_project_header_only_library(my_header_only_library)
 
 include_project_module(DeveloperMode)
-include_project_module(InstallRules)
+include_project_module(install/Rules)
