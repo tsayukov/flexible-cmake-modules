@@ -112,26 +112,54 @@ endfunction()
 
     install_header_only_library(
       TARGETS <targets>...
-      [INCLUDE_DIR <include_dir>]
+      [INCLUDE_DIRS <include_dirs>...]
     )
 
-  By default, `<include_dir>` is `"${PROJECT_SOURCE_DIR}/include"`.
+  `<include_dirs>` are the targets' include directories. They contain `include`
+  by default and each path should be relative to `${PROJECT_SOURCE_DIR}` or be
+  a subdirectory of `${PROJECT_SOURCE_DIR}`.
 
   See: https://cmake.org/cmake/help/latest/command/install.html
 #]=============================================================================]
 function(install_header_only_library)
   set(options "")
-  set(one_value_keywords INCLUDE_DIR)
-  set(multi_value_keywords TARGETS)
+  set(one_value_keywords "")
+  set(multi_value_keywords TARGETS INCLUDE_DIRS)
   cmake_parse_arguments(PARSE_ARGV 0 "args"
     "${options}"
     "${one_value_keywords}"
     "${multi_value_keywords}"
   )
 
-  if (NOT args_INCLUDE_DIR)
-    set(args_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include")
+  # Install headers
+
+  if (NOT args_INCLUDE_DIRS)
+    list(APPEND args_INCLUDE_DIRS "include")
   endif()
+
+  foreach (include_dir IN LISTS args_INCLUDE_DIRS)
+    file(REAL_PATH "${include_dir}" include_dir_path
+      BASE_DIRECTORY "${PROJECT_SOURCE_DIR}"
+    )
+    if (NOT EXISTS "${include_dir_path}")
+      message(FATAL_ERROR "\"${include_dir_path}\" doesn't exist.")
+    endif()
+
+    # We need to copy only content of `${include_dir_path}`, not the directory
+    # itself, so we append "/" in order to the `install(DIRECTORY ...)` works
+    # properly
+    list(APPEND include_dir_path_list "${include_dir_path}/")
+  endforeach()
+
+  install(DIRECTORY
+      ${include_dir_path_list}
+    DESTINATION "${INSTALL_INCLUDE_DIR}"
+    FILES_MATCHING
+      PATTERN "*.h"
+      PATTERN "*.hpp"
+  )
+
+  # Generate and install `${PACKAGE_NAME}Targets.cmake` file
 
   set(export_target_name "${PACKAGE_NAME}Targets")
 
@@ -147,13 +175,5 @@ function(install_header_only_library)
       "${export_target_name}"
     NAMESPACE ${namespace_lower}::
     DESTINATION "${INSTALL_CMAKE_DIR}"
-  )
-
-  install(DIRECTORY
-      "${args_INCLUDE_DIR}/"
-    DESTINATION "${INSTALL_INCLUDE_DIR}"
-    FILES_MATCHING
-      PATTERN "*.h"
-      PATTERN "*.hpp"
   )
 endfunction()

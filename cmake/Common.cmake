@@ -284,7 +284,7 @@ endmacro()
       [INCLUDE_DIR <include_dir>]
     )
 
-  <include_dir> is the target's include directory. It is `include` by default
+  `<include_dir>` is the target's include directory. It is `include` by default
   and should be relative to `${PROJECT_SOURCE_DIR}` or be a subdirectory of
   `${PROJECT_SOURCE_DIR}`.
 
@@ -311,14 +311,11 @@ function(add_project_header_only_library target_alias)
     set(args_INCLUDE_DIR "include")
   endif()
 
-  if (IS_ABSOLUTE "${args_INCLUDE_DIR}")
-    file(RELATIVE_PATH include_dir "${PROJECT_SOURCE_DIR}" "${args_INCLUDE_DIR}")
-  elseif (EXISTS "${PROJECT_SOURCE_DIR}/${args_INCLUDE_DIR}")
-    set(include_dir "${args_INCLUDE_DIR}")
-  else()
-    message(FATAL_ERROR
-      "\"${args_INCLUDE_DIR}\" is not relative to \"${PROJECT_SOURCE_DIR}\".\n"
-    )
+  file(REAL_PATH "${args_INCLUDE_DIR}" include_dir_path
+    BASE_DIRECTORY "${PROJECT_SOURCE_DIR}"
+  )
+  if (NOT EXISTS "${include_dir_path}")
+    message(FATAL_ERROR "\"${include_dir_path}\" doesn't exist.")
   endif()
 
   add_project_library(${target_alias} INTERFACE)
@@ -328,7 +325,7 @@ function(add_project_header_only_library target_alias)
   target_link_libraries(${target} INTERFACE ${cxx_standard})
 
   target_include_directories(${target}
-    ${warning_guard} INTERFACE "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/${include_dir}>"
+    ${warning_guard} INTERFACE "$<BUILD_INTERFACE:${include_dir_path}>"
   )
 endfunction()
 
