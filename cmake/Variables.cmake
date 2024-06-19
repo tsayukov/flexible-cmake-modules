@@ -17,8 +17,8 @@ define_project_namespace()
   Otherwise, neither when using `add_subdirectory` nor when using `FetchContent`
   is usually expected to generate install rules.
 #]=============================================================================]
-project_option(ENABLE_INSTALL "Enable the library installation" ON
-  IF (PROJECT_IS_TOP_LEVEL AND (NOT CMAKE_SKIP_INSTALL_RULES))
+project_option(ENABLE_INSTALL "Enable the library installation"
+  ON IF (PROJECT_IS_TOP_LEVEL AND (NOT CMAKE_SKIP_INSTALL_RULES))
   AUTHOR_WARNING
     "\n"
     "Installation is not expected when `PROJECT_IS_TOP_LEVEL` is set to `OFF` and `CMAKE_SKIP_INSTALL_RULES` is set to `ON`. But:\n"
@@ -33,13 +33,12 @@ project_option(ENABLE_INSTALL "Enable the library installation" ON
   `${NAMESPACE_UPPER}_INSTALL_<dependency-name>_LOCALLY`.
   `<dependency-name>` is just a name using by the `find_package` command.
 #]=============================================================================]
-project_option(INSTALL_EXTERNALS_LOCALLY
-  "Install external dependencies locally"
+project_option(INSTALL_EXTERNALS_LOCALLY "Install external dependencies locally"
   OFF
 )
 
-project_option(ENABLE_DEVELOPER_MODE "Enable developer mode" OFF
-  WEAK IF (NOT PROJECT_IS_TOP_LEVEL)
+project_option(ENABLE_DEVELOPER_MODE "Enable developer mode"
+  OFF WEAK IF (NOT PROJECT_IS_TOP_LEVEL)
   AUTHOR_WARNING
     "Developer mode is intended for developers of \"${PROJECT_NAME}\".\n"
 )
@@ -64,8 +63,7 @@ project_option(ENABLE_CCACHE "Enable ccache" OFF)
 #]=============================================================================]
 project_option(ENABLE_TREATING_INCLUDES_AS_SYSTEM
   "Use the `SYSTEM` option for the project's includes, compilers may disable warnings"
-  ON
-  IF (NOT PROJECT_IS_TOP_LEVEL)
+  ON IF (NOT PROJECT_IS_TOP_LEVEL)
 )
 
 
@@ -101,6 +99,7 @@ endif(ENABLE_INSTALL)
 
 ############################ Variable init guard ###############################
 
+# Prevent processing listfiles before including `Variables`
 macro(variable_init_guard)
-  # Do nothing, jist check if this macro exists
+  # Do nothing, just check if this macro exists
 endmacro()
