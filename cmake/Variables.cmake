@@ -88,6 +88,11 @@ if (ENABLE_INSTALL)
     "${CMAKE_INSTALL_DATAROOTDIR}/${PACKAGE_NAME}/cmake" PATH
     "Installation directory for CMake configuration files"
   )
+  
+  project_cached_variable(INSTALL_LICENSE_DIR
+    "${CMAKE_INSTALL_DATAROOTDIR}/${PACKAGE_NAME}" PATH
+    "Installation directory for the LICENSE file"
+  )
 
   if (ENABLE_DOCS)
     project_cached_variable(INSTALL_DOC_DIR

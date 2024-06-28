@@ -177,3 +177,11 @@ function(install_header_only_library)
     DESTINATION "${INSTALL_CMAKE_DIR}"
   )
 endfunction()
+
+# Install the LICENSE file
+macro(install_license)
+  install(FILES
+      "${PROJECT_SOURCE_DIR}/LICENSE"
+    DESTINATION "${INSTALL_LICENSE_DIR}"
+  )
+endmacro()
