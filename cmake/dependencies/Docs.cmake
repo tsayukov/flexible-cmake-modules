@@ -2,9 +2,6 @@ include_guard(GLOBAL)
 after_project_guard()
 
 
-enable_if_project_variable_is_set(ENABLE_DOCS)
-
-
 #[=============================================================================[
   If the documentation is enabled, add the target for building the documentation
   of files that can be recursively found in the `INPUTS` parameters and to place
@@ -68,6 +65,9 @@ function(add_docs_if_enabled target_alias)
     COMPONENT "docs" EXCLUDE_FROM_ALL
   )
 endfunction()
+
+
+enable_if_project_variable_is_set(ENABLE_DOCS)
 
 
 ################## Initialization the documentation generator ##################
