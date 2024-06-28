@@ -79,25 +79,19 @@ if (ENABLE_INSTALL)
     "The package name used by the `find_package` command"
   )
 
-  if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
-    set(windows_prefix "${PACKAGE_NAME}/")
-  else()
-    set(unix_suffix "/${PACKAGE_NAME}")
-  endif()
-
   project_cached_variable(INSTALL_INCLUDE_DIR
-    "${windows_prefix}${CMAKE_INSTALL_INCLUDEDIR}" PATH
+    "${CMAKE_INSTALL_INCLUDEDIR}" PATH
     "Installation directory for public headers"
   )
 
   project_cached_variable(INSTALL_CMAKE_DIR
-    "${windows_prefix}${CMAKE_INSTALL_DATAROOTDIR}${unix_suffix}/cmake" PATH
+    "${CMAKE_INSTALL_DATAROOTDIR}/${PACKAGE_NAME}/cmake" PATH
     "Installation directory for CMake configuration files"
   )
 
   if (ENABLE_DOCS)
     project_cached_variable(INSTALL_DOC_DIR
-      "${windows_prefix}${CMAKE_INSTALL_DATAROOTDIR}/doc${unix_suffix}" PATH
+      "${CMAKE_INSTALL_DATAROOTDIR}/${PACKAGE_NAME}/doc" PATH
       "Installation directory for documentation"
     )
   endif()
