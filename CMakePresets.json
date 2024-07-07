@@ -1,0 +1,102 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "project-namespaces",
+      "hidden": true,
+      "environment": {
+        "NAMESPACE_UPPER": "MY_HEADER_ONLY_LIBRARY",
+        "namespace_lower": "my_header_only_library"
+      }
+    },
+    {
+      "name": "debug",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "release",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "ninja-generator",
+      "hidden": true,
+      "generator": "Ninja"
+    },
+    {
+      "name": "unix-generator",
+      "hidden": true,
+      "generator": "Unix Makefiles"
+    },
+    {
+      "name": "vs-generator",
+      "hidden": true,
+      "generator": "Visual Studio 17 2022"
+    },
+    {
+      "name": "cmake-pedantic",
+      "hidden": true,
+      "warnings": {
+        "dev": true,
+        "deprecated": true,
+        "uninitialized": true,
+        "unusedCli": true,
+        "systemVars": false
+      },
+      "errors": {
+        "dev": true,
+        "deprecated": true
+      }
+    },
+    {
+      "name": "dev-mode",
+      "hidden": true,
+      "inherits": "cmake-pedantic",
+      "cacheVariables": {
+        "MY_HEADER_ONLY_LIBRARY_ENABLE_DEVELOPER_MODE": "TRUE"
+      }
+    },
+    {
+      "name": "default-tests",
+      "hidden": true,
+      "inherits": ["dev-mode", "ninja-generator"],
+      "cacheVariables": {
+        "MY_HEADER_ONLY_LIBRARY_ENABLE_TESTING": "TRUE"
+      }
+    },
+    {
+      "name": "default-tests-debug",
+      "inherits": ["default-tests", "debug"]
+    },
+    {
+      "name": "default-tests-release",
+      "inherits": ["default-tests", "release"]
+    }
+  ],
+  "buildPresets": [
+
+  ],
+  "testPresets": [
+    {
+      "name": "default-debug",
+      "configurePreset": "default-tests-debug"
+    },
+    {
+      "name": "default-release",
+      "configurePreset": "default-tests-release"
+    }
+  ],
+  "packagePresets": [
+
+  ],
+  "workflowPresets": [
+
+  ]
+}
