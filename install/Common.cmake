@@ -150,7 +150,12 @@ function(install_project_headers)
     COMPONENT "${namespace}_headers"
     FILES_MATCHING
       PATTERN "*.h"
+      PATTERN "*.hh"
+      PATTERN "*.h++"
       PATTERN "*.hpp"
+      PATTERN "*.hxx"
+      PATTERN "*.in"
+      PATTERN "*.inc"
   )
 endfunction()
 
