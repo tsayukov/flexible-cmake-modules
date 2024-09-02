@@ -41,6 +41,7 @@
       - print
       - print_var
       - print_var_with
+      - create_symlink_to_compile_commands
 
   Usage:
 
@@ -403,6 +404,21 @@ endmacro()
 macro(print_var_with variable hint)
   message("${hint}: ${variable} = \"${${variable}}\"")
 endmacro()
+
+#[=============================================================================[
+  Create a symbolic link in `${PROJECT_SOURCE_DIR}/build/` directory to
+  `compile_commands.json` if `${PROJECT_SOURCE_DIR}/build/` itself is not
+  the project binary directory.
+#]=============================================================================]
+function(create_symlink_to_compile_commands)
+  if (NOT PROJECT_BINARY_DIR STREQUAL "${PROJECT_SOURCE_DIR}/build")
+    file(MAKE_DIRECTORY "${PROJECT_SOURCE_DIR}/build")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
+      "${PROJECT_BINARY_DIR}/compile_commands.json"
+      "${PROJECT_SOURCE_DIR}/build/compile_commands.json"
+    )
+  endif()
+endfunction()
 
 
 ########################### The end of the listfile ############################

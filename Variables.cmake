@@ -78,6 +78,14 @@ project_dev_option(ENABLE_FORMATTING "Enable code formatting")
 
 # TODO: implement other developer options
 
+if (ENABLE_DEVELOPER_MODE)
+  set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "Generate `compile_commands.json`")
+
+  if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    create_symlink_to_compile_commands()
+  endif()
+endif()
+
 
 ##################### Project non-boolean cached variables #####################
 
