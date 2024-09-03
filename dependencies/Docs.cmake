@@ -24,15 +24,16 @@
 include_guard(GLOBAL)
 
 
-#[=============================================================================[
-  If the documentation is enabled, add the target for building the documentation
-  of files that can be recursively found in the `INPUTS` parameters and to place
-  the result in the `OUTPUT` parameter.
+enable_if_project_variable_is_set(ENABLE_DOCS)
 
-    add_docs_if_enabled(<target_alias>
-                        FORMAT <format>
-                        INPUTS <files or directories> ...
-                        [OUTPUT <output_directory>])
+#[=============================================================================[
+  Add the target for building the documentation of files that can be recursively
+  found in the `INPUTS` parameters and to place the result in the `OUTPUT`
+  parameter.
+
+    add_docs(<target_alias> FORMAT <format>
+             INPUTS <files or directories> ...
+             [OUTPUT <output_directory>])
 
   The true target name is `${namespace}_${target_alias}` with defined
   `${target_alias}` variable set to the target name.
@@ -43,7 +44,7 @@ include_guard(GLOBAL)
 
   Also generate install rules for documentation if `${ENABLE_INSTALL}` is set.
 #]=============================================================================]
-function(add_docs_if_enabled target_alias)
+function(add_docs target_alias)
   set(options "")
   set(one_value_keywords FORMAT OUTPUT)
   set(multi_value_keywords INPUTS)
@@ -52,8 +53,6 @@ function(add_docs_if_enabled target_alias)
     "${one_value_keywords}"
     "${multi_value_keywords}"
   )
-
-  enable_if_project_variable_is_set(ENABLE_DOCS)
 
   if (NOT ARGS_OUTPUT)
     string(TOLOWER ${ARGS_FORMAT} ARGS_OUTPUT)
@@ -86,10 +85,9 @@ function(add_docs_if_enabled target_alias)
       "${INSTALL_DOC_DIR}"
     COMPONENT "${namespace}_docs" EXCLUDE_FROM_ALL
   )
+  add_component_target(${namespace}_docs)
 endfunction()
 
-
-enable_if_project_variable_is_set(ENABLE_DOCS)
 
 ################## Initialization the documentation generator ##################
 
