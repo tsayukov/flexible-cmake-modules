@@ -18,6 +18,7 @@
   Commands:
     * Guards:
       - no_in_source_builds_guard
+      - requires_cmake
     * Watchers:
       - mark_command_as_deprecated (3.18+, see details)
       - mark_normal_variable_as_deprecated
@@ -132,6 +133,20 @@ function(no_in_source_builds_guard)
       "Windows (PowerShell): Remove-Item CMakeFiles, CMakeCache.txt, cmake_install.cmake -force -recurse\n"
       "Windows (Command Prompt): rmdir CMakeFiles /s /q && del /q CMakeCache.txt cmake_install.cmake\n"
       "NOTE: Build generator files may also remain, that is, 'Makefile', 'build.ninja' and so forth.\n"
+    )
+  endif()
+endfunction()
+
+#[=============================================================================[
+  Check if CMake's version is not less than ${version}, otherwise, print
+  the error message with ${reason}. It may be useful if building in the
+  developer mode needs higher CMake's version than building to only install
+  the project.
+#]=============================================================================]
+function(requires_cmake version reason)
+  if (CMAKE_VERSION VERSION_LESS "${version}")
+    message(FATAL_ERROR
+      "CMake ${version}+ is required because of the reason \"${reason}\", but the current version is ${CMAKE_VERSION}."
     )
   endif()
 endfunction()
