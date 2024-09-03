@@ -42,4 +42,27 @@ if (NOT benchmark_FOUND)
   FetchContent_MakeAvailable(benchmark)
 endif(NOT benchmark_FOUND)
 
+if (ENABLE_BENCHMARK_TOOLS)
+  if (NOT DEFINED benchmark_SOURCE_DIR)
+    set(benchmark_SOURCE_DIR "")
+  endif()
+
+  find_path(benchmark_tools
+    NAMES
+      "compare.py"
+    HINTS
+      "/usr/share/benchmark"
+      "${benchmark_SOURCE_DIR}/tools"
+  )
+  mark_as_advanced(benchmark_tools)
+  if (NOT benchmark_tools)
+    message(FATAL_ERROR "Benchmark tools is not found.")
+  endif()
+
+  find_or_init_python_venv()
+  pip3_install(-r "${benchmark_tools}/requirements.txt")
+  # Even though, `requirements.txt` doesn't have `pandas`, `compare.py` still requires it
+  pip3_install(wheel pandas)
+endif(ENABLE_BENCHMARK_TOOLS)
+
 add_subdirectory(${BENCHMARK_DIR})
