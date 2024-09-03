@@ -4,6 +4,16 @@
   https://opensource.org/license/mit for details.
   ------------------------------------------------------------------------------
   Installation commands
+  ------------------------------------------------------------------------------
+  Commands:
+    * Installation:
+      - install_project_cmake_configs
+      - install_project_license
+      - install_project_headers
+      - install_project_targets
+    * Auxiliary commands:
+      - add_component_target
+
 #]=============================================================================]
 
 include_guard(GLOBAL)
@@ -112,6 +122,7 @@ function(install_project_cmake_configs)
     DESTINATION "${INSTALL_CMAKE_DIR}"
     COMPONENT "${namespace}_configs"
   )
+  add_component_target(${namespace}_configs)
 endfunction()
 
 # Install the LICENSE file to `${INSTALL_LICENSE_DIR}`
@@ -157,6 +168,7 @@ function(install_project_headers)
       PATTERN "*.in"
       PATTERN "*.inc"
   )
+  add_component_target(${namespace}_headers)
 endfunction()
 
 #[=============================================================================[
@@ -212,6 +224,8 @@ function(install_project_targets)
         DESTINATION "${CMAKE_INSTALL_LIBDIR}"
         COMPONENT "${namespace}_development"
     )
+    add_component_target(${namespace}_runtime)
+    add_component_target(${namespace}_development)
   endif()
 
   install(TARGETS
@@ -227,4 +241,37 @@ function(install_project_targets)
     DESTINATION "${INSTALL_CMAKE_DIR}"
     COMPONENT "${namespace}_configs"
   )
+  add_component_target(${namespace}_configs)
+endfunction()
+
+
+############################## Auxiliary commands ##############################
+
+#[=============================================================================[
+  Add the custom target for an install ${component} to use it in build presets:
+
+    {
+      "name": "install_docs",
+      ...
+      "targets": "install_my_project_docs"
+    }
+
+  So the command below could run installation of the project documentation:
+
+    cmake --build --preset install_docs
+
+  If the custom target already exists, do nothing.
+#]=============================================================================]
+function(add_component_target component)
+  if (NOT TARGET install_${component})
+    add_custom_target(install_${component}
+      COMMAND
+        # `cmake --install` works only in 3.15+
+        ${CMAKE_COMMAND} -DCOMPONENT=${component} -P "cmake_install.cmake"
+      WORKING_DIRECTORY
+        "${PROJECT_BINARY_DIR}"
+      COMMENT
+        "Installing ${component} component..."
+    )
+  endif()
 endfunction()
