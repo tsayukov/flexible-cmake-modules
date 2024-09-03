@@ -70,6 +70,7 @@ project_dev_option(ENABLE_TESTING "Enable testing")
 project_cached_variable(TEST_DIR "tests" PATH "Testing directory")
 
 project_dev_option(ENABLE_BENCHMARKING "Enable benchmarking")
+project_dev_option(ENABLE_BENCHMARK_TOOLS "Enable benchmark tools")
 project_cached_variable(BENCHMARK_DIR "benchmarks" PATH "Benchmarking directory")
 
 project_dev_option(ENABLE_COVERAGE "Enable code coverage testing")
