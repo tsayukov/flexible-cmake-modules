@@ -86,6 +86,14 @@ if (ENABLE_DEVELOPER_MODE)
   endif()
 endif()
 
+project_option(ENABLE_PYTHON_VENV "Enable creating of Python virtual environment"
+  # Specify other conditions, if any
+  ON IF ENABLE_BENCHMARKING
+)
+project_cached_variable(PYTHON_VENV_DIR
+  "${PROJECT_SOURCE_DIR}/.venv" PATH
+  "Python virtual environment directory"
+)
 
 ##################### Project non-boolean cached variables #####################
 
