@@ -204,10 +204,13 @@ function(install_project_targets)
     message(FATAL_ERROR "The `TARGETS` parameters must have at least one target.")
   endif()
 
+  set(target_list "")
   foreach (target IN LISTS ARGS_TARGETS)
+    __get_project_target_name(${target})
     if (NOT TARGET ${target})
       message(FATAL_ERROR "`${target}` is not a target.")
     endif()
+    list(APPEND target_list ${target})
   endforeach()
 
   set(artifact_options "")
@@ -229,7 +232,7 @@ function(install_project_targets)
   endif()
 
   install(TARGETS
-      ${ARGS_TARGETS}
+      ${target_list}
     EXPORT "${PACKAGE_EXPORT_TARGET_NAME}"
     ${artifact_options}
     INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
