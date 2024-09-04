@@ -43,19 +43,15 @@ project_option(ENABLE_CCACHE "Enable ccache" OFF)
 
 #[=============================================================================[
   Enable treating the project's include directories as system via passing the
-  `SYSTEM` option to the `target_include_directories` command. This may have
-  effects such as suppressing warnings or skipping the contained headers in
-  dependency calculations (see compiler documentation).
+  `SYSTEM` option to the `target_include_directories` command inside the
+  `project_target_include_directories` command. This may have effects such as
+  suppressing warnings or skipping the contained headers in dependency
+  calculations (see compiler documentation).
 #]=============================================================================]
 project_option(ENABLE_TREATING_INCLUDES_AS_SYSTEM
   "Use the `SYSTEM` option for the project's includes, compilers may disable warnings"
   ON IF (NOT PROJECT_IS_TOP_LEVEL)
 )
-if (ENABLE_TREATING_INCLUDES_AS_SYSTEM)
-  project_cached_variable(WARNING_GUARD "SYSTEM" STRING "Warning guard")
-else()
-  project_cached_variable(WARNING_GUARD "" STRING "Warning guard")
-endif()
 
 
 ############################## Developer options ###############################

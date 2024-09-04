@@ -33,6 +33,15 @@
       - add_project_executable
       - get_project_target_property
       - set_project_target_property
+      - project_target_compile_definitions
+      - project_target_compile_features
+      - project_target_compile_options
+      - project_target_include_directories
+      - project_target_link_directories
+      - project_target_link_libraries
+      - project_target_link_options
+      - project_target_precompile_headers
+      - project_target_sources
     * Host information
       - get_n_physical_cores
       - get_n_logical_cores
@@ -48,10 +57,12 @@
 
   # File: CMakeLists.txt
     cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
-    project(my_project_name)
+    project(my_project_name CXX)
 
     include("${PROJECT_SOURCE_DIR}/cmake/Common.cmake")
     no_in_source_builds_guard()
+
+    # Next, see compiler/Common.cmake usage
 
 #]=============================================================================]
 
@@ -214,9 +225,18 @@ endmacro()
   is also defined and set to `ON`.
 
   E.g. the `add_project_library(my_library INTERFACE)` command defines
-  an interface library named by `${namespace}_my_library`. A short alias named
-  by `my_library` is also defined and set to the true target name.
-  Typical usage: `target_compile_features(${my_library} INTERFACE cxx_std_20)`.
+  an interface library named by `${namespace}_my_library`. To use the short
+  alias `my_library`, use `project_target_*` commands (see below) and pass it to
+  them instead of the full target name. Typical usage:
+
+    project_target_link_libraries(my_library INTERFACE another_library)
+
+  All `target_*` commands have `project_target_*` counterparts. They take some
+  `${target}` name and resolve it in the following way:
+    (a) if the `${target}` has a `${namespace}::<target_suffix>` form, replace
+    `::` to `_`, raise an error if there's no such target;
+    (b) if there's a `${namespace}_${target}` target, use it;
+    (c) otherwise, use the ${target}.
 
   Let's say we define a project target named by `${namespace}_my_library`.
   The `EXPORT_NAME` property is also added to the target and set to `my_library`.
@@ -378,6 +398,67 @@ macro(set_project_target_property target project_property value)
   )
 endmacro()
 
+function(__get_project_target_name target)
+  if ("${target}" MATCHES "^${namespace}::")
+    string(REPLACE "::" "_" target ${target})
+    if (NOT TARGET "${target}")
+      message(FATAL_ERROR "There is no such project target \"${target}\".")
+    endif()
+  elseif (TARGET "${namespace}_${target}")
+    set(target ${namespace}_${target})
+  endif()
+  set(target ${target} PARENT_SCOPE)
+endfunction()
+
+function(project_target_compile_definitions target)
+  __get_project_target_name(${target})
+  target_compile_definitions(${target} ${ARGN})
+endfunction()
+
+function(project_target_compile_features target)
+  __get_project_target_name(${target})
+  target_compile_features(${target} ${ARGN})
+endfunction()
+
+function(project_target_compile_options target)
+  __get_project_target_name(${target})
+  target_compile_options(${target} ${ARGN})
+endfunction()
+
+function(project_target_include_directories target)
+  __get_project_target_name(${target})
+  if (ENABLE_TREATING_INCLUDES_AS_SYSTEM)
+    set(warning_guards "SYSTEM")
+  else()
+    set(warning_guards "")
+  endif()
+  target_include_directories(${target} ${warning_guards} ${ARGN})
+endfunction()
+
+function(project_target_link_directories target)
+  __get_project_target_name(${target})
+  target_link_directories(${target} ${ARGN})
+endfunction()
+
+function(project_target_link_libraries target)
+  __get_project_target_name(${target})
+  target_link_libraries(${target} ${ARGN})
+endfunction()
+
+function(project_target_link_options target)
+  __get_project_target_name(${target})
+  target_link_options(${target} ${ARGN})
+endfunction()
+
+function(project_target_precompile_headers target)
+  __get_project_target_name(${target})
+  target_precompile_headers(${target} ${ARGN})
+endfunction()
+
+function(project_target_sources target)
+  __get_project_target_name(${target})
+  target_sources(${target} ${ARGN})
+endfunction()
 
 ############################### Host information ###############################
 

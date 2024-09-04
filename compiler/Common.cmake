@@ -39,11 +39,13 @@
     add_subdirectory(externals)
 
     add_project_library(my_library)
-    target_link_libraries(my_project_name_my_library
-      PUBLIC my_project_name_cxx_standard
+    project_target_link_libraries(my_library
+      PUBLIC
+        my_project_name::cxx_standard
     )
-    target_compile_options(my_project_name_my_library
-      PRIVATE ${CXX_OPTIONS}
+    project_target_compile_options(my_library
+      PRIVATE
+        ${CXX_OPTIONS}
     )
     # other target commands
 
