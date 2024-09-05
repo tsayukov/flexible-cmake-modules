@@ -374,6 +374,17 @@ function(project_cached_variable variable_alias value type docstring)
   set(${variable_alias} ${${NAMESPACE}_${variable_alias}} PARENT_SCOPE)
 endfunction()
 
+macro(__process_injected_option option)
+  set(${option} OFF)
+  if (NOT ARGC EQUAL 0)
+    list(FIND ARGN "${option}" option_index)
+    if (NOT option_index EQUAL "-1")
+      set(${option} ON)
+      list(REMOVE_AT ARGN ${option_index})
+    endif()
+  endif()
+endmacro()
+
 #[=============================================================================[
   Add a project library target called by `${namespace}_${target_suffix}`.
   All parameters of the `add_library` command are passed after `target_suffix`.
@@ -381,21 +392,14 @@ endfunction()
   installation.
 #]=============================================================================]
 function(add_project_library target_suffix)
-  set(options EXCLUDE_FROM_INSTALLATION)
-  set(one_value_keywords "")
-  set(multi_value_keywords "")
-  cmake_parse_arguments(PARSE_ARGV 1 "ARGS"
-    "${options}"
-    "${one_value_keywords}"
-    "${multi_value_keywords}"
-  )
+  __process_injected_option(EXCLUDE_FROM_INSTALLATION)
 
   set(target ${namespace}_${target_suffix})
   add_library(${target} ${ARGN})
   add_library(${namespace}::${target_suffix} ALIAS ${target})
   set_target_properties(${target} PROPERTIES EXPORT_NAME ${target_suffix})
 
-  if (ENABLE_INSTALL AND NOT ARGS_EXCLUDE_FROM_INSTALLATION)
+  if (ENABLE_INSTALL AND NOT EXCLUDE_FROM_INSTALLATION)
     append_install_project_target(${target})
   endif()
 endfunction()
@@ -407,21 +411,14 @@ endfunction()
   installation.
 #]=============================================================================]
 function(add_project_executable target_suffix)
-  set(options EXCLUDE_FROM_INSTALLATION)
-  set(one_value_keywords "")
-  set(multi_value_keywords "")
-  cmake_parse_arguments(PARSE_ARGV 1 "ARGS"
-    "${options}"
-    "${one_value_keywords}"
-    "${multi_value_keywords}"
-  )
+  __process_injected_option(EXCLUDE_FROM_INSTALLATION)
 
   set(target ${namespace}_${target_suffix})
   add_executable(${target} ${ARGN})
   add_executable(${namespace}::${target_suffix} ALIAS ${target})
   set_target_properties(${target} PROPERTIES EXPORT_NAME ${target_suffix})
 
-  if (ENABLE_INSTALL AND NOT ARGS_EXCLUDE_FROM_INSTALLATION)
+  if (ENABLE_INSTALL AND NOT EXCLUDE_FROM_INSTALLATION)
     append_install_project_target(${target})
   endif()
 endfunction()
