@@ -116,13 +116,14 @@ function(install_project_cmake_configs)
     ${arch_independent}
   )
 
+  set(configs_component "${namespace}_configs")
   install(FILES
       "${PROJECT_BINARY_DIR}/${config_file}"
       "${PROJECT_BINARY_DIR}/${config_version_file}"
     DESTINATION "${INSTALL_CMAKE_DIR}"
-    COMPONENT "${namespace}_configs"
+    COMPONENT ${configs_component}
   )
-  add_component_target(${namespace}_configs)
+  add_component_target(${configs_component})
 endfunction()
 
 # Install the LICENSE file to `${INSTALL_LICENSE_DIR}`
