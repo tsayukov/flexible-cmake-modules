@@ -230,36 +230,40 @@ function(install_project_targets)
 
   set(artifact_options "")
   if (NOT ARGS_HEADER_ONLY)
+    set(runtime_component "${namespace}_runtime")
+    set(development_component "${namespace}_development")
     list(APPEND artifact_options
       RUNTIME
         DESTINATION "${CMAKE_INSTALL_BINDIR}"
-        COMPONENT "${namespace}_runtime"
+        COMPONENT ${runtime_component}
       LIBRARY
         DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-        COMPONENT "${namespace}_runtime"
-        NAMELINK_COMPONENT "${namespace}_development"
+        COMPONENT ${runtime_component}
+        NAMELINK_COMPONENT ${development_component}
       ARCHIVE
         DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-        COMPONENT "${namespace}_development"
+        COMPONENT ${development_component}
     )
-    add_component_target(${namespace}_runtime)
-    add_component_target(${namespace}_development)
+    add_component_target(${runtime_component})
+    add_component_target(${development_component})
   endif()
 
   install(TARGETS
       ${target_list}
     EXPORT "${PACKAGE_EXPORT_TARGET_NAME}"
+    CONFIGURATIONS "Release"
     ${artifact_options}
     INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
   )
 
+  set(configs_component "${namespace}_configs")
   install(EXPORT
       "${PACKAGE_EXPORT_TARGET_NAME}"
     NAMESPACE ${namespace}::
     DESTINATION "${INSTALL_CMAKE_DIR}"
-    COMPONENT "${namespace}_configs"
+    COMPONENT ${configs_component}
   )
-  add_component_target(${namespace}_configs)
+  add_component_target(${configs_component})
 endfunction()
 
 
