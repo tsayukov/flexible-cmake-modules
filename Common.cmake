@@ -261,6 +261,11 @@ endmacro()
 
     `target_link_libraries(<consuming_target> ... ${namespace}::my_library)`
 
+  If `${NAMESPACE}_ENABLE_INSTALL` is enabled and a project target is not
+  excluded from installation manually (see `add_project_*` for details),
+  the project target is added to the `${PROJECT_SOURCE_DIR}` directory property
+  `${NAMESPACE}_INSTALL_PROJECT_TARGETS`. So, the `install_project_targets`
+  command can be used without passed project targets.
 #]=============================================================================]
 
 # Define the namespace, by default it is `${PROJECT_NAME}` in the appropriate
@@ -369,22 +374,56 @@ function(project_cached_variable variable_alias value type docstring)
   set(${variable_alias} ${${NAMESPACE}_${variable_alias}} PARENT_SCOPE)
 endfunction()
 
-# Add a project library target called by `${namespace}_${target_suffix}`.
-# All parameters of the `add_library` command are passed after `target_suffix`.
+#[=============================================================================[
+  Add a project library target called by `${namespace}_${target_suffix}`.
+  All parameters of the `add_library` command are passed after `target_suffix`.
+  Set the `EXCLUDE_FROM_INSTALLATION` option to exclude the target from
+  installation.
+#]=============================================================================]
 function(add_project_library target_suffix)
+  set(options EXCLUDE_FROM_INSTALLATION)
+  set(one_value_keywords "")
+  set(multi_value_keywords "")
+  cmake_parse_arguments(PARSE_ARGV 1 "ARGS"
+    "${options}"
+    "${one_value_keywords}"
+    "${multi_value_keywords}"
+  )
+
   set(target ${namespace}_${target_suffix})
   add_library(${target} ${ARGN})
   add_library(${namespace}::${target_suffix} ALIAS ${target})
   set_target_properties(${target} PROPERTIES EXPORT_NAME ${target_suffix})
+
+  if (ENABLE_INSTALL AND NOT ARGS_EXCLUDE_FROM_INSTALLATION)
+    append_install_project_target(${target})
+  endif()
 endfunction()
 
-# Add an executable target called by `${namespace}_${target_suffix}`.
-# All parameters of the `add_executable` command are passed after `target_suffix`.
+#[=============================================================================[
+  Add an executable target called by `${namespace}_${target_suffix}`.
+  All parameters of the `add_executable` command are passed after `target_suffix`.
+  Set the `EXCLUDE_FROM_INSTALLATION` option to exclude the target from
+  installation.
+#]=============================================================================]
 function(add_project_executable target_suffix)
+  set(options EXCLUDE_FROM_INSTALLATION)
+  set(one_value_keywords "")
+  set(multi_value_keywords "")
+  cmake_parse_arguments(PARSE_ARGV 1 "ARGS"
+    "${options}"
+    "${one_value_keywords}"
+    "${multi_value_keywords}"
+  )
+
   set(target ${namespace}_${target_suffix})
   add_executable(${target} ${ARGN})
   add_executable(${namespace}::${target_suffix} ALIAS ${target})
   set_target_properties(${target} PROPERTIES EXPORT_NAME ${target_suffix})
+
+  if (ENABLE_INSTALL AND NOT ARGS_EXCLUDE_FROM_INSTALLATION)
+    append_install_project_target(${target})
+  endif()
 endfunction()
 
 macro(get_project_target_property variable target project_property)

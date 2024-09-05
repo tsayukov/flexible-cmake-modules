@@ -13,6 +13,8 @@
       - install_project_targets
     * Auxiliary commands:
       - add_component_target
+      - append_install_project_target
+      - get_install_project_targets
 
 #]=============================================================================]
 
@@ -187,10 +189,12 @@ function(install_project_headers)
 endfunction()
 
 #[=============================================================================[
-  Install `targets` to specific destinations (see below). Generate and install
+  Install `targets` and install targets from the `${PROJECT_SOURCE_DIR}`
+  directory property `${NAMESPACE}_INSTALL_PROJECT_TARGETS` to specific
+  destinations (see below). Generate and install
   `${PACKAGE_EXPORT_TARGET_NAME}.cmake` file.
 
-    install_project_targets(TARGETS <targets>... [HEADER_ONLY])
+    install_project_targets([TARGETS <targets>...] [HEADER_ONLY])
 
   `HEADER_ONLY` option is used to exclude installation of other artifacts. It
   actually doesn't make headers install, only exports the corresponding
@@ -215,10 +219,6 @@ function(install_project_targets)
     "${multi_value_keywords}"
   )
 
-  if (NOT ARGS_TARGETS)
-    message(FATAL_ERROR "The `TARGETS` parameters must have at least one target.")
-  endif()
-
   set(target_list "")
   foreach (target IN LISTS ARGS_TARGETS)
     __get_project_target_name(${target})
@@ -227,6 +227,13 @@ function(install_project_targets)
     endif()
     list(APPEND target_list ${target})
   endforeach()
+
+  get_install_project_targets()
+  list(APPEND target_list ${install_project_targets})
+
+  if (NOT target_list)
+    message(FATAL_ERROR "There are no targets to install.")
+  endif()
 
   set(artifact_options "")
   if (NOT ARGS_HEADER_ONLY)
@@ -297,3 +304,22 @@ function(add_component_target component)
     )
   endif()
 endfunction()
+
+function(append_install_project_target target)
+  __get_project_target_name(${target})
+  set_property(DIRECTORY
+      "${PROJECT_SOURCE_DIR}"
+    APPEND PROPERTY
+      ${NAMESPACE}_INSTALL_PROJECT_TARGETS
+      ${target}
+  )
+endfunction()
+
+macro(get_install_project_targets)
+  get_property(install_project_targets
+    DIRECTORY
+      "${PROJECT_SOURCE_DIR}"
+    PROPERTY
+      ${NAMESPACE}_INSTALL_PROJECT_TARGETS
+  )
+endmacro()
