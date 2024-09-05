@@ -186,6 +186,10 @@ macro(__include_compiler_commands lang LANG)
         set(__compare_standards_result ${result} PARENT_SCOPE)
       endfunction()
 
+      if (NOT DEFINED CMAKE_${LANG}_STANDARD)
+        set(CMAKE_${LANG}_STANDARD ${standard})
+      endif()
+
       set(current_standard ${CMAKE_${LANG}_STANDARD})
       if (NOT current_standard)
         set(current_standard ${standard})
