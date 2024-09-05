@@ -31,12 +31,11 @@ enable_if_project_variable_is_set(ENABLE_DOCS)
   found in the `INPUTS` parameters and to place the result in the `OUTPUT`
   parameter.
 
-    add_docs(<target_alias> FORMAT <format>
+    add_docs(<target_suffix> FORMAT <format>
              INPUTS <files or directories> ...
              [OUTPUT <output_directory>])
 
-  The true target name is `${namespace}_${target_alias}` with defined
-  `${target_alias}` variable set to the target name.
+  The true target name is `${namespace}_${target_suffix}`.
 
   See supported formats: https://www.doxygen.nl/manual/starting.html#step2.
 
@@ -44,7 +43,7 @@ enable_if_project_variable_is_set(ENABLE_DOCS)
 
   Also generate install rules for documentation if `${ENABLE_INSTALL}` is set.
 #]=============================================================================]
-function(add_docs target_alias)
+function(add_docs target_suffix)
   set(options "")
   set(one_value_keywords FORMAT OUTPUT)
   set(multi_value_keywords INPUTS)
@@ -69,23 +68,22 @@ function(add_docs target_alias)
   set(DOXYGEN_GENERATE_${ARGS_FORMAT} YES)
   set(DOXYGEN_${ARGS_FORMAT}_OUTPUT "${output}")
 
-  set(target ${namespace}_${target_alias})
   doxygen_add_docs(
-    ${target} ${ARGS_INPUTS}
+    ${namespace}_${target_suffix} ${ARGS_INPUTS}
     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
     COMMENT "Generate ${ARGS_FORMAT} documentation"
   )
-  set(${target_alias} ${target} PARENT_SCOPE)
 
   enable_if_project_variable_is_set(ENABLE_INSTALL)
 
+  set(docs_component "${namespace}_docs")
   install(DIRECTORY
       "${output}"
     DESTINATION
       "${INSTALL_DOC_DIR}"
-    COMPONENT "${namespace}_docs" EXCLUDE_FROM_ALL
+    COMPONENT ${docs_component} EXCLUDE_FROM_ALL
   )
-  add_component_target(${namespace}_docs)
+  add_component_target(${docs_component})
 endfunction()
 
 
