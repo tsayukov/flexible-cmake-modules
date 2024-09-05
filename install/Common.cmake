@@ -134,41 +134,55 @@ macro(install_project_license)
 endmacro()
 
 #[=============================================================================[
-  Install all headers (i.e. *.h and *.hpp files) located in the `base_directory`
-  and its subdirectories recursively to `${CMAKE_INSTALL_INCLUDEDIR}`.
-  The directory structure in the `base_directory` is copied verbatim to the
+  Install all headers (*.h, *.hh, *.h++, *.hpp, *.hxx, *.in, *.inc, and others
+  described in the `PATTERNS` list) located in the `BASE_DIR` and its
+  subdirectories recursively to `${CMAKE_INSTALL_INCLUDEDIR}`.
+  The directory structure in the `BASE_DIR` is copied verbatim to the
   destination.
 
-    install_project_headers([<base_directory>])
+    install_project_headers([BASE_DIR <base_directory>]
+                            [PATTERNS <patterns>...])
 
-  By default, the `base_directory` parameter is `${PROJECT_SOURCE_DIR}/include`.
+  By default, the `BASE_DIR` parameter is `${PROJECT_SOURCE_DIR}/include`.
   Set the install component to `${namespace}_headers`.
 #]=============================================================================]
 function(install_project_headers)
-  if (ARGC EQUAL "0")
-    set(base_directory "include")
-  else()
-    set(base_directory "${ARGV0}")
-  endif()
-
-  if (NOT IS_ABSOLUTE "${base_directory}")
-    set(base_directory "${PROJECT_SOURCE_DIR}/${base_directory}")
-  endif()
-
-  install(DIRECTORY
-      "${base_directory}/"
-    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
-    COMPONENT "${namespace}_headers"
-    FILES_MATCHING
-      PATTERN "*.h"
-      PATTERN "*.hh"
-      PATTERN "*.h++"
-      PATTERN "*.hpp"
-      PATTERN "*.hxx"
-      PATTERN "*.in"
-      PATTERN "*.inc"
+  set(options "")
+  set(one_value_keywords BASE_DIR)
+  set(multi_value_keywords PATTERNS)
+    cmake_parse_arguments(PARSE_ARGV 0 "ARGS"
+    "${options}"
+    "${one_value_keywords}"
+    "${multi_value_keywords}"
   )
-  add_component_target(${namespace}_headers)
+
+  if (NOT ARGS_BASE_DIR)
+    set(ARGS_BASE_DIR "include")
+  endif()
+
+  if (NOT IS_ABSOLUTE "${ARGS_BASE_DIR}")
+    set(ARGS_BASE_DIR "${PROJECT_SOURCE_DIR}/${ARGS_BASE_DIR}")
+  endif()
+
+  list(APPEND ARGS_PATTERNS
+    "*.h"
+    "*.hh"
+    "*.h++"
+    "*.hpp"
+    "*.hxx"
+    "*.in"
+    "*.inc"
+  )
+  list(TRANSFORM ARGS_PATTERNS PREPEND "PATTERN;")
+
+  set(headers_component "${namespace}_headers")
+  install(DIRECTORY
+      "${ARGS_BASE_DIR}/"
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+    COMPONENT ${headers_component}
+    FILES_MATCHING ${ARGS_PATTERNS}
+  )
+  add_component_target(${headers_component})
 endfunction()
 
 #[=============================================================================[
