@@ -52,13 +52,13 @@ macro(__init_common)
   # This guard should be at the beginning
   __after_project_guard()
 
-  requires_cmake(3.14 "These modules are supported only by CMake 3.14+")
-
   include_project_module(common/Watchers)
   include_project_module(common/Guards)
   include_project_module(common/Project)
   include_project_module(common/HostInfo)
   include_project_module(common/Debug)
+
+  requires_cmake(3.14 "These modules are supported only by CMake 3.14+")
 
   # Init the project cached variables
   include_project_module(Variables)
