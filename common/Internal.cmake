@@ -10,6 +10,7 @@
   Commands:
   - __after_project_guard
   - __process_injected_option
+  - __compact_parse_arguments
   - __xor
 #]=============================================================================]
 
@@ -61,6 +62,53 @@ macro(__process_injected_option option)
       list(REMOVE_AT ARGN ${option_index})
     endif()
   endif()
+endmacro()
+
+#[=============================================================================[
+  For internal use. Use this command in functions.
+  The compact version of parsing of a function's parameters.
+
+    __compact_parse_arguments([__start_with <N>] [__prefix <prefix>]
+                              [__options <options>]
+                              [__values <one_value_keywords>]
+                              [__lists <multi_value_keywords>])
+
+  See: https://cmake.org/cmake/help/latest/command/cmake_parse_arguments.html
+#]=============================================================================]
+macro(__compact_parse_arguments)
+  set(options "")
+  set(one_value_keywords
+    __start_with
+    __prefix
+  )
+  set(multi_value_keywords
+    __options
+    __values
+    __lists
+  )
+  cmake_parse_arguments("__ARGS"
+    "${options}"
+    "${one_value_keywords}"
+    "${multi_value_keywords}"
+    ${ARGN}
+  )
+
+  if (NOT __ARGS___prefix)
+    set(__ARGS___prefix "ARGS")
+  endif()
+
+  if (NOT __ARGS___start_with)
+    set(__ARGS___start_with "0")
+  endif()
+
+  set(options ${__ARGS___options})
+  set(one_value_keywords ${__ARGS___values})
+  set(multi_value_keywords ${__ARGS___lists})
+  cmake_parse_arguments(PARSE_ARGV ${__ARGS___start_with} "${__ARGS___prefix}"
+    "${options}"
+    "${one_value_keywords}"
+    "${multi_value_keywords}"
+  )
 endmacro()
 
 # For internal use.

@@ -112,13 +112,8 @@ macro(__include_compiler_commands lang LANG)
     See supported languages: https://cmake.org/cmake/help/latest/command/project.html
   #]===========================================================================]
   function(get_${lang}_compiler_version compiler_id)
-    set(options MAJOR MINOR PATCH)
-    set(one_value_keywords "")
-    set(multi_value_keywords "")
-    cmake_parse_arguments(PARSE_ARGV 1 "ARGS"
-      "${options}"
-      "${one_value_keywords}"
-      "${multi_value_keywords}"
+    __compact_parse_arguments(__start_with 1
+      __options MAJOR MINOR PATCH
     )
 
     if (NOT CMAKE_${LANG}_COMPILER_ID STREQUAL "${compiler_id}")

@@ -63,20 +63,13 @@ include(CMakePackageConfigHelpers)
   Set `ARCH_INDEPENDENT` for header-only libraries.
 #]=============================================================================]
 function(install_project_cmake_configs)
-  set(options
-    NO_SET_AND_CHECK_MACRO
-    NO_CHECK_REQUIRED_COMPONENTS_MACRO
-    ARCH_INDEPENDENT
-  )
-  set(one_value_keywords
-    VERSION
-    COMPATIBILITY
-  )
-  set(multi_value_keywords PATH_VARS)
-  cmake_parse_arguments(PARSE_ARGV 0 "ARGS"
-    "${options}"
-    "${one_value_keywords}"
-    "${multi_value_keywords}"
+  __compact_parse_arguments(
+    __options
+      NO_SET_AND_CHECK_MACRO
+      NO_CHECK_REQUIRED_COMPONENTS_MACRO
+      ARCH_INDEPENDENT
+    __values VERSION COMPATIBILITY
+    __lists PATH_VARS
   )
 
   list(APPEND ARGS_PATH_VARS "INSTALL_CMAKE_DIR")
@@ -150,13 +143,9 @@ endmacro()
   Set the install component to `${namespace}_headers`.
 #]=============================================================================]
 function(install_project_headers)
-  set(options "")
-  set(one_value_keywords BASE_DIR)
-  set(multi_value_keywords PATTERNS)
-    cmake_parse_arguments(PARSE_ARGV 0 "ARGS"
-    "${options}"
-    "${one_value_keywords}"
-    "${multi_value_keywords}"
+  __compact_parse_arguments(
+    __values BASE_DIR
+    __lists PATTERNS
   )
 
   if (NOT ARGS_BASE_DIR)
@@ -210,13 +199,9 @@ endfunction()
   `${namespace}_development`, and `${namespace}_configs`.
 #]=============================================================================]
 function(install_project_targets)
-  set(options HEADER_ONLY)
-  set(one_value_keywords "")
-  set(multi_value_keywords TARGETS)
-  cmake_parse_arguments(PARSE_ARGV 0 "ARGS"
-    "${options}"
-    "${one_value_keywords}"
-    "${multi_value_keywords}"
+  __compact_parse_arguments(
+    __options HEADER_ONLY
+    __lists TARGETS
   )
 
   set(target_list "")

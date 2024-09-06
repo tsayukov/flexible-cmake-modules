@@ -47,14 +47,7 @@ function(no_in_source_builds_guard)
     return()
   endif()
 
-  set(options "")
-  set(one_value_keywords "")
-  set(multi_value_keywords RECURSIVE)
-  cmake_parse_arguments(PARSE_ARGV 0 "ARGS"
-    "${options}"
-    "${one_value_keywords}"
-    "${multi_value_keywords}"
-  )
+  __compact_parse_arguments(__lists RECURSIVE)
 
   set(error_message
     "In-source builds are not allowed. Instead, provide a path to build tree "
