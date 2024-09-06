@@ -32,13 +32,12 @@ endfunction()
 #[=============================================================================[
   Prevent in-source builds.
 
-    no_in_source_builds_guard([<directory>])
+    no_in_source_builds_guard([RECURSIVE <directories>...])
 
-  If `<directory>` is missing, see if the current listfile's directory is the
-  project binary directory.
-  If `<directory>` is passed and is a relative path, prepend the current
-  listfile's directory to it. Check if the project binary directory includes
-  `<directory>`'s path.
+  Check if the current listfile's directory is not the project binary directory.
+  If `<directories>` are passed, check if the project binary directory doesn't
+  include any of`<directories>`'s paths. If some of `<directories>`'s paths are
+  a relative path, prepend the current listfile's directory to them.
 
   Although, if this project is included as a subproject, the outer project
   is allowed to build wherever it wants.
@@ -47,6 +46,15 @@ function(no_in_source_builds_guard)
   if (NOT PROJECT_IS_TOP_LEVEL)
     return()
   endif()
+
+  set(options "")
+  set(one_value_keywords "")
+  set(multi_value_keywords RECURSIVE)
+  cmake_parse_arguments(PARSE_ARGV 0 "ARGS"
+    "${options}"
+    "${one_value_keywords}"
+    "${multi_value_keywords}"
+  )
 
   set(error_message
     "In-source builds are not allowed. Instead, provide a path to build tree "
@@ -75,18 +83,16 @@ function(no_in_source_builds_guard)
     "'build.ninja' and so forth."
   )
 
-  if (ARGC EQUAL "0")
-    if (CMAKE_CURRENT_LIST_DIR STREQUAL PROJECT_BINARY_DIR)
-      message(FATAL_ERROR ${error_message})
-    endif()
-  else()
-    set(dir "${ARGV0}")
+  if (CMAKE_CURRENT_LIST_DIR STREQUAL PROJECT_BINARY_DIR)
+    message(FATAL_ERROR ${error_message})
+  endif()
+
+  foreach (dir IN LISTS ARGS_RECURSIVE)
     if (NOT IS_ABSOLUTE "${dir}")
       set(dir "${CMAKE_CURRENT_LIST_DIR}/${dir}")
     endif()
-
     if (PROJECT_BINARY_DIR MATCHES "^${dir}/?")
       message(FATAL_ERROR ${error_message})
     endif()
-  endif()
+  endforeach()
 endfunction()
