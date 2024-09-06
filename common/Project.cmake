@@ -139,13 +139,8 @@ endmacro()
   try to set to `${value}`, otherwise, to the opposite one.
 #]=============================================================================]
 function(project_option variable_alias help_text value)
-  set(options "")
-  set(one_value_keywords "")
-  set(multi_value_keywords IF)
-  cmake_parse_arguments(PARSE_ARGV 3 "ARGS"
-    "${options}"
-    "${one_value_keywords}"
-    "${multi_value_keywords}"
+  __compact_parse_arguments(__start_with 3
+    __lists IF
   )
 
   set(variable ${NAMESPACE}_${variable_alias})

@@ -44,13 +44,9 @@ enable_if_project_variable_is_set(ENABLE_DOCS)
   Also generate install rules for documentation if `${ENABLE_INSTALL}` is set.
 #]=============================================================================]
 function(add_docs target_suffix)
-  set(options "")
-  set(one_value_keywords FORMAT OUTPUT)
-  set(multi_value_keywords INPUTS)
-  cmake_parse_arguments(PARSE_ARGV 1 "ARGS"
-    "${options}"
-    "${one_value_keywords}"
-    "${multi_value_keywords}"
+  __compact_parse_arguments(__start_with 1
+    __values FORMAT OUTPUT
+    __lists INPUTS
   )
 
   if (NOT ARGS_OUTPUT)
