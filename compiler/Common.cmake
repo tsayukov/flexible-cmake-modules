@@ -3,26 +3,25 @@
   Distributed under the MIT License. See accompanying file LICENSE or
   https://opensource.org/license/mit for details.
   ------------------------------------------------------------------------------
-  Define commands, variables, and targets to work with enabled languages.
+  Define commands, variables, and targets to work with enabled languages
   ------------------------------------------------------------------------------
   Commands for language `${lang}` (e.g. `c`, `cxx`, in lower case):
-    * Common commands:
-      - get_${lang}_compiler_version
-    * C/C++ standard:
-      - use_${lang}_standard_at_least
-      - ${lang}_standard_guard
-    * C/C++ extensions toggle:
-      - enable_${lang}_extensions
-      - disable_${lang}_extensions
-    * Interface C/C++ library (use `target_link_libraries` to link against
-      them):
-      - ${namespace}_${lang}_standard
-    * Normal variables as lists (use `target_compile_options` to include them):
-      - CXX_OPTIONS
-      - CXX_WARNING_OPTIONS
-      - CXX_ERROR_OPTIONS
-      - CXX_LANGUAGE_OPTIONS
-      - CXX_DIAGNOSTIC_OPTIONS
+  - Common commands:
+    - get_${lang}_compiler_version
+  - C/C++ standard:
+    - use_${lang}_standard_at_least
+    - ${lang}_standard_guard
+  - C/C++ extensions toggle:
+    - enable_${lang}_extensions
+    - disable_${lang}_extensions
+  - Interface C/C++ library (use `target_link_libraries` to link against them):
+    - ${namespace}_${lang}_standard
+  - Normal variables as lists (use `target_compile_options` to include them):
+    - CXX_OPTIONS
+    - CXX_WARNING_OPTIONS
+    - CXX_ERROR_OPTIONS
+    - CXX_LANGUAGE_OPTIONS
+    - CXX_DIAGNOSTIC_OPTIONS
 
   Usage:
 

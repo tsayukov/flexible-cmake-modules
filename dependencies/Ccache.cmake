@@ -3,7 +3,7 @@
   Distributed under the MIT License. See accompanying file LICENSE or
   https://opensource.org/license/mit for details.
   ------------------------------------------------------------------------------
-  Ccache support for fast recompilation.
+  Ccache support for fast recompilation
   ------------------------------------------------------------------------------
   Enable the `${NAMESPACE}_ENABLE_CCACHE` project option to turn ccache on.
   See `../Variables.cmake` for details.
