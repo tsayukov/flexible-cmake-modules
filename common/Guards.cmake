@@ -11,6 +11,7 @@
 #]=============================================================================]
 
 include_guard(GLOBAL)
+__after_project_guard()
 
 
 #[=============================================================================[
@@ -29,38 +30,63 @@ function(requires_cmake version reason)
 endfunction()
 
 #[=============================================================================[
-  TODO(issue #31): make this command universal
-  Prevent in-source builds. Prefer to start each listfile with this function.
+  Prevent in-source builds.
+
+    no_in_source_builds_guard([<directory>])
+
+  If `<directory>` is missing, see if the current listfile's directory is the
+  project binary directory.
+  If `<directory>` is passed and is a relative path, prepend the current
+  listfile's directory to it. Check if the project binary directory includes
+  `<directory>`'s path.
+
   Although, if this project is included as a subproject, the outer project
   is allowed to build wherever it wants.
 #]=============================================================================]
 function(no_in_source_builds_guard)
-  if (PROJECT_IS_TOP_LEVEL AND (CMAKE_CURRENT_LIST_DIR STREQUAL CMAKE_BINARY_DIR))
-    message(FATAL_ERROR
-      "In-source builds are not allowed. Instead, provide a path to build tree "
-      "like so:\n"
+  if (NOT PROJECT_IS_TOP_LEVEL)
+    return()
+  endif()
 
-      "cmake -B <binary-directory>\n"
+  set(error_message
+    "In-source builds are not allowed. Instead, provide a path to build tree "
+    "like so:\n"
 
-      "Or use presets with an out-of-source build configuration like so:\n"
+    "cmake -B <binary-directory>\n"
 
-      "cmake --preset <preset-name>\n"
+    "Or use presets with an out-of-source build configuration like so:\n"
 
-      "To remove files you accidentally created execute:\n"
+    "cmake --preset <preset-name>\n"
 
-      "NOTE: be careful if you had you own directory and files with same names! "
-      "Use your version control system to restore your data.\n"
+    "To remove files you accidentally created execute:\n"
 
-      "Linux: rm -rf CMakeFiles CMakeCache.txt cmake_install.cmake\n"
+    "NOTE: be careful if you had you own directory and files with same names! "
+    "Use your version control system to restore your data.\n"
 
-      "Windows (PowerShell): "
-      "Remove-Item CMakeFiles, CMakeCache.txt, cmake_install.cmake -Force -Recurse\n"
+    "Linux: rm -rf CMakeFiles CMakeCache.txt cmake_install.cmake\n"
 
-      "Windows (Command Prompt): "
-      "rmdir CMakeFiles /s /q && del /q CMakeCache.txt cmake_install.cmake\n"
+    "Windows (PowerShell): "
+    "Remove-Item CMakeFiles, CMakeCache.txt, cmake_install.cmake -Force -Recurse\n"
 
-      "NOTE: Build generator files may also remain, that is, 'Makefile', "
-      "'build.ninja' and so forth."
-    )
+    "Windows (Command Prompt): "
+    "rmdir CMakeFiles /s /q && del /q CMakeCache.txt cmake_install.cmake\n"
+
+    "NOTE: Build generator files may also remain, that is, 'Makefile', "
+    "'build.ninja' and so forth."
+  )
+
+  if (ARGC EQUAL "0")
+    if (CMAKE_CURRENT_LIST_DIR STREQUAL PROJECT_BINARY_DIR)
+      message(FATAL_ERROR ${error_message})
+    endif()
+  else()
+    set(dir "${ARGV0}")
+    if (NOT IS_ABSOLUTE "${dir}")
+      set(dir "${CMAKE_CURRENT_LIST_DIR}/${dir}")
+    endif()
+
+    if (PROJECT_BINARY_DIR MATCHES "^${dir}/?")
+      message(FATAL_ERROR ${error_message})
+    endif()
   endif()
 endfunction()
