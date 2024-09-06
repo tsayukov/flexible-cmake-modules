@@ -69,8 +69,9 @@ macro(__init_common)
   include_project_module(install/Common)
   include_project_module(modules/Common)
 
-  # And this guard should be at the end
+  # And these guards should be at the end
   no_in_source_builds_guard()
+  no_in_source_builds_guard(common)
 endmacro()
 
 #[=============================================================================[
