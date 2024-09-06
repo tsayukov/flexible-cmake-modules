@@ -1,5 +1,5 @@
 #[=============================================================================[
-  Project namespace, options, and cached variables.
+  Project namespace, options, and cached variables
   ------------------------------------------------------------------------------
   This listfile is intended for editing existing cached variables or/and adding
   additional ones.
