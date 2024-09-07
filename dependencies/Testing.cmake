@@ -18,7 +18,7 @@ include_guard(GLOBAL)
 cxx_standard_guard()
 
 
-enable_if_project_variable_is_set(ENABLE_TESTING)
+enable_if(ENABLE_TESTING)
 
 enable_testing()
 

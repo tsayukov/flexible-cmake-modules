@@ -18,7 +18,7 @@
 include_guard(GLOBAL)
 
 
-enable_if_project_variable_is_set(ENABLE_MEMORY_CHECKING)
+enable_if(ENABLE_MEMORY_CHECKING)
 
 macro(init_valgrind)
   find_program(VALGRIND_PATH valgrind REQUIRED)

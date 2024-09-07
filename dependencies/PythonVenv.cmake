@@ -19,7 +19,7 @@
 include_guard(GLOBAL)
 
 
-enable_if_project_variable_is_set(ENABLE_PYTHON_VENV)
+enable_if(ENABLE_PYTHON_VENV)
 requires_cmake(3.15 "Using `*_FIND_VIRTUALENV` in FindPython2 or FindPython3 modules")
 
 #[=============================================================================[
