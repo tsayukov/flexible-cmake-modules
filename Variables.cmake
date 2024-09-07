@@ -73,6 +73,8 @@ project_dev_option(ENABLE_COVERAGE "Enable code coverage testing")
 
 project_dev_option(ENABLE_FORMATTING "Enable code formatting")
 
+project_dev_option(ENABLE_MEMORY_CHECKING "Enable memory checking tools")
+
 # TODO: implement other developer options
 
 if (ENABLE_DEVELOPER_MODE)
