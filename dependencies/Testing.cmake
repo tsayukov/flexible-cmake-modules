@@ -21,7 +21,7 @@ enable_if(ENABLE_TESTING)
 
 enable_testing()
 
-use_cxx_standard_at_least(14)
+use_cxx_standard_at_least(14 NAME "GTest")
 
 find_package(GTest)
 if (NOT GTest_FOUND)

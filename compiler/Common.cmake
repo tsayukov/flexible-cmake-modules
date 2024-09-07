@@ -116,9 +116,8 @@ macro(__include_compiler_commands lang LANG)
 
     if (NOT CMAKE_${LANG}_COMPILER_ID STREQUAL "${compiler_id}")
       message(FATAL_ERROR
-        "\n"
-        "${compiler_id} is either a wrong name or not the current ${LANG} compiler.\n"
-        "Hint: the current ${LANG} compiler is \"${CMAKE_${LANG}_COMPILER_ID}\".\n"
+        "${compiler_id} is either a wrong name or not the current ${LANG} compiler. "
+        "Hint: the current ${LANG} compiler is \"${CMAKE_${LANG}_COMPILER_ID}\"."
       )
     endif()
 
@@ -147,90 +146,75 @@ macro(__include_compiler_commands lang LANG)
     ############################# C/C++ standard ###############################
 
     #[=========================================================================[
-      Check if `CMAKE_${LANG}_STANDARD` is set to at least `standard` and
+      Check if `CMAKE_${LANG}_STANDARD` is set to at least `${standard}` and
       in the very first call define the `${namespace}_${lang}_standard` target
-      as an interface library with the corresponding standard which other
-      targets can link against. `${namespace}_${lang}_standard` should be
-      treated as a target with the least supported standard of this library.
-      The first time this function should be called in the root listfile to
-      define `${namespace}_${lang}_standard`.
-      Use its next calls to check if some dependency's requirement is not
-      greater than the standard in `${namespace}_${lang}_standard`.
+      as an interface library with the standard set to the maximum of
+      `${CMAKE_${LANG}_STANDARD}` and `${standard}`, which other targets can
+      link against. `${namespace}_${lang}_standard` should be treated as
+      a target with the least supported standard of this library.
+
+      If `CMAKE_${LANG}_STANDARD` is not defined, the first call of the function
+      set its compile feature to `${lang}_std_${standard}`.
+
+      The first time this function should be called in the current project's
+      root listfile to define `${namespace}_${lang}_standard`.
+      If there's no such call, but `CMAKE_${LANG}_STANDARD` is defined,
+      the `${namespace}_${lang}_standard` target will have the standard that is
+      set in `CMAKE_${LANG}_STANDARD`.
+      If there's no such call and `CMAKE_${LANG}_STANDARD` is not defined,
+      then this function is no-op.
+
+      Use next calls of this function to check if some dependency's requirement
+      is not greater than the standard in `${namespace}_${lang}_standard`.
     #]=========================================================================]
     function(use_${lang}_standard_at_least standard)
-      # Helper comparison of C/C++ standards
-      function(__compare_standards lhs rhs)
-        if (NOT lhs MATCHES "^9[0-9]$")
-          set(lhs ${lhs}00)
+      if (NOT DEFINED CMAKE_${LANG}_STANDARD)
+        if (CMAKE_CURRENT_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
+          set(CMAKE_${LANG}_STANDARD ${standard})
+          set(CMAKE_${LANG}_STANDARD ${standard} PARENT_SCOPE)
+        else()
+          return()
         endif()
-        if (NOT rhs MATCHES "^9[0-9]$")
-          set(rhs ${rhs}00)
-        endif()
+      endif()
 
-        if (lhs LESS rhs)
-          set(result "LESS")
-        elseif (lhs GREATER rhs)
-          set(result "GREATER")
-        else() # lhr EQUAL rhs
-          set(result "EQUAL")
-        endif()
+      __compact_parse_arguments(__start_with 1
+        __values NAME
+      )
 
-        set(__compare_standards_result ${result} PARENT_SCOPE)
-      endfunction()
+      __check_standard_consistency(${LANG} ${standard} NAME "${ARGS_NAME}")
 
       set(target_suffix ${lang}_standard)
       set(target ${namespace}_${target_suffix})
-      if ((NOT TARGET ${target}) AND (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR))
-        message(FATAL_ERROR
-          "The `use_${lang}_standard_at_least(<standard>)` command must be "
-          "called in the root listfile of the current library."
-        )
-      endif()
-
-      if (NOT DEFINED CMAKE_${LANG}_STANDARD)
-        set(CMAKE_${LANG}_STANDARD ${standard})
-      endif()
-
-      set(current_standard ${CMAKE_${LANG}_STANDARD})
-      if (NOT current_standard)
-        set(current_standard ${standard})
-      endif()
-
-      __compare_standards(${current_standard} ${standard})
-      if (__compare_standards_result STREQUAL "LESS")
-        message(FATAL_ERROR
-          "The library requires the ${LANG} standard ${current_standard}, but got: ${standard}."
-        )
-      endif()
-
       if (NOT TARGET ${target})
         add_project_library(${target_suffix} INTERFACE)
-        target_compile_features(${target}
+        project_target_compile_features(${target_suffix}
           INTERFACE
-            ${lang}_std_${current_standard}
+            ${lang}_std_${CMAKE_${LANG}_STANDARD}
         )
         set(CMAKE_${LANG}_STANDARD_REQUIRED ON PARENT_SCOPE)
       endif()
-
-      set(CMAKE_${LANG}_STANDARD ${current_standard} PARENT_SCOPE)
     endfunction()
 
 
     ######################### C/C++ extensions toggle ##########################
 
     function(enable_${lang}_extensions)
-      set_target_properties(${namespace}_${lang}_standard
-        PROPERTIES
-          ${LANG}_EXTENSIONS ON
-      )
+      if (TARGET ${namespace}_${lang}_standard)
+        set_target_properties(${namespace}_${lang}_standard
+          PROPERTIES
+            ${LANG}_EXTENSIONS ON
+        )
+      endif()
       set(CMAKE_${LANG}_EXTENSIONS ON PARENT_SCOPE)
     endfunction()
 
     function(disable_${lang}_extensions)
-      set_target_properties(${namespace}_${lang}_standard
-        PROPERTIES
-          ${LANG}_EXTENSIONS OFF
-      )
+      if (TARGET ${namespace}_${lang}_standard)
+        set_target_properties(${namespace}_${lang}_standard
+          PROPERTIES
+            ${LANG}_EXTENSIONS OFF
+        )
+      endif()
       set(CMAKE_${LANG}_EXTENSIONS OFF PARENT_SCOPE)
     endfunction()
 
@@ -238,6 +222,61 @@ macro(__include_compiler_commands lang LANG)
 
 endmacro()
 
+# For internal use. Helper comparison of C/C++ standards.
+function(__compare_standards lhs rhs)
+  if (NOT lhs MATCHES "^9[0-9]$")
+    set(lhs ${lhs}00)
+  endif()
+  if (NOT rhs MATCHES "^9[0-9]$")
+    set(rhs ${rhs}00)
+  endif()
+
+  if (lhs LESS rhs)
+    set(result "LESS")
+  elseif (lhs GREATER rhs)
+    set(result "GREATER")
+  else() # lhs EQUAL rhs
+    set(result "EQUAL")
+  endif()
+
+  set(__compare_standards_result ${result} PARENT_SCOPE)
+endfunction()
+
+# For internal use. Helper processor of `${LANG}` standards consistency.
+function(__check_standard_consistency LANG required_standard)
+  __compact_parse_arguments(__start_with 1
+    __values NAME
+  )
+
+  __compare_standards(${required_standard} ${CMAKE_${LANG}_STANDARD})
+  if (NOT __compare_standards_result STREQUAL "GREATER")
+    return()
+  endif()
+
+  if (CMAKE_CURRENT_LIST_DIR STREQUAL PROJECT_SOURCE_DIR)
+    message(FATAL_ERROR
+      "The project \"${PROJECT_NAME}\" requires at least "
+      "the ${LANG} standard ${required_standard}, "
+      "but CMAKE_${LANG}_STANDARD is set to ${CMAKE_${LANG}_STANDARD}."
+    )
+  else()
+    if (ARGS_NAME)
+      set(depended_part_name "\"${ARGS_NAME}\"")
+    else()
+      file(RELATIVE_PATH relative_file_path "${PROJECT_SOURCE_DIR}"
+        "${CMAKE_CURRENT_LIST_FILE}"
+      )
+      set(depended_part_name "defined in \"${relative_file_path}\"")
+    endif()
+
+    message(FATAL_ERROR
+      "The project \"${PROJECT_NAME}\" is built against "
+      "the ${LANG} standard ${CMAKE_${LANG}_STANDARD}, "
+      "but its dependent part ${depended_part_name} "
+      "requires at least ${required_standard}."
+    )
+  endif()
+endfunction()
 
 macro(__include_compiler_options lang LANG)
   # So far, support only C++ options
