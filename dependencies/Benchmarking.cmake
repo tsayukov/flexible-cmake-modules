@@ -21,13 +21,13 @@ include_guard(GLOBAL)
 enable_if(ENABLE_BENCHMARKING)
 
 macro(init_google_benchmark)
-  use_cxx_standard_at_least(11)
+  use_cxx_standard_at_least(11 NAME "Google benchmark")
 
   find_package(benchmark)
   set(BENCHMARK_TOOLS_HINTS "/usr/share/benchmark")
   if (NOT benchmark_FOUND)
     can_install_locally(benchmark)
-    use_cxx_standard_at_least(14)
+    use_cxx_standard_at_least(14 NAME "Google benchmark (building)")
 
     include(FetchContent)
     FetchContent_Declare(
@@ -59,11 +59,11 @@ macro(init_google_benchmark_tools)
     endif()
 
     find_or_init_python_venv()
-    message(STATUS "Installing google benchmark tools' dependencies")
+    message(STATUS "Installing Google benchmark tools' dependencies")
     pip3_install(-r "${BENCHMARK_TOOLS}/requirements.txt")
     # Even though, `requirements.txt` doesn't have `pandas`, `compare.py` still requires it
     pip3_install(wheel pandas)
-    message(STATUS "Installing google benchmark tools' dependencies - done")
+    message(STATUS "Installing Google benchmark tools' dependencies - done")
   endif(ENABLE_BENCHMARK_TOOLS)
 endmacro()
 
