@@ -76,6 +76,7 @@
     - add_project_library
     - add_project_executable
   - `target_*` counterparts:
+    - get_project_target_name
     - project_target_compile_definitions
     - project_target_compile_features
     - project_target_compile_options
@@ -233,57 +234,15 @@ endfunction()
 
 ########################### `target_*` counterparts ############################
 
-function(project_target_compile_definitions target)
-  __get_project_target_name(${target})
-  target_compile_definitions(${target} ${ARGN})
-endfunction()
-
-function(project_target_compile_features target)
-  __get_project_target_name(${target})
-  target_compile_features(${target} ${ARGN})
-endfunction()
-
-function(project_target_compile_options target)
-  __get_project_target_name(${target})
-  target_compile_options(${target} ${ARGN})
-endfunction()
-
-function(project_target_include_directories target)
-  __get_project_target_name(${target})
-  if (ENABLE_TREATING_INCLUDES_AS_SYSTEM)
-    set(warning_guards "SYSTEM")
-  else()
-    set(warning_guards "")
-  endif()
-  target_include_directories(${target} ${warning_guards} ${ARGN})
-endfunction()
-
-function(project_target_link_directories target)
-  __get_project_target_name(${target})
-  target_link_directories(${target} ${ARGN})
-endfunction()
-
-function(project_target_link_libraries target)
-  __get_project_target_name(${target})
-  target_link_libraries(${target} ${ARGN})
-endfunction()
-
-function(project_target_link_options target)
-  __get_project_target_name(${target})
-  target_link_options(${target} ${ARGN})
-endfunction()
-
-function(project_target_precompile_headers target)
-  __get_project_target_name(${target})
-  target_precompile_headers(${target} ${ARGN})
-endfunction()
-
-function(project_target_sources target)
-  __get_project_target_name(${target})
-  target_sources(${target} ${ARGN})
-endfunction()
-
-function(__get_project_target_name target)
+#[=============================================================================[
+  Resolve the `${target}` name in the following way:
+  (a) if the `${target}` has a `${namespace}::<target_suffix>` form, replace
+     `::` to `_`, raise an error if there's no such target;
+  (b) if there's a `${namespace}_${target}` target, use it;
+  (c) otherwise, use the ${target}.
+  Then put the final result into the `target` variable.
+#]=============================================================================]
+function(get_project_target_name target)
   if ("${target}" MATCHES "^${namespace}::")
     string(REPLACE "::" "_" target ${target})
     if (NOT TARGET "${target}")
@@ -293,6 +252,56 @@ function(__get_project_target_name target)
     set(target ${namespace}_${target})
   endif()
   set(target ${target} PARENT_SCOPE)
+endfunction()
+
+function(project_target_compile_definitions target)
+  get_project_target_name(${target})
+  target_compile_definitions(${target} ${ARGN})
+endfunction()
+
+function(project_target_compile_features target)
+  get_project_target_name(${target})
+  target_compile_features(${target} ${ARGN})
+endfunction()
+
+function(project_target_compile_options target)
+  get_project_target_name(${target})
+  target_compile_options(${target} ${ARGN})
+endfunction()
+
+function(project_target_include_directories target)
+  get_project_target_name(${target})
+  if (ENABLE_TREATING_INCLUDES_AS_SYSTEM)
+    set(warning_guards "SYSTEM")
+  else()
+    set(warning_guards "")
+  endif()
+  target_include_directories(${target} ${warning_guards} ${ARGN})
+endfunction()
+
+function(project_target_link_directories target)
+  get_project_target_name(${target})
+  target_link_directories(${target} ${ARGN})
+endfunction()
+
+function(project_target_link_libraries target)
+  get_project_target_name(${target})
+  target_link_libraries(${target} ${ARGN})
+endfunction()
+
+function(project_target_link_options target)
+  get_project_target_name(${target})
+  target_link_options(${target} ${ARGN})
+endfunction()
+
+function(project_target_precompile_headers target)
+  get_project_target_name(${target})
+  target_precompile_headers(${target} ${ARGN})
+endfunction()
+
+function(project_target_sources target)
+  get_project_target_name(${target})
+  target_sources(${target} ${ARGN})
 endfunction()
 
 

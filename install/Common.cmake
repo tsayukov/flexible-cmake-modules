@@ -206,7 +206,7 @@ function(install_project_targets)
 
   set(target_list "")
   foreach (target IN LISTS ARGS_TARGETS)
-    __get_project_target_name(${target})
+    get_project_target_name(${target})
     if (NOT TARGET ${target})
       message(FATAL_ERROR "`${target}` is not a target.")
     endif()
@@ -291,7 +291,7 @@ function(add_component_target component)
 endfunction()
 
 function(append_install_project_target target)
-  __get_project_target_name(${target})
+  get_project_target_name(${target})
   set_property(DIRECTORY
       "${PROJECT_SOURCE_DIR}"
     APPEND PROPERTY
