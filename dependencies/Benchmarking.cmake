@@ -19,7 +19,7 @@ include_guard(GLOBAL)
 cxx_standard_guard()
 
 
-enable_if_project_variable_is_set(ENABLE_BENCHMARKING)
+enable_if(ENABLE_BENCHMARKING)
 
 use_cxx_standard_at_least(11)
 

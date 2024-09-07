@@ -68,7 +68,7 @@
   - Project namespace:
     - define_project_namespace
   - Project options and cached variables:
-    - enable_if_project_variable_is_set
+    - enable_if
     - project_option
     - project_dev_option
     - project_cached_variable
@@ -118,11 +118,32 @@ endfunction()
 
 ##################### Project options and cached variables #####################
 
-# Enable the rest of a listfile if the project cached variable is set
-macro(enable_if_project_variable_is_set variable_suffix)
-  if (NOT ${NAMESPACE}_${variable_suffix})
-    return()
-  endif()
+#[=============================================================================[
+  Enable the rest of a listfile if one of these conditions holds for each
+  `${variable}` passed to the command:
+  (a) `${variable}` has a `${NAMESPACE}::<variable-suffix>` form and
+      `${NAMESPACE}_${variable}` is defined and is set to the true value;
+  (b) either, there's a `${NAMESPACE}_${variable}` variable and it's set to the true
+      value;
+  (c) either, `${variable}` is set to the true value.
+#]=============================================================================]
+macro(enable_if variable)
+  foreach (__variable ${variable} ${ARGN})
+    if (${__variable} MATCHES "^${NAMESPACE}::")
+      string(REPLACE "::" "_" __variable ${__variable})
+      if (NOT ${__variable})
+        return()
+      endif()
+    endif()
+    if (DEFINED ${NAMESPACE}_${__variable})
+      if (NOT ${NAMESPACE}_${__variable})
+        return()
+      endif()
+    endif()
+    if (NOT ${__variable})
+      return()
+    endif()
+  endforeach()
 endmacro()
 
 #[=============================================================================[

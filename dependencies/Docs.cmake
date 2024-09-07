@@ -24,7 +24,7 @@
 include_guard(GLOBAL)
 
 
-enable_if_project_variable_is_set(ENABLE_DOCS)
+enable_if(ENABLE_DOCS)
 
 #[=============================================================================[
   Add the target for building the documentation of files that can be recursively
@@ -70,7 +70,7 @@ function(add_docs target_suffix)
     COMMENT "Generate ${ARGS_FORMAT} documentation"
   )
 
-  enable_if_project_variable_is_set(ENABLE_INSTALL)
+  enable_if(ENABLE_INSTALL)
 
   set(docs_component "${namespace}_docs")
   install(DIRECTORY
