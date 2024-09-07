@@ -10,7 +10,6 @@
     - get_${lang}_compiler_version
   - C/C++ standard:
     - use_${lang}_standard_at_least
-    - ${lang}_standard_guard
   - C/C++ extensions toggle:
     - enable_${lang}_extensions
     - disable_${lang}_extensions
@@ -50,7 +49,6 @@
 
   # File: externals/CMakeLists.txt
     no_in_source_builds_guard()
-    cxx_standard_guard()
 
     use_cxx_standard_at_least(17) # okay
     # include an external library that requires at least the standard C++17
@@ -180,6 +178,15 @@ macro(__include_compiler_commands lang LANG)
         set(__compare_standards_result ${result} PARENT_SCOPE)
       endfunction()
 
+      set(target_suffix ${lang}_standard)
+      set(target ${namespace}_${target_suffix})
+      if ((NOT TARGET ${target}) AND (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR))
+        message(FATAL_ERROR
+          "The `use_${lang}_standard_at_least(<standard>)` command must be "
+          "called in the root listfile of the current library."
+        )
+      endif()
+
       if (NOT DEFINED CMAKE_${LANG}_STANDARD)
         set(CMAKE_${LANG}_STANDARD ${standard})
       endif()
@@ -196,8 +203,6 @@ macro(__include_compiler_commands lang LANG)
         )
       endif()
 
-      set(target_suffix ${lang}_standard)
-      set(target ${namespace}_${target_suffix})
       if (NOT TARGET ${target})
         add_project_library(${target_suffix} INTERFACE)
         target_compile_features(${target}
@@ -208,17 +213,6 @@ macro(__include_compiler_commands lang LANG)
       endif()
 
       set(CMAKE_${LANG}_STANDARD ${current_standard} PARENT_SCOPE)
-    endfunction()
-
-    # Raise an error if the `${${lang}_standard}` target is not defined
-    function(${lang}_standard_guard)
-      if (NOT TARGET ${namespace}_${lang}_standard)
-        message(FATAL_ERROR
-          "\n"
-          "The `${namespace}_${lang}_standard` target must be defined.\n"
-          "Hint: call the `use_${lang}_standard_at_least(<standard>)` command in the root listfile of the current library before this code has been processed.\n"
-        )
-      endif()
     endfunction()
 
 

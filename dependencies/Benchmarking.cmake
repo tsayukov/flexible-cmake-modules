@@ -16,7 +16,6 @@
 #]=============================================================================]
 
 include_guard(GLOBAL)
-cxx_standard_guard()
 
 
 enable_if(ENABLE_BENCHMARKING)
