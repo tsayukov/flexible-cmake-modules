@@ -10,8 +10,8 @@
     see `common/Watchers.cmake` for detais;
   - Guards, see `common/Guards.cmake` for details;
   - Project related commands, see `common/Project.cmake` for details;
-  - Host information, see `common/HostInfo.cmake` for details;
   - Debugging, see `common/Debug.cmake` for details;
+  - Miscellaneous, see `common/Miscellaneous.cmake` for details;
 
   See `Variables.cmake` to learn about existing project cached variables. That
   listfile is intended for editing existing cached variables or/and adding
@@ -55,8 +55,8 @@ macro(__init_common)
   include_project_module(common/Watchers)
   include_project_module(common/Guards)
   include_project_module(common/Project)
-  include_project_module(common/HostInfo)
   include_project_module(common/Debug)
+  include_project_module(common/Miscellaneous)
 
   requires_cmake(3.14 "These modules are supported only by CMake 3.14+")
 
