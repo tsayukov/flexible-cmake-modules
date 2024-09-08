@@ -36,6 +36,17 @@ project_option(ENABLE_INSTALL "Enable the library installation"
   ON IF (PROJECT_IS_TOP_LEVEL AND (NOT CMAKE_SKIP_INSTALL_RULES))
 )
 
+#[=============================================================================[
+  Set to `ON` if your library can be used as a shared library or executable with
+  plugins. Otherwise, set to `OFF`, e.g., if you develop a header-only library
+  or reqular executable (without the `ENABLE_EXPORTS` property set).
+  See: https://cmake.org/cmake/help/latest/module/GenerateExportHeader.html
+#]=============================================================================]
+project_option(ENABLE_EXPORT_HEADER "Enable creation of an export header" ON)
+if (ENABLE_EXPORT_HEADER)
+  include(GenerateExportHeader)
+endif()
+
 project_option(ENABLE_DOCS "Enable creating documentation" OFF)
 
 # For small projects it is useless to enable `ccache`
