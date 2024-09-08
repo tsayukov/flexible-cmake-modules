@@ -9,7 +9,7 @@
   - PROJECT_IS_TOP_LEVEL (until CMake 3.21)
   Commands:
   - __after_project_guard
-  - __parse_and_remove_injected_option
+  - __parse_and_remove_injected_options
   - __compact_parse_arguments
   - __xor
 #]=============================================================================]
@@ -49,19 +49,22 @@ endif()
 
 #[=============================================================================[
   For internal use. Use this command in functions.
-  Find the first appearance of `${option}` in `${ARGN}`, set the variable called
-  `${option}` to `ON` if found, otherwise, set the variable to `OFF`. Remove the
-  first appearance of `${option}` from `${ARGN}`.
+  Find the first appearance of passed options in an outer function's `${ARGN}`,
+  set each variable called by option's name to `ON` if found, otherwise, set
+  the variable to `OFF`. Remove the first appearance of each option from
+  the outer function's `${ARGN}`.
 #]=============================================================================]
-macro(__parse_and_remove_injected_option option)
-  set(${option} OFF)
-  if (NOT ARGC EQUAL 0)
-    list(FIND ARGN "${option}" option_index)
-    if (NOT option_index EQUAL "-1")
-      set(${option} ON)
-      list(REMOVE_AT ARGN ${option_index})
+macro(__parse_and_remove_injected_options)
+  foreach (__option IN LISTS ${ARGN})
+    set(${__option} OFF)
+    if (NOT ARGC EQUAL 0)
+      list(FIND ARGN "${__option}" __option_index)
+      if (NOT __option_index EQUAL "-1")
+        set(${__option} ON)
+        list(REMOVE_AT ARGN ${__option_index})
+      endif()
     endif()
-  endif()
+  endforeach()
 endmacro()
 
 #[=============================================================================[
