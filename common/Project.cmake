@@ -221,7 +221,7 @@ endfunction()
   installation.
 #]=============================================================================]
 function(add_project_library target_suffix)
-  __process_injected_option(EXCLUDE_FROM_INSTALLATION)
+  __parse_and_remove_injected_option(EXCLUDE_FROM_INSTALLATION)
 
   set(target ${namespace}_${target_suffix})
   add_library(${target} ${ARGN})
@@ -240,7 +240,7 @@ endfunction()
   installation.
 #]=============================================================================]
 function(add_project_executable target_suffix)
-  __process_injected_option(EXCLUDE_FROM_INSTALLATION)
+  __parse_and_remove_injected_option(EXCLUDE_FROM_INSTALLATION)
 
   set(target ${namespace}_${target_suffix})
   add_executable(${target} ${ARGN})

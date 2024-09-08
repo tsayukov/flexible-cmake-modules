@@ -9,7 +9,7 @@
   - PROJECT_IS_TOP_LEVEL (until CMake 3.21)
   Commands:
   - __after_project_guard
-  - __process_injected_option
+  - __parse_and_remove_injected_option
   - __compact_parse_arguments
   - __xor
 #]=============================================================================]
@@ -53,7 +53,7 @@ endif()
   `${option}` to `ON` if found, otherwise, set the variable to `OFF`. Remove the
   first appearance of `${option}` from `${ARGN}`.
 #]=============================================================================]
-macro(__process_injected_option option)
+macro(__parse_and_remove_injected_option option)
   set(${option} OFF)
   if (NOT ARGC EQUAL 0)
     list(FIND ARGN "${option}" option_index)
