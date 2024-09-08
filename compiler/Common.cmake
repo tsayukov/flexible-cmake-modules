@@ -279,6 +279,15 @@ function(__check_standard_consistency LANG required_standard)
 endfunction()
 
 macro(__include_compiler_options lang LANG)
+  if (ENABLE_EXPORT_HEADER)
+    # See: https://cmake.org/cmake/help/latest/prop_tgt/VISIBILITY_INLINES_HIDDEN.html
+    set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
+    if ("${LANG}" MATCHES "^C(XX)?$")
+      # See: https://cmake.org/cmake/help/latest/prop_tgt/LANG_VISIBILITY_PRESET.html
+      set(CMAKE_${LANG}_VISIBILITY_PRESET "hidden")
+    endif()
+  endif()
+
   # So far, support only C++ options
   if ("${LANG}" STREQUAL "CXX")
     include_project_module(compiler/CxxOptions)
