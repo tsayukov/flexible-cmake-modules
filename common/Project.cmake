@@ -217,6 +217,7 @@ endfunction()
 #[=============================================================================[
   Add a project library target called by `${namespace}_${target_suffix}`.
   All parameters of the `add_library` command are passed after `target_suffix`.
+  
   Set the `EXCLUDE_FROM_INSTALLATION` option to exclude the target from
   installation.
 #]=============================================================================]
@@ -236,6 +237,7 @@ endfunction()
 #[=============================================================================[
   Add an executable target called by `${namespace}_${target_suffix}`.
   All parameters of the `add_executable` command are passed after `target_suffix`.
+
   Set the `EXCLUDE_FROM_INSTALLATION` option to exclude the target from
   installation.
 #]=============================================================================]
@@ -261,6 +263,7 @@ endfunction()
      `::` to `_`, raise an error if there's no such target;
   (b) if there's a `${namespace}_${target}` target, use it;
   (c) otherwise, use the ${target}.
+
   Then put the final result into the `target` variable.
 #]=============================================================================]
 function(get_project_target_name target)
@@ -328,13 +331,94 @@ endfunction()
 
 ########################## Project target properties ###########################
 
-macro(get_project_target_property variable target project_property)
-  get_target_property("${variable}" ${target} ${NAMESPACE}_${project_property})
-endmacro()
+#[=============================================================================[
+  Put the value of a `<full-target-name>` target's property to a `${variable}`.
+  `<full-target-name>` is a result of calling the `get_project_target_name` on
+  `${target}`. The property's name is either a name passed after the `PROPERTY`
+  keyword, that is, a regular target's property, or `${NAMESPACE}` prefix with
+  a following underscore and a name passed after the `PROJECT_PROPERTY` keyword.
 
-macro(set_project_target_property target project_property value)
+    get_project_target_property(<variable> <target>
+                                (PROPERTY | PROJECT_PROPERTY) <property>)
+
+#]=============================================================================]
+function(get_project_target_property variable target)
+  __compact_parse_arguments(__start_with 2
+    __values
+      PROPERTY
+      PROJECT_PROPERTY
+  )
+
+  __xor(${ARGS_PROPERTY} ${ARGS_PROJECT_PROPERTY})
+  if (NOT __xor_result)
+    message(FATAL_ERROR
+      "`PROPERTY` and `PROJECT_PROPERTY` are mutually exclusive options."
+    )
+  endif()
+
+  if (ARGS_PROPERTY)
+    set(property ${ARGS_PROPERTY})
+  elseif (ARGS_PROJECT_PROPERTY)
+    set(property ${NAMESPACE}_${ARGS_PROJECT_PROPERTY})
+  endif()
+
+  get_project_target_name(${target})
+
+  get_target_property(${variable} ${target} ${property})
+  set(${variable} ${${variable}} PARENT_SCOPE)
+endfunction()
+
+#[=============================================================================[
+  Set a `<full-target-name>` target's property to a `${value}`.
+  `<full-target-name>` is a result of calling the `get_project_target_name` on
+  `${target}`. The property's name is either a name passed after the `PROPERTY`
+  keyword, that is, a regular target's property, or `${NAMESPACE}` prefix with
+  a following underscore and a name passed after the `PROJECT_PROPERTY` keyword.
+
+    set_project_target_property(<target>
+                                (PROPERTY | PROJECT_PROPERTY) <property>
+                                <value>)
+
+#]=============================================================================]
+function(set_project_target_property target)
+  __compact_parse_arguments(__start_with 1
+    __lists
+      PROPERTY
+      PROJECT_PROPERTY
+  )
+
+  __xor(${ARGS_PROPERTY} ${ARGS_PROJECT_PROPERTY})
+  if (NOT __xor_result)
+    message(FATAL_ERROR
+      "`PROPERTY` and `PROJECT_PROPERTY` are mutually exclusive options."
+    )
+  endif()
+
+  if (ARGS_PROPERTY)
+    set(kw_name "PROPERTY")
+    set(kw_list ${PROPERTY})
+  elseif (ARGS_PROJECT_PROPERTY)
+    set(kw_name "PROJECT_PROPERTY")
+    set(kw_list ${PROJECT_PROPERTY})
+  endif()
+
+  list(LENGTH kw_list length)
+  if (NOT length EQUAL "2")
+    message(FATAL_ERROR
+      "A property name and a value are expected after the `${kw_name}` keyword, "
+      "but got a list of size ${length}: \"${kw_list}\"."
+    )
+  endif()
+  list(GET kw_list 0 property)
+  list(GET kw_list 1 value)
+
+  if (ARGS_PROJECT_PROPERTY)
+    set(property ${NAMESPACE}_${property})
+  endif()
+
+  get_project_target_name(${target})
   set_target_properties(${target}
     PROPERTIES
-      ${NAMESPACE}_${project_property} "${value}"
+      ${property} ${value}
   )
-endmacro()
+endfunction()
