@@ -217,12 +217,12 @@ endfunction()
 #[=============================================================================[
   Add a project library target called by `${namespace}_${target_suffix}`.
   All parameters of the `add_library` command are passed after `target_suffix`.
-  
+
   Set the `EXCLUDE_FROM_INSTALLATION` option to exclude the target from
   installation.
 #]=============================================================================]
 function(add_project_library target_suffix)
-  __parse_and_remove_injected_option(EXCLUDE_FROM_INSTALLATION)
+  __parse_and_remove_injected_options(EXCLUDE_FROM_INSTALLATION)
 
   set(target ${namespace}_${target_suffix})
   add_library(${target} ${ARGN})
@@ -242,7 +242,7 @@ endfunction()
   installation.
 #]=============================================================================]
 function(add_project_executable target_suffix)
-  __parse_and_remove_injected_option(EXCLUDE_FROM_INSTALLATION)
+  __parse_and_remove_injected_options(EXCLUDE_FROM_INSTALLATION)
 
   set(target ${namespace}_${target_suffix})
   add_executable(${target} ${ARGN})
