@@ -13,7 +13,10 @@
   `${NAMESPACE}_INSTALL_<dependency>_LOCALLY`, where `dependency` is
   a package case-sensitive name using in the `find_package` command.
   Use the `can_install_locally()` function to check this out.
-
+  ------------------------------------------------------------------------------
+  Commands:
+  - can_install_locally
+  ------------------------------------------------------------------------------
   Usage:
 
   # File: dependencies/Testing.cmake
@@ -48,10 +51,12 @@ function(can_install_locally dependency_name)
 
   if (NOT allowed)
     message(FATAL_ERROR
-      "\n"
       "'${dependency_name}' is not allowed to install locally.\n"
-      "Pass `-D${NAMESPACE}_INSTALL_${dependency_name}_LOCALLY=ON` if you want otherwise.\n"
-      "Passing `-D${NAMESPACE}_INSTALL_EXTERNALS_LOCALLY=ON` allows that for all of the external dependencies, except for those that are already set to `OFF`.\n"
+      "Pass `-D${NAMESPACE}_INSTALL_${dependency_name}_LOCALLY=ON` "
+      "if you want otherwise.\n"
+      "Passing `-D${NAMESPACE}_INSTALL_EXTERNALS_LOCALLY=ON` allows that "
+      "for all of the external dependencies, except for those "
+      "that are already set to `OFF`."
     )
   endif()
 endfunction()
