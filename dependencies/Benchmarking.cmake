@@ -13,6 +13,10 @@
   Enable the `${NAMESPACE}_ENABLE_DEVELOPER_MODE` or
   `${NAMESPACE}_ENABLE_BENCHMARKING` project option to turn benchmarking on.
   See `../Variables.cmake` for details.
+  ------------------------------------------------------------------------------
+  Init commands:
+  - init_google_benchmark
+  - init_google_benchmark_tools
 #]=============================================================================]
 
 include_guard(GLOBAL)
