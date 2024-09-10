@@ -23,17 +23,6 @@
   - see `install/Common.cmake` for details;
   - see `modules/Common.cmake` for details.
 
-  Usage:
-
-  # File: CMakeLists.txt
-    cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
-    project(my_project_name CXX)
-
-    include("${PROJECT_SOURCE_DIR}/cmake/Common.cmake")
-    no_in_source_builds_guard()
-
-    # Next, see compiler/Common.cmake usage
-
 #]=============================================================================]
 
 include_guard(GLOBAL)
@@ -43,25 +32,25 @@ include_guard(GLOBAL)
   For internal use.
   This macro must be called at the end of the current listfile. It checks if the
   `project` command is already called, prevents in-source builds inside the
-  'cmake' directory, and initialize some common variables, project options, and
-  project cached variables.
+  'cmake' directory, and initialize some common commands, variables, project
+  options, and project cached variables.
 #]=============================================================================]
 macro(__init_common)
-  include_project_module(common/Internal)
+  include("${CMAKE_CURRENT_LIST_DIR}/common/Internal.cmake")
 
   # This guard should be at the beginning
   __after_project_guard()
 
-  include_project_module(common/Watchers)
-  include_project_module(common/Guards)
-  include_project_module(common/Project)
-  include_project_module(common/Debug)
-  include_project_module(common/Miscellaneous)
+  include("${CMAKE_CURRENT_LIST_DIR}/common/Watchers.cmake")
+  include("${CMAKE_CURRENT_LIST_DIR}/common/Guards.cmake")
+  include("${CMAKE_CURRENT_LIST_DIR}/common/Project.cmake")
+  include("${CMAKE_CURRENT_LIST_DIR}/common/Debug.cmake")
+  include("${CMAKE_CURRENT_LIST_DIR}/common/Miscellaneous.cmake")
 
   requires_cmake(3.14 "These modules are supported only by CMake 3.14+")
 
   # Init the project cached variables
-  include_project_module(Variables)
+  include("${CMAKE_CURRENT_LIST_DIR}/Variables.cmake")
 
   # Include other Commons after Variables
   include_project_module(compiler/Common)
