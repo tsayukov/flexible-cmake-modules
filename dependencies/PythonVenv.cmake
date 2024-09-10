@@ -73,8 +73,6 @@ macro(__find_or_init_python_venv_impl)
     message(STATUS "Creating ${ARGV0} virtual environment in \"$ENV{VIRTUAL_ENV}\"")
     execute_process(COMMAND
         ${${ARGV0}_EXECUTABLE} -m venv "$ENV{VIRTUAL_ENV}"
-      WORKING_DIRECTORY
-        "${benchmark_compare_py}"
     )
     message(STATUS "Creating ${ARGV0} virtual environment in \"$ENV{VIRTUAL_ENV}\" - done")
 
