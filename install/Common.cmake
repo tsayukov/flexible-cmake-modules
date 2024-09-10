@@ -97,6 +97,7 @@ function(install_project_cmake_configs)
     set(ARGS_VERSION "${PROJECT_VERSION}")
   endif()
 
+  set(arch_independent "")
   if (ARGS_ARCH_INDEPENDENT)
     set(arch_independent "ARCH_INDEPENDENT")
   endif()
