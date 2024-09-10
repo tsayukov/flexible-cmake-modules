@@ -479,31 +479,19 @@ function(set_project_target_property target)
   endif()
 
   if (ARGS_PROPERTY)
-    set(kw_name "PROPERTY")
-    set(kw_list ${ARGS_PROPERTY})
+    __get_key_value(ARGS_PROPERTY)
   elseif (ARGS_PROJECT_PROPERTY)
-    set(kw_name "PROJECT_PROPERTY")
-    set(kw_list ${ARGS_PROJECT_PROPERTY})
+    __get_key_value(ARGS_PROJECT_PROPERTY)
   endif()
-
-  list(LENGTH kw_list length)
-  if (NOT length EQUAL "2")
-    message(FATAL_ERROR
-      "A property name and a value are expected after the `${kw_name}` keyword, "
-      "but got a list of size ${length}: \"${kw_list}\"."
-    )
-  endif()
-  list(GET kw_list 0 property)
-  list(GET kw_list 1 value)
 
   if (ARGS_PROJECT_PROPERTY)
-    set(property ${NAMESPACE}_${property})
+    set(property ${NAMESPACE}_${key})
   endif()
 
   get_project_target_name(${target})
   set_target_properties(${target}
     PROPERTIES
-      ${property} ${value}
+      ${key} ${value}
   )
 endfunction()
 

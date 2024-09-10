@@ -167,3 +167,26 @@ function(__only_one_of first_param_name second_param_name)
     )
   endif()
 endfunction()
+
+# For internal use. Use this command in functions.
+# Check if the `${param_name}` is a variable that holds a key-value pair.
+function(__key_value_check param_name)
+  list(LENGTH ${param_name} length)
+  if (NOT length EQUAL "2")
+    message(FATAL_ERROR
+      "A property name and a value are expected after the `${param_name}` keyword, "
+      "but got a list of size ${length}: \"${${param_name}}\"."
+    )
+  endif()
+endfunction()
+
+# For internal use. Use this command in functions.
+function(__get_key_value param_name)
+  __key_value_check(${param_name})
+
+  list(GET ${param_name} 0 key)
+  set(key ${key} PARENT_SCOPE)
+
+  list(GET ${param_name} 1 value)
+  set(value ${value} PARENT_SCOPE)
+endfunction()
