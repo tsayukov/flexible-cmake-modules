@@ -62,17 +62,6 @@ macro(__init_common)
   no_in_source_builds_guard(RECURSIVE common)
 endmacro()
 
-#[=============================================================================[
-  Include the `${module}.cmake` file located in the `${ROOT_CMAKE_MODULES_DIR}`
-  directory of the current project. It let us include listfiles by name,
-  preventing name collisions by using `include(${module})` when a module with
-  the same name is defined in the outer score, e.g. the outer project sets its
-  own `CMAKE_MODULE_PATH`.
-#]=============================================================================]
-macro(include_project_module module)
-  include("${PROJECT_SOURCE_DIR}/${ROOT_CMAKE_MODULES_DIR}/${module}.cmake")
-endmacro()
-
 
 ########################### The end of the listfile ############################
 
