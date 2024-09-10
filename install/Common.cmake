@@ -128,10 +128,11 @@ endmacro()
 
 #[=============================================================================[
   Install all headers (*.h, *.hh, *.h++, *.hpp, *.hxx, *.in, *.inc, and others
-  described in the `PATTERNS` list) located in the `BASE_DIR` and its
-  subdirectories recursively to `${CMAKE_INSTALL_INCLUDEDIR}`.
-  The directory structure in the `BASE_DIR` is copied verbatim to the
-  destination.
+  described in the `PATTERNS` list) located in the `BASE_DIR`, export headers'
+  directories (see the `generate_project_export_header` command), if any,
+  and their subdirectories recursively to `${CMAKE_INSTALL_INCLUDEDIR}`.
+  The directory structure in the `BASE_DIR` and export headers' directories, if
+  any, is copied verbatim to the destination.
 
     install_project_headers([BASE_DIR <base_directory>]
                             [PATTERNS <patterns>...])
@@ -164,9 +165,21 @@ function(install_project_headers)
   )
   list(TRANSFORM ARGS_PATTERNS PREPEND "PATTERN;")
 
+  set(export_headers_directories "")
+  get_install_project_targets()
+  foreach (target IN LISTS ${install_project_targets})
+    get_project_target_property(export_header_dir ${target}
+      PROJECT_PROPERTY EXPORT_HEADER_DIR
+    )
+    if (export_header_dir)
+      list(APPEND export_headers_directories "${export_header_dir}/")
+    endif()
+  endforeach()
+
   set(headers_component "${namespace}_headers")
   install(DIRECTORY
       "${ARGS_BASE_DIR}/"
+      ${export_headers_directories}
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
     COMPONENT ${headers_component}
     FILES_MATCHING ${ARGS_PATTERNS}

@@ -273,6 +273,72 @@ function(add_project_executable target_suffix)
   endif()
 endfunction()
 
+#[=============================================================================[
+  Call the `generate_export_header` command on the `<full-target-name>` under
+  the hood, but also populate the `INTERFACE_INCLUDE_DIRECTORIES` and
+  `INCLUDE_DIRECTORIES` target properties by `BASE_INCLUDE_DIRECTORY` parameter.
+  If there's no such parameter, use the `BINARY_DIR` target property, also if
+  `BASE_INCLUDE_DIRECTORY` is a relative path, add `BINARY_DIR` to it as a prefix.
+  Add `BASE_INCLUDE_DIRECTORY` to the `${NAMESPACE}_EXPORT_HEADER_DIR` project
+  target property, so the export header can be installed via
+  the `install_project_headers` command.
+
+  If BASE_NAME is not defined, use `<target-suffix>` by default.
+
+  `<full-target-name>` and `<target-suffix>` is a result of calling
+  the `get_project_target_name` on `${target}`.
+#]=============================================================================]
+function(generate_project_export_header target)
+  if (NOT ENABLE_EXPORT_HEADER)
+    return()
+  endif()
+
+  __parse_and_remove_injected_one_value_parameters(
+  # parameters of the `generate_export_header`
+    BASE_NAME
+    EXPORT_FILE_NAME
+  # custom parameters
+    BASE_INCLUDE_DIRECTORY
+  )
+
+  get_project_target_name(${target})
+
+  if (NOT BASE_NAME)
+    set(BASE_NAME ${target_suffix})
+  endif()
+
+  get_target_property(binary_dir ${target} BINARY_DIR)
+
+  if (NOT BASE_INCLUDE_DIRECTORY)
+    set(BASE_INCLUDE_DIRECTORY "${binary_dir}")
+  elseif (NOT IS_ABSOLUTE "${BASE_INCLUDE_DIRECTORY}")
+    set(BASE_INCLUDE_DIRECTORY "${binary_dir}/${BASE_INCLUDE_DIRECTORY}")
+  endif()
+
+  if (NOT EXPORT_FILE_NAME)
+    string(TOLOWER "${BASE_NAME}" base_name_lower)
+    set(EXPORT_FILE_NAME "${binary_dir}/${base_name_lower}_export.h")
+  elseif (NOT IS_ABSOLUTE "${EXPORT_FILE_NAME}")
+    set(EXPORT_FILE_NAME "${binary_dir}/${EXPORT_FILE_NAME}")
+  endif()
+
+  generate_export_header(${target}
+    BASE_NAME ${BASE_NAME}
+    EXPORT_FILE_NAME "${EXPORT_FILE_NAME}"
+    ${ARGN}
+  )
+
+  project_target_include_directories(${target}
+    PUBLIC
+      "$<BUILD_INTERFACE:${BASE_INCLUDE_DIRECTORY}>"
+  )
+
+  set_project_target_property(${target}
+    PROJECT_PROPERTY
+      EXPORT_HEADER_DIR "${BASE_INCLUDE_DIRECTORY}"
+  )
+endfunction()
+
 
 ########################### `target_*` counterparts ############################
 
