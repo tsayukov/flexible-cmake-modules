@@ -59,7 +59,13 @@ macro(__init_common)
   include_project_module(modules/Common)
 
   # And these guards should be at the end
-  no_in_source_builds_guard(RECURSIVE common)
+  no_in_source_builds_guard(RECURSIVE
+    common
+    compiler
+    dependencies
+    install
+    modules
+  )
 endmacro()
 
 
