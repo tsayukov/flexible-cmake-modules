@@ -148,7 +148,7 @@ endmacro()
 # For internal use.
 # Exclusive OR. Use the `__xor_result` variable to get the result.
 function(__xor lhs rhs)
-  if (((NOT "${lhs}") AND "${rhs}") OR ("${lhs}" AND (NOT "${rhs}")))
+  if (((NOT lhs) AND rhs) OR (lhs AND (NOT rhs)))
     set(__xor_result ON PARENT_SCOPE)
   else()
     set(__xor_result OFF PARENT_SCOPE)
