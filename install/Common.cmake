@@ -175,10 +175,9 @@ function(install_project_headers)
 endfunction()
 
 #[=============================================================================[
-  Install `targets` and install targets from the `${PROJECT_SOURCE_DIR}`
-  directory property `${NAMESPACE}_INSTALL_PROJECT_TARGETS` to specific
-  destinations (see below). Generate and install
-  `${PACKAGE_EXPORT_TARGET_NAME}.cmake` file.
+  Install `targets` and install targets from the global project property
+  `${NAMESPACE}_INSTALL_PROJECT_TARGETS` to specific destinations (see below).
+  Generate and install `${PACKAGE_EXPORT_TARGET_NAME}.cmake` file.
 
     install_project_targets([TARGETS <targets>...] [HEADER_ONLY])
 
@@ -289,18 +288,15 @@ endfunction()
 
 function(append_install_project_target target)
   get_project_target_name(${target})
-  set_property(DIRECTORY
-      "${PROJECT_SOURCE_DIR}"
-    APPEND PROPERTY
+  set_global_project_property(APPEND
+    PROPERTY
       ${NAMESPACE}_INSTALL_PROJECT_TARGETS
       ${target}
   )
 endfunction()
 
 macro(get_install_project_targets)
-  get_property(install_project_targets
-    DIRECTORY
-      "${PROJECT_SOURCE_DIR}"
+  get_global_project_property(install_project_targets
     PROPERTY
       ${NAMESPACE}_INSTALL_PROJECT_TARGETS
   )

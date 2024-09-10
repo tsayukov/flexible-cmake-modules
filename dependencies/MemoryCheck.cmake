@@ -61,9 +61,8 @@ endfunction()
 #[=============================================================================[
   Add an unity target called `${namespace}_memcheck` by default, if no name is
   passed as the first parameter. This target runs all memcheck targets that are
-  contained in the `${PROJECT_SOURCE_DIR}` directory property
-  `${NAMESPACE}_MEMCHECK_TARGETS`, so this function should be called after all
-  `add_memory_check` calling.
+  contained in the global project property `${NAMESPACE}_MEMCHECK_TARGETS`, so
+  this function should be called after all `add_memory_check` calling.
 #]=============================================================================]
 function(add_unity_memory_check)
   get_property(memcheck_targets
