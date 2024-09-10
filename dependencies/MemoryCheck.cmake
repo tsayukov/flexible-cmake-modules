@@ -6,7 +6,7 @@
   Memory checking tools
   ------------------------------------------------------------------------------
   See: https://valgrind.org/
-
+  ------------------------------------------------------------------------------
   Variables:
   - VALGRIND_PATH (can be set before if the `valgrind` path cannot be found by
     CMake)

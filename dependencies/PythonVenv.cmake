@@ -8,12 +8,11 @@
   Enable the `${NAMESPACE}_ENABLE_PYTHON_VENV` project option to turn this
   module on. Then find and create, if needed, Python virtual environment in
   `${${NAMESPACE}_PYTHON_VENV_DIR}`. See `../Variables.cmake` for details.
-
+  ------------------------------------------------------------------------------
   Commands:
     - find_or_init_python_venv
     - pip2_install
     - pip3_install
-
 #]=============================================================================]
 
 include_guard(GLOBAL)

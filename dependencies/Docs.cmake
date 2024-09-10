@@ -7,7 +7,10 @@
   ------------------------------------------------------------------------------
   Enable the `${NAMESPACE}_ENABLE_DOCS` project option to turn
   documentation generation on. See `../Variables.cmake` for details.
-
+  ------------------------------------------------------------------------------
+  Commands:
+  - add_docs
+  ------------------------------------------------------------------------------
   Usage:
 
   # File: CMakeLists.txt
