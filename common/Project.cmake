@@ -319,7 +319,7 @@ function(generate_project_export_header target)
     string(TOLOWER "${BASE_NAME}" base_name_lower)
     set(EXPORT_FILE_NAME "${binary_dir}/${base_name_lower}_export.h")
   elseif (NOT IS_ABSOLUTE "${EXPORT_FILE_NAME}")
-    set(EXPORT_FILE_NAME "${binary_dir}/${EXPORT_FILE_NAME}")
+    set(EXPORT_FILE_NAME "${BASE_INCLUDE_DIRECTORY}/${EXPORT_FILE_NAME}")
   endif()
 
   generate_export_header(${target}
