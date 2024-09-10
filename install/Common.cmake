@@ -6,16 +6,15 @@
   Installation commands
   ------------------------------------------------------------------------------
   Commands:
-    * Installation:
-      - install_project_cmake_configs
-      - install_project_license
-      - install_project_headers
-      - install_project_targets
-    * Auxiliary commands:
-      - add_component_target
-      - append_install_project_target
-      - get_install_project_targets
-
+  - Installation:
+    - install_project_cmake_configs
+    - install_project_license
+    - install_project_headers
+    - install_project_targets
+  - Auxiliary commands:
+    - add_component_target
+    - append_install_project_target
+    - get_install_project_targets
 #]=============================================================================]
 
 include_guard(GLOBAL)
@@ -23,7 +22,6 @@ __variable_init_guard()
 
 
 enable_if(ENABLE_INSTALL)
-
 
 # Helper functions for creating config files that can be included by other
 # projects to find and use a package.

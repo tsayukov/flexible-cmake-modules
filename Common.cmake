@@ -22,7 +22,6 @@
   - see `dependencies/Common.cmake` for details;
   - see `install/Common.cmake` for details;
   - see `modules/Common.cmake` for details.
-
 #]=============================================================================]
 
 include_guard(GLOBAL)

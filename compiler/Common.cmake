@@ -8,20 +8,31 @@
   Commands for language `${lang}` (e.g. `c`, `cxx`, in lower case):
   - Common commands:
     - get_${lang}_compiler_version
+      - get_c_compiler_version
+      - get_cxx_compiler_version
+      - ...
   - C/C++ standard:
     - use_${lang}_standard_at_least
+      - get_c_compiler_version
+      - get_cxx_compiler_version
   - C/C++ extensions toggle:
     - enable_${lang}_extensions
+      - enable_c_extensions
+      - enable_cxx_extensions
     - disable_${lang}_extensions
+      - disable_c_extensions
+      - disable_cxx_extensions
   - Interface C/C++ library (use `target_link_libraries` to link against them):
-    - ${namespace}_${lang}_standard
+    - ${namespace}::${lang}_standard
+      - ${namespace}::c_standard
+      - ${namespace}::cxx_standard
   - Normal variables as lists (use `target_compile_options` to include them):
     - CXX_OPTIONS
     - CXX_WARNING_OPTIONS
     - CXX_ERROR_OPTIONS
     - CXX_LANGUAGE_OPTIONS
     - CXX_DIAGNOSTIC_OPTIONS
-
+  ------------------------------------------------------------------------------
   Usage:
 
   # File: CMakeLists.txt
