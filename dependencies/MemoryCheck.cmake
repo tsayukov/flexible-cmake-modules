@@ -13,6 +13,8 @@
   Commands:
   - add_memory_check
   - add_unity_memory_check
+  Init commands:
+  - init_valgrind
 #]=============================================================================]
 
 include_guard(GLOBAL)
