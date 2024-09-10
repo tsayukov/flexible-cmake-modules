@@ -14,6 +14,8 @@
   ------------------------------------------------------------------------------
   Commands:
   - use_ccache
+  Init commands:
+  - init_ccache
 #]=============================================================================]
 
 include_guard(GLOBAL)
@@ -21,7 +23,7 @@ include_guard(GLOBAL)
 
 enable_if(ENABLE_CCACHE)
 
-macro(__init_ccache)
+macro(init_ccache)
   find_program(CCACHE_PATH ccache)
   mark_as_advanced(CCACHE_PATH)
   __enable_if_ccache_is_found()
@@ -54,4 +56,4 @@ endfunction()
 
 ############################# The end of the file ##############################
 
-__init_ccache()
+init_ccache()
