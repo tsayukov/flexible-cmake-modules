@@ -17,6 +17,16 @@ define_project_namespace()
 ############################### Project options ################################
 
 #[=============================================================================[
+  The root directory for the current listfile. Change it if you want to place
+  all your auxiliary CMake-related files, in other directory (e.g., not "cmake",
+  but "CMake" and so forth). It has to be the path relative to
+  `${PROJECT_SOURCE_DIR}`.
+#]=============================================================================]
+project_cached_variable(ROOT_CMAKE_MODULES_DIR "cmake" INTERNAL
+  "Directory for auxiliary CMake-related files"
+)
+
+#[=============================================================================[
   Allow to install all external dependencies locally (e.g. using `FetchContent`,
   or `ExternalProject` and downloading external sources into the binary
   directory), except to those that is not allowed explicitly by setting
