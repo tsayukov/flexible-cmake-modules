@@ -13,6 +13,7 @@
   - __parse_and_remove_injected_one_value_parameters
   - __compact_parse_arguments
   - __xor
+  - __only_one_of
 #]=============================================================================]
 
 include_guard(GLOBAL)
@@ -152,5 +153,17 @@ function(__xor lhs rhs)
     set(__xor_result ON PARENT_SCOPE)
   else()
     set(__xor_result OFF PARENT_SCOPE)
+  endif()
+endfunction()
+
+# For internal use. Use this command in functions.
+# Check if the only one of passed parameters is set.
+function(__only_one_of first_param_name second_param_name)
+  __xor("${${first_param_name}}" "${${second_param_name}}")
+  if (NOT __xor_result)
+    message(FATAL_ERROR
+      "Only one of `${first_param_name}` and `${second_param_name}` parameters "
+      "can be set."
+    )
   endif()
 endfunction()
