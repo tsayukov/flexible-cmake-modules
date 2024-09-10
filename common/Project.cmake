@@ -486,10 +486,10 @@ function(set_project_target_property target)
 
   if (ARGS_PROPERTY)
     set(kw_name "PROPERTY")
-    set(kw_list ${PROPERTY})
+    set(kw_list ${ARGS_PROPERTY})
   elseif (ARGS_PROJECT_PROPERTY)
     set(kw_name "PROJECT_PROPERTY")
-    set(kw_list ${PROJECT_PROPERTY})
+    set(kw_list ${ARGS_PROJECT_PROPERTY})
   endif()
 
   list(LENGTH kw_list length)
