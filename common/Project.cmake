@@ -274,24 +274,29 @@ endfunction()
 ########################### `target_*` counterparts ############################
 
 #[=============================================================================[
-  Resolve the `${target}` name in the following way:
-  (a) if the `${target}` has a `${namespace}::<target_suffix>` form, replace
+  Resolve the `${target}` and `${target_suffix}` names in the following way:
+  (a) if the `${target}` has a `${namespace}::${target_suffix}` form, replace
      `::` to `_`, raise an error if there's no such target;
-  (b) if there's a `${namespace}_${target}` target, use it;
-  (c) otherwise, use the ${target}.
+  (b) if there's a `${namespace}_${target}` target, use it as `target` and use
+      `${target}` as `target_suffix`;
+  (c) otherwise, use the ${target} as both `target` and `target_suffix`.
 
-  Then put the final result into the `target` variable.
+  Then put the final result into the `target` and `target_suffix` variables.
 #]=============================================================================]
 function(get_project_target_name target)
+  set(target_suffix ${target})
   if ("${target}" MATCHES "^${namespace}::")
     string(REPLACE "::" "_" target ${target})
     if (NOT TARGET "${target}")
       message(FATAL_ERROR "There is no such project target \"${target}\".")
     endif()
+    string(LENGTH "${namespace}_" prefix_length)
+    string(SUBSTRING "${target}" 0 ${prefix_length} target_suffix)
   elseif (TARGET "${namespace}_${target}")
     set(target ${namespace}_${target})
   endif()
   set(target ${target} PARENT_SCOPE)
+  set(target_suffix ${target_suffix} PARENT_SCOPE)
 endfunction()
 
 function(project_target_compile_definitions target)
