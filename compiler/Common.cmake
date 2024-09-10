@@ -85,7 +85,10 @@ macro(__init_compiler_common)
 
     __include_compiler_commands(${__lang} ${__LANG})
     __include_compiler_options(${__lang} ${__LANG})
-    use_ccache_if_enabled_for(${__LANG})
+
+    if (ENABLE_CCACHE)
+      use_ccache(${__LANG})
+    endif()
   endforeach()
 endmacro()
 

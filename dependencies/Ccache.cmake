@@ -9,38 +9,49 @@
   See `../Variables.cmake` for details.
 
   See supported languages:
-    - https://ccache.dev/
-    - https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_LAUNCHER.html
+  - https://ccache.dev/
+  - https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_LAUNCHER.html
+
+  Commands:
+  - use_ccache
 #]=============================================================================]
 
 include_guard(GLOBAL)
 
 
-# Set `CMAKE_${LANG}_COMPILER_LAUNCHER` if `ccache` is enabled and found
-function(use_ccache_if_enabled_for LANG)
-  enable_if(ENABLE_CCACHE)
+enable_if(ENABLE_CCACHE)
 
+macro(__init_ccache)
+  find_program(CCACHE_PATH ccache)
+  mark_as_advanced(CCACHE_PATH)
+  __enable_if_ccache_is_found()
+endmacro()
+
+# Set `CMAKE_${LANG}_COMPILER_LAUNCHER` if `ccache` is found and supports `${LANG}
+function(use_ccache LANG)
   if (NOT LANG MATCHES "^((OBJ)?C(XX)?|ASM.*|CUDA)$")
     message(AUTHOR_WARNING "${LANG} is not supported by ccache.")
     return()
   endif()
 
-  if (CCACHE_PATH)
-    set(CMAKE_${LANG}_COMPILER_LAUNCHER
-      "${CCACHE_PATH}" CACHE FILEPATH "${LANG} compiler launcher" FORCE
+  __enable_if_ccache_is_found()
+  set(CMAKE_${LANG}_COMPILER_LAUNCHER
+    "${CCACHE_PATH}" CACHE FILEPATH "${LANG} compiler launcher" FORCE
+  )
+endfunction()
+
+function(__enable_if_ccache_is_found)
+  if (NOT CCACHE_PATH)
+    message(AUTHOR_WARNING
+      "Ccache is not found, that will may increase the re-compilation time. "
+      "Pass `-DCCACHE_PATH=path/to/bin` to specify the path to the `ccache` "
+      "binary file."
     )
+    return()
   endif()
 endfunction()
 
 
-enable_if(ENABLE_CCACHE)
+############################# The end of the file ##############################
 
-find_program(CCACHE_PATH ccache)
-mark_as_advanced(CCACHE_PATH)
-if (NOT CCACHE_PATH)
-  message(AUTHOR_WARNING
-    "\n"
-    "Ccache is not found, that will increase the re-compilation time.\n"
-    "Pass `-DCCACHE_PATH=path/to/bin` to specify the path to the `ccache` binary file.\n"
-  )
-endif()
+__init_ccache()
