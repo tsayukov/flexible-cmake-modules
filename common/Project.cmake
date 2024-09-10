@@ -237,6 +237,10 @@ endfunction()
   Add a project library target called by `${namespace}_${target_suffix}`.
   All parameters of the `add_library` command are passed after `target_suffix`.
 
+  If the target is a shared library, also set the following target properties:
+  - `SOVERSION` to `${PROJECT_VERSION_MAJOR}`;
+  - `VERSION` to `${PROJECT_VERSION}`.
+
   Set the `EXCLUDE_FROM_INSTALLATION` option to exclude the target from
   installation.
 #]=============================================================================]
@@ -247,6 +251,15 @@ function(add_project_library target_suffix)
   add_library(${target} ${ARGN})
   add_library(${namespace}::${target_suffix} ALIAS ${target})
   set_target_properties(${target} PROPERTIES EXPORT_NAME ${target_suffix})
+
+  get_target_property(target_type ${target} TYPE)
+  if (target_type STREQUAL "SHARED_LIBRARY")
+    set_target_properties(${target}
+      PROPERTIES
+        SOVERSION ${PROJECT_VERSION_MAJOR}
+        VERSION ${PROJECT_VERSION}
+    )
+  endif()
 
   if (ENABLE_INSTALL AND NOT EXCLUDE_FROM_INSTALLATION)
     append_install_project_target(${target})
