@@ -67,6 +67,8 @@
   Command groups:
   - Project namespace:
     - define_project_namespace
+  - Including
+    - include_project_module
   - Project options and cached variables:
     - enable_if
     - project_option
@@ -114,6 +116,20 @@ function(define_project_namespace)
   string(TOLOWER ${namespace} namespace)
   set(namespace ${namespace} PARENT_SCOPE)
 endfunction()
+
+
+################################## Including ###################################
+
+#[=============================================================================[
+  Include the `${module}.cmake` file located in the `${ROOT_CMAKE_MODULES_DIR}`
+  directory of the current project. It let us include listfiles by name,
+  preventing name collisions by using `include(${module})` when a module with
+  the same name is defined in the outer score, e.g. the outer project sets its
+  own `CMAKE_MODULE_PATH`.
+#]=============================================================================]
+macro(include_project_module module)
+  include("${PROJECT_SOURCE_DIR}/${ROOT_CMAKE_MODULES_DIR}/${module}.cmake")
+endmacro()
 
 
 ##################### Project options and cached variables #####################
