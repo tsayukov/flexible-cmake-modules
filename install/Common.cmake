@@ -19,7 +19,6 @@
 #]=============================================================================]
 
 include_guard(GLOBAL)
-no_in_source_builds_guard()
 __variable_init_guard()
 
 
