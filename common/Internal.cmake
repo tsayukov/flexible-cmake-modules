@@ -10,6 +10,7 @@
   Commands:
   - __after_project_guard
   - __parse_and_remove_injected_options
+  - __parse_and_remove_injected_one_value_parameters
   - __compact_parse_arguments
   - __xor
 #]=============================================================================]
@@ -57,11 +58,41 @@ endif()
 macro(__parse_and_remove_injected_options)
   foreach (__option IN LISTS ${ARGN})
     set(${__option} OFF)
-    if (NOT ARGC EQUAL 0)
+    if (NOT ARGC EQUAL "0")
       list(FIND ARGN "${__option}" __option_index)
       if (NOT __option_index EQUAL "-1")
         set(${__option} ON)
         list(REMOVE_AT ARGN ${__option_index})
+      endif()
+    endif()
+  endforeach()
+endmacro()
+
+#[=============================================================================[
+  For internal use. Use this command in functions.
+  Find the first appearance of passed one-value keys in an outer function's
+  `${ARGN}`, set each variable called by key's name to the value following it
+  for each found key, raise an error, if no such value is found, otherwise, set
+  the variable to an empty string. Remove the first appearance of each key-value
+  pair from the outer function's `${ARGN}`.
+#]=============================================================================]
+macro(__parse_and_remove_injected_one_value_parameters)
+  list(LENGTH ARGN __length)
+  math(EXPR __last_index "__length - 1")
+  foreach (__key IN LISTS ${ARGN})
+    set(${__key} "")
+    if (NOT ARGC EQUAL "0")
+      list(FIND ARGN "${__key}" __key_index)
+      if (__key_index GREATER_EQUAL __last_index)
+        message(FATAL_ERROR
+          "`${__key}` cannot be the last parameter, "
+          "because a value is expected after it."
+        )
+      endif()
+      if (NOT __key_index EQUAL "-1")
+        math(EXPR __value_index "${__key_index} + 1")
+        list(GET ARGN ${__value_index} ${__key})
+        list(REMOVE_AT ARGN ${__key_index} ${__value_index})
       endif()
     endif()
   endforeach()
