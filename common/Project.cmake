@@ -60,7 +60,7 @@
 
   If `${NAMESPACE}_ENABLE_INSTALL` is enabled and a project target is not
   excluded from installation manually (see `add_project_*` for details),
-  the project target is added to the `${PROJECT_SOURCE_DIR}` directory property
+  the project target is added to the global project property
   `${NAMESPACE}_INSTALL_PROJECT_TARGETS`. So, the `install_project_targets`
   command can be used without passed project targets.
   ------------------------------------------------------------------------------
@@ -91,6 +91,9 @@
   - Project target properties:
     - get_project_target_property
     - set_project_target_property
+  - Global project properties:
+    - get_global_project_property
+    - set_global_project_property
 #]=============================================================================]
 
 include_guard(GLOBAL)
@@ -442,4 +445,15 @@ function(set_project_target_property target)
     PROPERTIES
       ${property} ${value}
   )
+endfunction()
+
+
+########################## Project target properties ###########################
+
+macro(get_global_project_property variable)
+  get_property(${variable} DIRECTORY "${PROJECT_SOURCE_DIR}" ${ARGN})
+endmacro()
+
+function(set_global_project_property)
+  set_property(DIRECTORY "${PROJECT_SOURCE_DIR}" ${ARGN})
 endfunction()
