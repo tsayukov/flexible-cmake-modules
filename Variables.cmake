@@ -46,6 +46,8 @@ project_option(ENABLE_INSTALL "Enable the library installation"
   ON IF (PROJECT_IS_TOP_LEVEL AND (NOT CMAKE_SKIP_INSTALL_RULES))
 )
 
+project_option(BUILD_SHARED_LIBS "Treat libraries as shared by default" OFF)
+
 #[=============================================================================[
   Set to `ON` if your library can be used as a shared library or executable with
   plugins. Otherwise, set to `OFF`, e.g., if you develop a header-only library
