@@ -234,8 +234,11 @@ endfunction()
 ########################### Project target creation ############################
 
 #[=============================================================================[
-  Add a project library target called by `${namespace}_${target_suffix}`.
-  All parameters of the `add_library` command are passed after `target_suffix`.
+  Add a project library target called by `${namespace}_${target_suffix}` with
+  a `${namespace}::${target_suffix}` alias. All parameters of the `add_library`
+  command are passed after `target_suffix`.
+
+  Set the `EXPORT_NAME` and `OUTPUT_NAME` target properties to `${target_suffix}`.
 
   If the target is a shared library, also set the following target properties:
   - `SOVERSION` to `${PROJECT_VERSION_MAJOR}`;
@@ -250,7 +253,11 @@ function(add_project_library target_suffix)
   set(target ${namespace}_${target_suffix})
   add_library(${target} ${ARGN})
   add_library(${namespace}::${target_suffix} ALIAS ${target})
-  set_target_properties(${target} PROPERTIES EXPORT_NAME ${target_suffix})
+  set_target_properties(${target}
+    PROPERTIES
+      EXPORT_NAME ${target_suffix}
+      OUTPUT_NAME ${target_suffix}
+  )
 
   get_target_property(target_type ${target} TYPE)
   if (target_type STREQUAL "SHARED_LIBRARY")
@@ -267,8 +274,11 @@ function(add_project_library target_suffix)
 endfunction()
 
 #[=============================================================================[
-  Add an executable target called by `${namespace}_${target_suffix}`.
-  All parameters of the `add_executable` command are passed after `target_suffix`.
+  Add an executable target called by `${namespace}_${target_suffix}` with
+  a `${namespace}::${target_suffix}` alias. All parameters of
+  the `add_executable` command are passed after `target_suffix`.
+
+  Set the `EXPORT_NAME` and `OUTPUT_NAME` target properties to `${target_suffix}`.
 
   Set the `EXCLUDE_FROM_INSTALLATION` option to exclude the target from
   installation.
@@ -279,7 +289,11 @@ function(add_project_executable target_suffix)
   set(target ${namespace}_${target_suffix})
   add_executable(${target} ${ARGN})
   add_executable(${namespace}::${target_suffix} ALIAS ${target})
-  set_target_properties(${target} PROPERTIES EXPORT_NAME ${target_suffix})
+  set_target_properties(${target}
+    PROPERTIES
+      EXPORT_NAME ${target_suffix}
+      OUTPUT_NAME ${target_suffix}
+  )
 
   if (ENABLE_INSTALL AND NOT EXCLUDE_FROM_INSTALLATION)
     append_install_project_target(${target})
