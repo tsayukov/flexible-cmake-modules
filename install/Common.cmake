@@ -168,7 +168,7 @@ function(install_project_headers)
 
   set(export_headers_directories "")
   get_install_project_targets()
-  foreach (target IN LISTS ${install_project_targets})
+  foreach (target IN LISTS install_project_targets)
     get_project_target_property(export_header_dir ${target}
       PROJECT_PROPERTY EXPORT_HEADER_DIR
     )

@@ -507,18 +507,16 @@ function(set_project_target_property target)
 
   if (ARGS_PROPERTY)
     __get_key_value(ARGS_PROPERTY)
+    set(property ${key})
   elseif (ARGS_PROJECT_PROPERTY)
     __get_key_value(ARGS_PROJECT_PROPERTY)
-  endif()
-
-  if (ARGS_PROJECT_PROPERTY)
     set(property ${NAMESPACE}_${key})
   endif()
 
   get_project_target_name(${target})
   set_target_properties(${target}
     PROPERTIES
-      ${key} ${value}
+      ${property} ${value}
   )
 endfunction()
 
