@@ -46,10 +46,18 @@ project_option(ENABLE_INSTALL "Enable the library installation"
   ON IF (PROJECT_IS_TOP_LEVEL AND (NOT CMAKE_SKIP_INSTALL_RULES))
 )
 
+#[=============================================================================[
+  Set project-specific `BUILD_SHARED_LIBS`, so if an outer project that included
+  this project as a subproject set its own `BUILD_SHARED_LIBS`, this won't have
+  effect. The outer project can control this project's behavior regarding the
+  type of libraries by setting `${NAMESPACE}_BUILD_SHARED_LIBS` before this
+  project is included.
+  See: https://cmake.org/cmake/help/latest/variable/BUILD_SHARED_LIBS.html
+#]=============================================================================]
 project_option(BUILD_SHARED_LIBS "Treat libraries as shared by default" OFF)
 
 #[=============================================================================[
-  Set to `ON` if your library can be used as a shared library or executable with
+  Enable to make your library be used as a shared library or executable with
   plugins. Otherwise, set to `OFF`, e.g., if you develop a header-only library
   or reqular executable (without the `ENABLE_EXPORTS` property set).
   See: https://cmake.org/cmake/help/latest/module/GenerateExportHeader.html
