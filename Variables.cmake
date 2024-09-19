@@ -67,6 +67,27 @@ if (ENABLE_EXPORT_HEADER)
   include(GenerateExportHeader)
 endif()
 
+#[=============================================================================[
+  Add the rpath, such as is set in `CMAKE_INSTALL_RPATH` below, to all installed
+  shared libraries or executables. It may be useful for platforms that support
+  rpath, when shared libraries or executables have dependencies that's
+  distributed with the package itself and can be installed in a special place
+  unknown for the dynamic loader.
+  E.g., in Linux, the rpath set to `$ORIGIN` means that the dynamic loader will
+  be looking for dependent shared libraries in the same place where the origin
+  installed shared library or executable is located. You can add other paths,
+  e.g., "\$ORIGIN/../lib".
+  See: https://cmake.org/cmake/help/latest/prop_tgt/INSTALL_RPATH.html
+#]=============================================================================]
+project_option(ENABLE_INSTALL_RPATH "Enable adding rpath during installation" OFF)
+if (ENABLE_INSTALL_RPATH AND ENABLE_INSTALL)
+  if (APPLE)
+    set(CMAKE_INSTALL_RPATH "@loader_path")
+  elseif (UNIX)
+    set(CMAKE_INSTALL_RPATH "\$ORIGIN")
+  endif()
+endif()
+
 project_option(ENABLE_DOCS "Enable creating documentation" OFF)
 
 # For small projects it is useless to enable `ccache`
