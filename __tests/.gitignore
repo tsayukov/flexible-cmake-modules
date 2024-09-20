@@ -1,0 +1,2 @@
+# Exclude test builds in the current directory
+/*build*
