@@ -43,6 +43,7 @@ endfunction()
   is allowed to build wherever it wants.
 #]=============================================================================]
 function(no_in_source_builds_guard)
+  get_project_is_top_level()
   if (NOT PROJECT_IS_TOP_LEVEL)
     return()
   endif()

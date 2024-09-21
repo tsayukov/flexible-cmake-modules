@@ -5,9 +5,8 @@
   ------------------------------------------------------------------------------
   Internal variables and commands
   ------------------------------------------------------------------------------
-  Variables:
-  - PROJECT_IS_TOP_LEVEL (until CMake 3.21)
   Commands:
+  - get_project_is_top_level
   - __after_project_guard
   - __parse_and_remove_injected_options
   - __parse_and_remove_injected_one_value_parameters
@@ -18,6 +17,26 @@
 
 include_guard(GLOBAL)
 
+
+#[=============================================================================[
+  The `PROJECT_IS_TOP_LEVEL` is set by the `project` command in CMake 3.21+.
+  Otherwise, the custom version of that variable is used that works
+  in the same way as described in the `PROJECT_IS_TOP_LEVEL` documentation.
+  See: https://cmake.org/cmake/help/latest/variable/PROJECT_IS_TOP_LEVEL.html
+#]=============================================================================]
+function(get_project_is_top_level)
+  if (CMAKE_VERSION LESS "3.21")
+    __get_project_is_top_level()
+    set(PROJECT_IS_TOP_LEVEL ${__project_is_top_level} PARENT_SCOPE)
+  endif()
+endfunction()
+
+macro(__get_project_is_top_level)
+  string(COMPARE EQUAL
+    "${CMAKE_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}"
+    __project_is_top_level
+  )
+endmacro()
 
 #[=============================================================================[
   For internal use.
@@ -33,21 +52,6 @@ function(__after_project_guard)
     )
   endif()
 endfunction()
-
-__after_project_guard()
-
-#[=============================================================================[
-  The `PROJECT_IS_TOP_LEVEL` is set by the `project` command in CMake 3.21+.
-  Otherwise, the custom version of that variable is used that works
-  in the same way as described in the `PROJECT_IS_TOP_LEVEL` documentation.
-  See: https://cmake.org/cmake/help/latest/variable/PROJECT_IS_TOP_LEVEL.html
-#]=============================================================================]
-if (CMAKE_VERSION LESS "3.21")
-  string(COMPARE EQUAL
-    "${CMAKE_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}"
-    PROJECT_IS_TOP_LEVEL
-  )
-endif()
 
 #[=============================================================================[
   For internal use. Use this command in functions.
