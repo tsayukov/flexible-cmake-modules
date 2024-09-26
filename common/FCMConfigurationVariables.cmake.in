@@ -1,0 +1,93 @@
+# Flexible CMake Modules
+# ------------------------------------------------------------------------------
+# Author: Pavel Tsayukov
+# Repository: https://github.com/tsayukov/flexible-cmake-modules
+# Distributed under the MIT License. See the accompanying file LICENSE or
+# https://opensource.org/license/mit for details.
+# ------------------------------------------------------------------------------
+#
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# FOR COAUTHORS AND CONTRIBUTORS: fill in your name, contacts, and changes above
+#
+#[=================================================================[#github/wiki
+  # FCM Configuration Variables' Getters
+
+  ## Table of Contents
+
+  - [fcm_get_command_prefix](#fcm_get_command_prefix)
+  - [fcm_get_project_command_prefix](#fcm_get_project_command_prefix)
+  - [fcm_get_project_target_prefix](#fcm_get_project_target_prefix)
+  - [fcm_get_project_cache_prefix](#fcm_get_project_cache_prefix)
+
+  The `common/FCMConfigurationVariables` module defines commands for getting FCM
+  configuration variables.
+
+  ## `fcm_get_command_prefix`
+
+  Use an `FCM_COMMAND_PREFIX` variable after calling this command
+  to get its value.
+
+  ## `fcm_get_project_command_prefix`
+
+  Use an `FCM_PROJECT_COMMAND_PREFIX` variable after calling this command
+  to get its value.
+
+  ## `fcm_get_project_target_prefix`
+
+  Use an `FCM_PROJECT_TARGET_PREFIX` variable after calling this command
+  to get its value.
+
+  ## `fcm_get_project_cache_prefix`
+
+  Use an `FCM_PROJECT_CACHE_PREFIX` variable after calling this command
+  to get its value.
+
+#]=================================================================]#github/wiki
+
+include_guard(GLOBAL)
+
+
+macro(@FCM_COMMAND_PREFIX@internal_get_configuration_variable variable_name)
+  set(__fcm_version "0")
+  set(__fcm_cache_dir "${PROJECT_BINARY_DIR}/FCM_cache/v${__fcm_version}")
+  set(__c_id_pattern "^[_A-Za-z][_0-9A-Za-z]*$")
+
+  if (EXISTS "${__fcm_cache_dir}/override/${variable_name}")
+    file(READ "${__fcm_cache_dir}/override/${variable_name}" __value_id)
+  elseif (EXISTS "${__fcm_cache_dir}/${variable_name}")
+    file(READ "${__fcm_cache_dir}/${variable_name}" __value_id)
+  else()
+    message(FATAL_ERROR
+      "${variable_name} is not found !!! Try to re-configure the project."
+    )
+  endif()
+
+  if (NOT __value_id MATCHES "${__c_id_pattern}")
+    message(FATAL_ERROR
+      "${variable_name} is corrupted, probably because someone changed it !!! "
+      "${variable_name} must be a proper C identifier."
+    )
+  endif()
+
+  set(${variable_name} "${__value_id}")
+endmacro()
+
+function(@FCM_COMMAND_PREFIX@get_command_prefix)
+  @FCM_COMMAND_PREFIX@internal_get_configuration_variable(FCM_COMMAND_PREFIX)
+  set(FCM_COMMAND_PREFIX ${FCM_COMMAND_PREFIX} PARENT_SCOPE)
+endfunction()
+
+function(@FCM_COMMAND_PREFIX@get_project_command_prefix)
+  @FCM_COMMAND_PREFIX@internal_get_configuration_variable(FCM_PROJECT_COMMAND_PREFIX)
+  set(FCM_PROJECT_COMMAND_PREFIX ${FCM_PROJECT_COMMAND_PREFIX} PARENT_SCOPE)
+endfunction()
+
+function(@FCM_COMMAND_PREFIX@get_project_target_prefix)
+  @FCM_COMMAND_PREFIX@internal_get_configuration_variable(FCM_PROJECT_TARGET_PREFIX)
+  set(FCM_PROJECT_TARGET_PREFIX ${FCM_PROJECT_TARGET_PREFIX} PARENT_SCOPE)
+endfunction()
+
+function(@FCM_COMMAND_PREFIX@get_project_cache_prefix)
+  @FCM_COMMAND_PREFIX@internal_get_configuration_variable(FCM_PROJECT_CACHE_PREFIX)
+  set(FCM_PROJECT_CACHE_PREFIX ${FCM_PROJECT_CACHE_PREFIX} PARENT_SCOPE)
+endfunction()
