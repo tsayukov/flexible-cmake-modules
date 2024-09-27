@@ -39,7 +39,9 @@
 include_guard(GLOBAL)
 
 
-macro(@FCM_COMMAND_PREFIX@include file)
+macro(@FCM_COMMAND_PREFIX@include
+  file
+)
   set(__ARGN ${ARGN})
   @FCM_COMMAND_PREFIX@parse_and_remove_arguments_from(__ARGN
     __OPTIONS__ "TEMPLATE"
@@ -52,7 +54,9 @@ macro(@FCM_COMMAND_PREFIX@include file)
   endif()
 endmacro()
 
-macro(@FCM_COMMAND_PREFIX@internal_include_template file)
+macro(@FCM_COMMAND_PREFIX@internal_include_template
+  file
+)
   set(__ARGN ${ARGN})
   @FCM_COMMAND_PREFIX@parse_and_remove_arguments_from(__ARGN
     __OPTIONS__ "OPTIONAL"
