@@ -1,0 +1,88 @@
+# Flexible CMake Modules
+# ------------------------------------------------------------------------------
+# Author: Pavel Tsayukov
+# Repository: https://github.com/tsayukov/flexible-cmake-modules
+# Distributed under the MIT License. See the accompanying file LICENSE or
+# https://opensource.org/license/mit for details.
+# ------------------------------------------------------------------------------
+#
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# FOR COAUTHORS AND CONTRIBUTORS: fill in your name, contacts, and changes above
+#
+#[=================================================================[#github/wiki
+  # Debugging
+
+  ## Table of Contents
+
+  - [fcm_create_symlink_to_compile_commands](#fcm_create_symlink_to_compile_commands)
+  - [fcm_print](#fcm_print)
+  - [fcm_print_var](#fcm_print_var)
+  - [fcm_print_var_with](#fcm_print_var_with)
+
+  ## fcm_create_symlink_to_compile_commands
+
+  Create a symbolic link in the [`PROJECT_SOURCE_DIR`][1]`/build/` directory
+  to `compile_commands.json` if `PROJECT_SOURCE_DIR/build/` itself
+  is not [`PROJECT_BINARY_DIR`][2].
+
+  ## fcm_print
+
+  Print `"<text>"`.
+
+  ```
+  fcm_print("<text>")
+  ```
+
+  ## fcm_print_var
+
+  Print the `<variable>` name and its value.
+
+  ```
+  fcm_print_var(<variable>)
+  ```
+
+  ## fcm_print_var_with
+
+  Print the `<variable>` name and its value prefixing the message with
+  `"<hint>"`.
+
+  ```
+  fcm_print_var_with(<variable> "<hint>")
+  ```
+
+  [1]: https://cmake.org/cmake/help/latest/variable/PROJECT_SOURCE_DIR.html
+  [2]: https://cmake.org/cmake/help/latest/variable/PROJECT_BINARY_DIR.html
+
+#]=================================================================]#github/wiki
+
+include_guard(GLOBAL)
+
+
+function(@FCM_COMMAND_PREFIX@create_symlink_to_compile_commands)
+  if (NOT PROJECT_BINARY_DIR STREQUAL "${PROJECT_SOURCE_DIR}/build")
+    file(MAKE_DIRECTORY "${PROJECT_SOURCE_DIR}/build")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
+      "${PROJECT_BINARY_DIR}/compile_commands.json"
+      "${PROJECT_SOURCE_DIR}/build/compile_commands.json"
+    )
+  endif()
+endfunction()
+
+macro(@FCM_COMMAND_PREFIX@print
+  text
+)
+  message("${text}")
+endmacro()
+
+macro(@FCM_COMMAND_PREFIX@print_var
+  variable
+)
+  message("${variable} = \"${${variable}}\"")
+endmacro()
+
+macro(@FCM_COMMAND_PREFIX@print_var_with
+  variable
+  hint
+)
+  message("${hint}: ${variable} = \"${${variable}}\"")
+endmacro()
