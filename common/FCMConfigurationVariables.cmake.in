@@ -12,6 +12,9 @@
 #[=================================================================[#github/wiki
   # Getters of FCM Configuration Variables
 
+  The `common/FCMConfigurationVariables` module defines commands for getting FCM
+  configuration variables.
+
   ## Table of Contents
 
   - [fcm_get_all_configuration_variables](#fcm_get_all_configuration_variables)
@@ -20,29 +23,26 @@
   - [fcm_get_project_target_prefix](#fcm_get_project_target_prefix)
   - [fcm_get_project_cache_prefix](#fcm_get_project_cache_prefix)
 
-  The `common/FCMConfigurationVariables` module defines commands for getting FCM
-  configuration variables.
-
-  ## `fcm_get_all_configuration_variables`
+  ## fcm_get_all_configuration_variables
 
   Get all the configuration variables listed below.
 
-  ## `fcm_get_command_prefix`
+  ## fcm_get_command_prefix
 
   Use an `FCM_COMMAND_PREFIX` variable after calling this command
   to get its value.
 
-  ## `fcm_get_project_command_prefix`
+  ## fcm_get_project_command_prefix
 
   Use an `FCM_PROJECT_COMMAND_PREFIX` variable after calling this command
   to get its value.
 
-  ## `fcm_get_project_target_prefix`
+  ## fcm_get_project_target_prefix
 
   Use an `FCM_PROJECT_TARGET_PREFIX` variable after calling this command
   to get its value.
 
-  ## `fcm_get_project_cache_prefix`
+  ## fcm_get_project_cache_prefix
 
   Use an `FCM_PROJECT_CACHE_PREFIX` variable after calling this command
   to get its value.
@@ -52,29 +52,31 @@
 include_guard(GLOBAL)
 
 
-macro(@FCM_COMMAND_PREFIX@internal_get_configuration_variable variable_name)
+macro(@FCM_COMMAND_PREFIX@internal_get_configuration_variable
+  variable
+)
   set(__fcm_version "0")
   set(__fcm_cache_dir "${PROJECT_BINARY_DIR}/FCM_cache/v${__fcm_version}")
   set(__c_id_pattern "^[_A-Za-z][_0-9A-Za-z]*$")
 
-  if (EXISTS "${__fcm_cache_dir}/override/${variable_name}")
-    file(READ "${__fcm_cache_dir}/override/${variable_name}" __value_id)
-  elseif (EXISTS "${__fcm_cache_dir}/${variable_name}")
-    file(READ "${__fcm_cache_dir}/${variable_name}" __value_id)
+  if (EXISTS "${__fcm_cache_dir}/override/${variable}")
+    file(READ "${__fcm_cache_dir}/override/${variable}" __value_id)
+  elseif (EXISTS "${__fcm_cache_dir}/${variable}")
+    file(READ "${__fcm_cache_dir}/${variable}" __value_id)
   else()
     message(FATAL_ERROR
-      "${variable_name} is not found !!! Try to re-configure the project."
+      "${variable} is not found !!! Try to re-configure the project."
     )
   endif()
 
   if (NOT __value_id MATCHES "${__c_id_pattern}")
     message(FATAL_ERROR
-      "${variable_name} is corrupted, probably because someone changed it !!! "
-      "${variable_name} must be a proper C identifier."
+      "${variable} is corrupted, probably because someone changed it !!! "
+      "${variable} must be a proper C identifier."
     )
   endif()
 
-  set(${variable_name} "${__value_id}")
+  set(${variable} "${__value_id}")
 endmacro()
 
 macro(@FCM_COMMAND_PREFIX@get_all_configuration_variables)
