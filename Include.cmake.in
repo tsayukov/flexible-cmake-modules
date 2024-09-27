@@ -32,7 +32,7 @@
   [3]: https://cmake.org/cmake/help/latest/variable/PROJECT_SOURCE_DIR.html
   [4]: https://cmake.org/cmake/help/latest/variable/PROJECT_BINARY_DIR.html
   [5]: https://cmake.org/cmake/help/latest/command/configure_file.html#transformations
-  [6]: TODO(add_link)
+  [6]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables
 
 #]=================================================================]#github/wiki
 
