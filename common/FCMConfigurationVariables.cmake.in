@@ -10,10 +10,11 @@
 # FOR COAUTHORS AND CONTRIBUTORS: fill in your name, contacts, and changes above
 #
 #[=================================================================[#github/wiki
-  # FCM Configuration Variables' Getters
+  # Getters of FCM Configuration Variables
 
   ## Table of Contents
 
+  - [fcm_get_all_configuration_variables](#fcm_get_all_configuration_variables)
   - [fcm_get_command_prefix](#fcm_get_command_prefix)
   - [fcm_get_project_command_prefix](#fcm_get_project_command_prefix)
   - [fcm_get_project_target_prefix](#fcm_get_project_target_prefix)
@@ -21,6 +22,10 @@
 
   The `common/FCMConfigurationVariables` module defines commands for getting FCM
   configuration variables.
+
+  ## `fcm_get_all_configuration_variables`
+
+  Get all the configuration variables listed below.
 
   ## `fcm_get_command_prefix`
 
@@ -70,6 +75,17 @@ macro(@FCM_COMMAND_PREFIX@internal_get_configuration_variable variable_name)
   endif()
 
   set(${variable_name} "${__value_id}")
+endmacro()
+
+macro(@FCM_COMMAND_PREFIX@get_all_configuration_variables)
+  foreach (variable IN ITEMS
+    FCM_COMMAND_PREFIX
+    FCM_PROJECT_COMMAND_PREFIX
+    FCM_PROJECT_TARGET_PREFIX
+    FCM_PROJECT_CACHE_PREFIX
+  )
+    @FCM_COMMAND_PREFIX@internal_get_configuration_variable(${variable})
+  endforeach()
 endmacro()
 
 function(@FCM_COMMAND_PREFIX@get_command_prefix)
