@@ -203,6 +203,8 @@ foreach (variable IN ITEMS
     message(STATUS "FCM: found default ${variable}: \"${__control_value_id}\"")
     set(${variable} ${__control_value_id})
   endif()
+
+  unset(${variable}_CONTROL)
 endforeach()
 
 
@@ -216,8 +218,3 @@ foreach (module IN ITEMS FcmInclude Common)
   )
   include("${PROJECT_BINARY_DIR}/${__fcm_root}/${module}.cmake")
 endforeach()
-
-unset(FCM_COMMAND_PREFIX_CONTROL)
-unset(FCM_PROJECT_COMMAND_PREFIX_CONTROL)
-unset(FCM_PROJECT_TARGET_PREFIX_CONTROL)
-unset(FCM_PROJECT_CACHE_PREFIX_CONTROL)
