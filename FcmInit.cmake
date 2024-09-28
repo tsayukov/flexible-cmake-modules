@@ -208,13 +208,22 @@ foreach (variable IN ITEMS
 endforeach()
 
 
-file(RELATIVE_PATH __fcm_root "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_LIST_DIR}")
+set(${FCM_PROJECT_CACHE_PREFIX}_CMAKE_MODULE_PATH
+  "${CMAKE_CURRENT_LIST_DIR}"
+  "${CMAKE_CURRENT_LIST_DIR}/modules"
+  CACHE STRING
+  "Search paths for CMake modules"
+)
+set(CMAKE_MODULE_PATH ${${FCM_PROJECT_CACHE_PREFIX}_CMAKE_MODULE_PATH})
+
+
+file(RELATIVE_PATH __fcm_dir "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_LIST_DIR}")
 
 foreach (module IN ITEMS FcmInclude Common)
   configure_file(
-    "${PROJECT_SOURCE_DIR}/${__fcm_root}/${module}.cmake.in"
-    "${PROJECT_BINARY_DIR}/${__fcm_root}/${module}.cmake"
+    "${PROJECT_SOURCE_DIR}/${__fcm_dir}/${module}.cmake.in"
+    "${PROJECT_BINARY_DIR}/${__fcm_dir}/${module}.cmake"
     @ONLY
   )
-  include("${PROJECT_BINARY_DIR}/${__fcm_root}/${module}.cmake")
+  include("${PROJECT_BINARY_DIR}/${__fcm_dir}/${module}.cmake")
 endforeach()

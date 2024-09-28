@@ -108,9 +108,5 @@ macro(@FCM_COMMAND_PREFIX@internal_include_template
 endmacro()
 
 
-@FCM_COMMAND_PREFIX@include(
-  "${CMAKE_CURRENT_LIST_DIR}/common/FcmConfigVariables.cmake.in" TEMPLATE
-)
-@FCM_COMMAND_PREFIX@include(
-  "${CMAKE_CURRENT_LIST_DIR}/common/ParseArgs.cmake.in" TEMPLATE
-)
+@FCM_COMMAND_PREFIX@include("common/FcmConfigVariables" TEMPLATE)
+@FCM_COMMAND_PREFIX@include("common/ParseArgs" TEMPLATE)
