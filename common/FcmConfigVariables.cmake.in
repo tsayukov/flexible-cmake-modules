@@ -12,9 +12,6 @@
 #[=================================================================[#github/wiki
   # Getters of FCM Configuration Variables
 
-  The `common/FCMConfigurationVariables` module defines commands for getting FCM
-  configuration variables.
-
   ## Table of Contents
 
   - [fcm_get_all_configuration_variables](#fcm_get_all_configuration_variables)
