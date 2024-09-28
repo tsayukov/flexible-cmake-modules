@@ -29,14 +29,14 @@
 
   project(library-name CXX)
 
-  include(cmake/InitFCM.cmake)
+  include(cmake/FcmInit.cmake)
   ```
 
   You may adjust Flexible CMake Modules by setting control variables before
-  including the `InitFCM` module. These control variables will be unset after
+  including the `FcmInit` module. These control variables will be unset after
   the initialization, so they won't affect any sub-projects using FCM as well.
   Thus, be careful when using cached entries with the same names; they will be
-  used by each `InitFCM` module if the normal variables are not defined.
+  used by each `FcmInit` module if the normal variables are not defined.
 
   ## Prefixes
 
@@ -104,17 +104,17 @@
   and use the `FCM_PROJECT_CACHE_PREFIX` variable.
 
   [1]: https://cmake.org/cmake/help/latest/command/string.html#make-c-identifier
-  [2]: TODO(add_link)
-  [3]: TODO(add_link)
-  [4]: TODO(add_link)
-  [5]: TODO(add_link)
-  [6]: TODO(add_link)
-  [7]: TODO(add_link)
-  [8]: TODO(add_link)
-  [9]: TODO(add_link)
-  [10]: TODO(add_link)
-  [11]: TODO(add_link)
-  [12]: TODO(add_link)
+  [2]: https://github.com/tsayukov/flexible-cmake-modules/wiki/fcm_include
+  [3]: TODO(add_link) fcm_add_library
+  [4]: TODO(add_link) fcm_add_executable
+  [5]: TODO(add_link) fcm_add_custom_target
+  [6]: TODO(add_link) fcm_cache_entry
+  [7]: TODO(add_link) fcm_option
+  [8]: TODO(add_link) fcm_dev_option
+  [9]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_command_prefix
+  [10]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_project_command_prefix
+  [11]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_project_target_prefix
+  [12]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_project_cache_prefix
 #]=================================================================]#github/wiki
 
 include_guard(DIRECTORY)
@@ -208,7 +208,7 @@ endforeach()
 
 file(RELATIVE_PATH __fcm_root "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_LIST_DIR}")
 
-foreach (module IN ITEMS Include Common)
+foreach (module IN ITEMS FcmInclude Common)
   configure_file(
     "${PROJECT_SOURCE_DIR}/${__fcm_root}/${module}.cmake.in"
     "${PROJECT_BINARY_DIR}/${__fcm_root}/${module}.cmake"

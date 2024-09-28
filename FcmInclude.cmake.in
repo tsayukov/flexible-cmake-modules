@@ -109,7 +109,7 @@ endmacro()
 
 
 @FCM_COMMAND_PREFIX@include(
-  "${CMAKE_CURRENT_LIST_DIR}/common/FCMConfigurationVariables.cmake.in" TEMPLATE
+  "${CMAKE_CURRENT_LIST_DIR}/common/FcmConfigVariables.cmake.in" TEMPLATE
 )
 @FCM_COMMAND_PREFIX@include(
   "${CMAKE_CURRENT_LIST_DIR}/common/ParseArgs.cmake.in" TEMPLATE
