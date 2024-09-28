@@ -49,7 +49,7 @@
 
   An underscore will be added to each non-empty prefix. Note, that these control
   variables can be set to an empty string. It is the same if there are
-  no prefixes at all. It is not recommended to remove the prefix for FCM's
+  no prefixes at all. It is not allowed to remove the prefix for FCM's
   commands, because then they will override some CMake commands.
 
   ### FCM_COMMAND_PREFIX_CONTROL
@@ -87,8 +87,8 @@
   ### FCM_PROJECT_TARGET_PREFIX_CONTROL
 
   The `FCM_PROJECT_TARGET_PREFIX_CONTROL` defines a prefix for project-specific
-  targets that is set by calling the [`fcm_add_library()`][3],
-  [`fcm_add_executable()`][4], and [`fcm_add_custom_target()`][5] command.
+  targets that is set by calling the [`fcm_add_library()`][3]
+  and [`fcm_add_executable()`][4]  commands.
   By default, its value is a project name in lower case, converted to a proper
   C identifier. To get the prefix, call
   the [`fcm_get_project_target_prefix()`][11] command and use
@@ -105,12 +105,11 @@
 
   [1]: https://cmake.org/cmake/help/latest/command/string.html#make-c-identifier
   [2]: https://github.com/tsayukov/flexible-cmake-modules/wiki/fcm_include
-  [3]: TODO(add_link) fcm_add_library
-  [4]: TODO(add_link) fcm_add_executable
-  [5]: TODO(add_link) fcm_add_custom_target
-  [6]: TODO(add_link) fcm_cache_entry
-  [7]: TODO(add_link) fcm_option
-  [8]: TODO(add_link) fcm_dev_option
+  [3]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-specific-commands#fcm_add_library
+  [4]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-specific-commands#fcm_add_executable
+  [6]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-specific-commands#fcm_cache_entry
+  [7]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-specific-commands#fcm_option
+  [8]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-specific-commands#fcm_dev_option
   [9]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_command_prefix
   [10]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_project_command_prefix
   [11]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_project_target_prefix
@@ -156,7 +155,7 @@ foreach (variable IN ITEMS
     set(${variable}_CONTROL "${__default_${variable}}")
   endif()
 
-  if (${variable}_CONTROL)
+  if (NOT ${variable}_CONTROL STREQUAL "")
     string(MAKE_C_IDENTIFIER "${${variable}_CONTROL}_" __control_value_id)
     if (NOT __control_value_id MATCHES "${__c_id_pattern}")
       message(FATAL_ERROR
@@ -165,6 +164,8 @@ foreach (variable IN ITEMS
         "${variable}_CONTROL must be a proper C identifier."
       )
     endif()
+  elseif ("${variable}_CONTROL" STREQUAL "FCM_COMMAND_PREFIX")
+    message(FATAL_ERROR "`FCM_COMMAND_PREFIX` must be non-empty.")
   endif()
 
   set(__fcm_cache_dir "${PROJECT_BINARY_DIR}/FCM_cache/v${__fcm_version}")
