@@ -38,20 +38,10 @@
   ```
 
   Parse arguments from `<variable>` and, if the `__INPUT__` list is present,
-  from `<arguments>`. If this command is called in a macro body, there
-  are two ways to parse `ARGN` or [similar][1]:
+  from `<arguments>`. If this command is called in a macro body,
+  the way to parse `ARGN` or [similar][1] is as follows:
 
   ```cmake
-  # The first way
-  macro(foo)
-    set(__ARGN ${ARGN})
-    fcm_parse_and_remove_arguments_from(__ARGN
-      # ...
-    )
-    # ...
-  endmacro()
-
-  # The second way
   macro(bar)
     set(__ARGN "")
     fcm_parse_and_remove_arguments_from(__ARGN __INPUT__ ${ARGN}
@@ -150,7 +140,7 @@ macro(@FCM_COMMAND_PREFIX@parse_and_remove_arguments_from
   variable
 )
   @FCM_COMMAND_PREFIX@internal_parse_and_remove_arguments_from(${variable}
-    __ARGS__ ${${variable}}
+    __INPUT__ ${${variable}}
     ${ARGN}
   )
 endmacro()
@@ -174,13 +164,13 @@ function(@FCM_COMMAND_PREFIX@internal_parse_and_remove_arguments_from
     "${multi_value_keywords}"
   )
 
-  if (NOT ARGS___PREFIX__)
+  if (NOT DEFINED ARGS___PREFIX__)
     set(ARGS___PREFIX__ "ARGS")
   endif()
 
   set(option_indices_to_remove "")
 
-  foreach (option IN ITEMS ${ARGS___OPTIONS__})
+  foreach (option IN LISTS ARGS___OPTIONS__)
     list(FIND ARGS___INPUT__ "${option}" option_index)
     if (option_index EQUAL "-1")
       set(${ARGS___PREFIX__}_${option} FALSE PARENT_SCOPE)
@@ -190,7 +180,7 @@ function(@FCM_COMMAND_PREFIX@internal_parse_and_remove_arguments_from
     endif()
   endforeach()
 
-  if (option_indices_to_remove)
+  if (NOT option_indices_to_remove STREQUAL "")
     list(REMOVE_AT ARGS___INPUT__ ${option_indices_to_remove})
   endif()
 
@@ -199,7 +189,7 @@ function(@FCM_COMMAND_PREFIX@internal_parse_and_remove_arguments_from
   list(LENGTH ARGS___INPUT__ input_length)
   math(EXPR last_index "${input_length} - 1")
 
-  foreach (key IN ITEMS ${ARGS___ONE_VALUE_KEYS__})
+  foreach (key IN LISTS ARGS___ONE_VALUE_KEYS__)
     list(FIND ARGS___INPUT__ "${key}" key_index)
     if (key_index EQUAL "-1")
       unset(${ARGS___PREFIX__}_${key} PARENT_SCOPE)
@@ -212,18 +202,24 @@ function(@FCM_COMMAND_PREFIX@internal_parse_and_remove_arguments_from
       math(EXPR value_index "${key_index} + 1")
       list(GET ARGS___INPUT__ ${value_index} value)
       set(${ARGS___PREFIX__}_${key} "${value}" PARENT_SCOPE)
-      list(APPEND option_indices_to_remove ${key_index} ${value_index})
+      list(APPEND key_value_indices_to_remove ${key_index} ${value_index})
     endif()
   endforeach()
 
-  if (key_value_indices_to_remove)
+  if (NOT key_value_indices_to_remove STREQUAL "")
     list(REMOVE_AT ARGS___INPUT__ ${key_value_indices_to_remove})
   endif()
 
-  if (NOT ARGS___OUTPUT_VARIABLE__)
-    set(${variable} ${ARGS___INPUT__} PARENT_SCOPE)
+  if (NOT DEFINED ARGS___OUTPUT_VARIABLE__)
+    set(output_variable ${variable})
   else()
-    set(${ARGS___OUTPUT_VARIABLE__} ${ARGS___INPUT__} PARENT_SCOPE)
+    set(output_variable ${ARGS___OUTPUT_VARIABLE__})
+  endif()
+
+  if (NOT DEFINED ARGS___INPUT__)
+    set(${output_variable} "" PARENT_SCOPE)
+  else()
+    set(${output_variable} ${ARGS___INPUT__} PARENT_SCOPE)
   endif()
 endfunction()
 
