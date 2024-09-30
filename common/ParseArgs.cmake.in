@@ -140,7 +140,7 @@ macro(@FCM_COMMAND_PREFIX@parse_and_remove_arguments_from
   variable
 )
   @FCM_COMMAND_PREFIX@internal_parse_and_remove_arguments_from(${variable}
-    __INPUT__ ${${variable}}
+    __INPUT__ ${${}${variable}}
     ${ARGN}
   )
 endmacro()
