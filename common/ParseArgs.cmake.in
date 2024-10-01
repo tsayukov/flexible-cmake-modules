@@ -216,7 +216,7 @@ function(@FCM_COMMAND_PREFIX@internal_parse_and_remove_arguments_from
     set(output_variable ${ARGS___OUTPUT_VARIABLE__})
   endif()
 
-  if (NOT DEFINED ARGS___INPUT__)
+  if (NOT DEFINED ARGS___INPUT__ OR ARGS___INPUT__ STREQUAL "")
     set(${output_variable} "" PARENT_SCOPE)
   else()
     set(${output_variable} ${ARGS___INPUT__} PARENT_SCOPE)
