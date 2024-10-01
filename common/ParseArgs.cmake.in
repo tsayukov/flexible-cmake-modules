@@ -194,7 +194,7 @@ function(@FCM_COMMAND_PREFIX@internal_parse_and_remove_arguments_from
     if (key_index EQUAL "-1")
       unset(${ARGS___PREFIX__}_${key} PARENT_SCOPE)
     elseif (key_index GREATER_EQUAL last_index)
-      message(FATAL_ERROR
+      message(FATAL_ERROR ${__FCM_DEBUG_SYMBOL__}
         "`${key}` cannot be the last parameter, "
         "because a value is expected after it."
       )
