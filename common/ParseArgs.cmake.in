@@ -168,7 +168,7 @@ function(@FCM_COMMAND_PREFIX@internal_parse_and_remove_arguments_from
   )
 
   if (ARGS___NO_PREFIX__ AND DEFINED ARGS___PREFIX__)
-    message(FATAL_ERROR ${__FCM_DEBUG_SYMBOL__}
+    message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
       "`__NO_PREFIX__` and `__PREFIX__` are mutual exclusive parameters."
     )
   elseif (ARGS___NO_PREFIX__)
@@ -205,7 +205,7 @@ function(@FCM_COMMAND_PREFIX@internal_parse_and_remove_arguments_from
     if (key_index EQUAL "-1")
       unset(${ARGS___PREFIX__}${key} PARENT_SCOPE)
     elseif (key_index GREATER_EQUAL last_index)
-      message(FATAL_ERROR ${__FCM_DEBUG_SYMBOL__}
+      message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
         "`${key}` cannot be the last parameter, "
         "because a value is expected after it."
       )
@@ -283,7 +283,9 @@ function(@FCM_COMMAND_PREFIX@only_one_of_variables_is_true)
 
   if (NOT true_count EQUAL "1")
     list(JOIN ARGN ", " arguments)
-    message(FATAL_ERROR "Only one of ${arguments} arguments can be true.")
+    message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+      "Only one of ${arguments} arguments can be true."
+    )
   endif()
 endfunction()
 
@@ -300,14 +302,16 @@ function(@FCM_COMMAND_PREFIX@only_one_of_variables_is_defined)
 
   if (NOT true_count EQUAL "1")
     list(JOIN ARGN ", " arguments)
-    message(FATAL_ERROR "Only one of ${arguments} arguments can be defined.")
+    message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+      "Only one of ${arguments} arguments can be defined."
+    )
   endif()
 endfunction()
 
 function(@FCM_COMMAND_PREFIX@is_pair variable)
   list(LENGTH ${variable} length)
   if (NOT length EQUAL "2")
-    message(FATAL_ERROR
+    message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
       "A pair are expected, but got a list of size ${length}: \"${${variable}}\"."
     )
   endif()
