@@ -32,7 +32,7 @@
   ```
   fcm_parse_and_remove_arguments_from(<variable> [__INPUT__ <arguments>...]
                                       [__OUTPUT_VARIABLE__ <output_variable>]
-                                      [__PREFIX__ <argument_prefix>]
+                                      [__NO_PREFIX__ | __PREFIX__ <argument_prefix>]
                                       [__OPTIONS__ <options>...]
                                       [__ONE_VALUE_KEYS__ <one-value-keywords>...])
   ```
@@ -65,7 +65,8 @@
   `foo(DESTINATION /usr/local/bin)`, then the value of `MY_PREFIX_SKIP_ALL` will
   be `FALSE`, the value of `MY_PREFIX_DESTINATION` will be `/usr/local/bin`,
   and the value of `MY_PREFIX_RENAME` will be unset. By default,
-  the `<argument_prefix>` is `ARGS`.
+  the `<argument_prefix>` is `ARGS`. Pass `__NO_PREFIX__` to use variables
+  as is, e.g., `SKIP_ALL`, `DESTINATION`, and so forth.
 
   Passing options and keywords with their values will be removed, but only their
   first appearance. Remaining arguments will be stored in-place
@@ -148,7 +149,9 @@ endmacro()
 function(@FCM_COMMAND_PREFIX@internal_parse_and_remove_arguments_from
   variable
 )
-  set(options "")
+  set(options
+    "__NO_PREFIX__"
+  )
   set(one_value_keywords
     "__PREFIX__"
     "__OUTPUT_VARIABLE__"
@@ -164,8 +167,16 @@ function(@FCM_COMMAND_PREFIX@internal_parse_and_remove_arguments_from
     "${multi_value_keywords}"
   )
 
-  if (NOT DEFINED ARGS___PREFIX__)
-    set(ARGS___PREFIX__ "ARGS")
+  if (ARGS___NO_PREFIX__ AND DEFINED ARGS___PREFIX__)
+    message(FATAL_ERROR ${__FCM_DEBUG_SYMBOL__}
+      "`__NO_PREFIX__` and `__PREFIX__` are mutual exclusive parameters."
+    )
+  elseif (ARGS___NO_PREFIX__)
+    set(ARGS___PREFIX__ "")
+  elseif (NOT DEFINED ARGS___PREFIX__)
+    set(ARGS___PREFIX__ "ARGS_")
+  else()
+    set(ARGS___PREFIX__ "${ARGS___PREFIX__}_")
   endif()
 
   set(option_indices_to_remove "")
@@ -173,9 +184,9 @@ function(@FCM_COMMAND_PREFIX@internal_parse_and_remove_arguments_from
   foreach (option IN LISTS ARGS___OPTIONS__)
     list(FIND ARGS___INPUT__ "${option}" option_index)
     if (option_index EQUAL "-1")
-      set(${ARGS___PREFIX__}_${option} FALSE PARENT_SCOPE)
+      set(${ARGS___PREFIX__}${option} FALSE PARENT_SCOPE)
     else()
-      set(${ARGS___PREFIX__}_${option} TRUE PARENT_SCOPE)
+      set(${ARGS___PREFIX__}${option} TRUE PARENT_SCOPE)
       list(APPEND option_indices_to_remove ${option_index})
     endif()
   endforeach()
@@ -192,7 +203,7 @@ function(@FCM_COMMAND_PREFIX@internal_parse_and_remove_arguments_from
   foreach (key IN LISTS ARGS___ONE_VALUE_KEYS__)
     list(FIND ARGS___INPUT__ "${key}" key_index)
     if (key_index EQUAL "-1")
-      unset(${ARGS___PREFIX__}_${key} PARENT_SCOPE)
+      unset(${ARGS___PREFIX__}${key} PARENT_SCOPE)
     elseif (key_index GREATER_EQUAL last_index)
       message(FATAL_ERROR ${__FCM_DEBUG_SYMBOL__}
         "`${key}` cannot be the last parameter, "
@@ -201,7 +212,7 @@ function(@FCM_COMMAND_PREFIX@internal_parse_and_remove_arguments_from
     else()
       math(EXPR value_index "${key_index} + 1")
       list(GET ARGS___INPUT__ ${value_index} value)
-      set(${ARGS___PREFIX__}_${key} "${value}" PARENT_SCOPE)
+      set(${ARGS___PREFIX__}${key} "${value}" PARENT_SCOPE)
       list(APPEND key_value_indices_to_remove ${key_index} ${value_index})
     endif()
   endforeach()
