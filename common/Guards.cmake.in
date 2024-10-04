@@ -74,7 +74,7 @@ function(@FCM_COMMAND_PREFIX@no_in_source_builds_guard)
     return()
   endif()
 
-  @FCM_COMMAND_PREFIX@compact_parse_arguments(__MULTI_VALUE_KEYS__ "RECURSIVE")
+  cmake_parse_arguments(PARSE_ARGV 0 "ARGS" "" "" "RECURSIVE")
 
   set(error_message
     "In-source builds are not allowed. Instead, provide a path to build tree "

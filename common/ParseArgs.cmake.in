@@ -17,7 +17,6 @@
   ## Table of Contents
 
   - [fcm_parse_and_remove_arguments_from](#fcm_parse_and_remove_arguments_from)
-  - [fcm_compact_parse_arguments](#fcm_compact_parse_arguments)
   - [fcm_only_one_of_variables_is_true](#fcm_only_one_of_variables_is_true)
   - [fcm_only_one_of_variables_is_defined](#fcm_only_one_of_variables_is_defined)
   - [fcm_is_pair](#fcm_is_pair)
@@ -102,22 +101,6 @@
   Remaining arguments will be stored in-place
   in the `<variable>` or in the specified `<output_variable>` following
   `__OUTPUT_VARIABLE__`.
-
-  ## fcm_compact_parse_arguments
-
-  A compact version of the [`cmake_parse_arguments()`][2] command. Use it only
-  in functions.
-
-  ```
-  fcm_compact_parse_arguments([__START_WITH__ <N>]
-                              [__PREFIX__ <prefix>]
-                              [__OPTIONS__ <options>...]
-                              [__ONE_VALUE_KEYS__ <one_value_keywords>...]
-                              [__MULTI_VALUE_KEYS__ <multi_value_keywords>...])
-  ```
-
-  All parameters are similar to `cmake_parse_arguments`'s parameters.
-  By default, `<N>` is zero and `<prefix>` is `ARGS`.
 
   ## fcm_only_one_of_variables_is_true
 
@@ -254,42 +237,6 @@ function(@FCM_COMMAND_PREFIX@internal_parse_and_remove_arguments_from
   endif()
 endfunction()
 
-macro(@FCM_COMMAND_PREFIX@compact_parse_arguments)
-  set(options "")
-  set(one_value_keywords
-    "__START_WITH__"
-    "__PREFIX__"
-  )
-  set(multi_value_keywords
-    "__OPTIONS__"
-    "__ONE_VALUE_KEYS__"
-    "__MULTI_VALUE_KEYS__"
-  )
-  cmake_parse_arguments("__ARGS"
-    "${options}"
-    "${one_value_keywords}"
-    "${multi_value_keywords}"
-    ${ARGN}
-  )
-
-  if (NOT __ARGS___START_WITH__)
-    set(__ARGS___START_WITH__ "0")
-  endif()
-
-  if (NOT __ARGS___PREFIX__)
-    set(__ARGS___PREFIX__ "ARGS")
-  endif()
-
-  set(options ${__ARGS___OPTIONS__})
-  set(one_value_keywords ${__ARGS___ONE_VALUE_KEYS__})
-  set(multi_value_keywords ${__ARGS___MULTI_VALUE_KEYS__})
-  cmake_parse_arguments(PARSE_ARGV ${__ARGS___START_WITH__} "${__ARGS___PREFIX__}"
-    "${options}"
-    "${one_value_keywords}"
-    "${multi_value_keywords}"
-  )
-endmacro()
-
 function(@FCM_COMMAND_PREFIX@only_one_of_variables_is_true)
   set(true_count "0")
   foreach (variable IN LISTS ARGN)
@@ -340,10 +287,7 @@ endfunction()
 function(@FCM_COMMAND_PREFIX@extract_pair variable)
   @FCM_COMMAND_PREFIX@is_pair(${variable})
 
-  @FCM_COMMAND_PREFIX@compact_parse_arguments(
-    __START_WITH__ 1
-    __ONE_VALUE_KEYS__ "KEY_TO" "VALUE_TO"
-  )
+  cmake_parse_arguments(PARSE_ARGV 1 "ARGS" "" "KEY_TO;VALUE_TO" "")
 
   if (ARGS_KEY_TO)
     list(GET ${variable} 0 ${ARGS_OUTPUT_KEY})
