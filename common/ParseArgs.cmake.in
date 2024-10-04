@@ -32,7 +32,7 @@
   ```
   fcm_parse_and_remove_arguments_from(<variable> [__INPUT__ <arguments>...]
                                       [__OUTPUT_VARIABLE__ <output_variable>]
-                                      [__NO_PREFIX__ | __PREFIX__ <argument_prefix>]
+                                      [__PREFIX__ <argument_prefix>]
                                       [__OPTIONS__ <options>...]
                                       [__ONE_VALUE_KEYS__ <one-value-keywords>...])
   ```
@@ -59,19 +59,49 @@
 
   After the first appearance of the extra arguments found, their values will
   be stored in variables with names corresponding to the respective keyword
-  and following `<argument_prefix>` and an underscore, e.g., with
-  `__PREFIX__ MY_PREFIX`, `__OPTIONS__ SKIP_ALL`,
-  and `__ONE_VALUE_KEYS__ DESTINATION RENAME` in a `foo` command, if call
-  `foo(DESTINATION /usr/local/bin)`, then the value of `MY_PREFIX_SKIP_ALL` will
-  be `FALSE`, the value of `MY_PREFIX_DESTINATION` will be `/usr/local/bin`,
+  and following `<argument_prefix>` and an underscore, e.g., let's say we have
+  the `foo` command:
+
+  ```cmake
+  function(foo)
+    fcm_parse_and_remove_arguments_from(ARGN
+      __PREFIX__ "MY_PREFIX"
+      __OPTIONS__ "SKIP_ALL"
+      __ONE_VALUE_KEYS__ "DESTINATION" "RENAME"
+    )
+    # ...
+  endfunction()
+
+  foo(DESTINATION /usr/local/bin)
+  ```
+
+  After the `foo` call, the value of `MY_PREFIX_SKIP_ALL` will be `FALSE`,
+  the value of `MY_PREFIX_DESTINATION` will be `/usr/local/bin`,
   and the value of `MY_PREFIX_RENAME` will be unset. By default,
-  the `<argument_prefix>` is `ARGS`. Pass `__NO_PREFIX__` to use variables
-  as is, e.g., `SKIP_ALL`, `DESTINATION`, and so forth.
+  the `<argument_prefix>` is `ARGS`.
 
   Passing options and keywords with their values will be removed, but only their
-  first appearance. Remaining arguments will be stored in-place
+  first appearance.
+
+  ```cmake
+  function(foo)
+    fcm_parse_and_remove_arguments_from(ARGN
+      __OPTIONS__ "O1"
+      __ONE_VALUE_KEYS__ "K1" "K2"
+    )
+    # ...
+  endfunction()
+
+  # The first "K1" will not be removed because it doesn't have any following
+  # value; other keywords are not a value
+  foo(K1 K1 value)
+  foo(K1 O1 K1 value)
+  foo(K1 K2 value_2 K1 value_1)
+  ```
+
+  Remaining arguments will be stored in-place
   in the `<variable>` or in the specified `<output_variable>` following
-  __OUTPUT_VARIABLE__`.
+  `__OUTPUT_VARIABLE__`.
 
   ## fcm_compact_parse_arguments
 
@@ -149,88 +179,78 @@ endmacro()
 function(@FCM_COMMAND_PREFIX@internal_parse_and_remove_arguments_from
   variable
 )
-  set(options
-    "__NO_PREFIX__"
-  )
-  set(one_value_keywords
-    "__PREFIX__"
-    "__OUTPUT_VARIABLE__"
-  )
-  set(multi_value_keywords
-    "__INPUT__"
-    "__OPTIONS__"
-    "__ONE_VALUE_KEYS__"
-  )
-  cmake_parse_arguments(PARSE_ARGV 1 "ARGS"
-    "${options}"
-    "${one_value_keywords}"
-    "${multi_value_keywords}"
+  cmake_parse_arguments(PARSE_ARGV 1 "__ARGS"
+    ""
+    "__PREFIX__;__OUTPUT_VARIABLE__"
+    "__INPUT__;__OPTIONS__;__ONE_VALUE_KEYS__"
   )
 
-  if (ARGS___NO_PREFIX__ AND DEFINED ARGS___PREFIX__)
-    message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
-      "`__NO_PREFIX__` and `__PREFIX__` are mutual exclusive parameters."
-    )
-  elseif (ARGS___NO_PREFIX__)
-    set(ARGS___PREFIX__ "")
-  elseif (NOT DEFINED ARGS___PREFIX__)
-    set(ARGS___PREFIX__ "ARGS_")
+  if (NOT DEFINED __ARGS___PREFIX__)
+    set(__ARGS___PREFIX__ "ARGS")
   else()
-    set(ARGS___PREFIX__ "${ARGS___PREFIX__}_")
+    set(__ARGS___PREFIX__ "${__ARGS___PREFIX__}")
   endif()
 
-  set(option_indices_to_remove "")
+  list(REMOVE_DUPLICATES __ARGS___OPTIONS__)
+  list(REMOVE_DUPLICATES __ARGS___ONE_VALUE_KEYS__)
 
-  foreach (option IN LISTS ARGS___OPTIONS__)
-    list(FIND ARGS___INPUT__ "${option}" option_index)
+  set(arg_indices_to_remove "")
+
+  foreach (option IN LISTS __ARGS___OPTIONS__)
+    list(FIND __ARGS___INPUT__ "${option}" option_index)
     if (option_index EQUAL "-1")
-      set(${ARGS___PREFIX__}${option} FALSE PARENT_SCOPE)
+      set(${__ARGS___PREFIX__}_${option} FALSE PARENT_SCOPE)
     else()
-      set(${ARGS___PREFIX__}${option} TRUE PARENT_SCOPE)
-      list(APPEND option_indices_to_remove ${option_index})
+      set(${__ARGS___PREFIX__}_${option} TRUE PARENT_SCOPE)
+      list(APPEND arg_indices_to_remove ${option_index})
     endif()
   endforeach()
 
-  if (NOT option_indices_to_remove STREQUAL "")
-    list(REMOVE_AT ARGS___INPUT__ ${option_indices_to_remove})
+  set(found_one_value_key_indices "")
+
+  list(LENGTH __ARGS___INPUT__ input_size)
+  if (NOT input_size LESS 2)
+    math(EXPR last_index_for_key "${input_size} - 2")
+    foreach (index RANGE 0 ${last_index_for_key})
+      list(GET __ARGS___INPUT__ ${index} key)
+      list(FIND __ARGS___ONE_VALUE_KEYS__ ${key} key_index)
+      if (key_index EQUAL "-1" OR key_index IN_LIST found_one_value_key_indices)
+        continue()
+      endif()
+
+      math(EXPR next_index "${index} + 1")
+      list(GET __ARGS___INPUT__ ${next_index} value)
+      if (value IN_LIST __ARGS___OPTIONS__ OR value IN_LIST __ARGS___ONE_VALUE_KEYS__)
+        continue()
+      endif()
+
+      set(${__ARGS___PREFIX__}_${key} "${value}" PARENT_SCOPE)
+      list(APPEND found_one_value_key_indices ${key_index})
+      list(APPEND arg_indices_to_remove ${index} ${next_index})
+    endforeach()
   endif()
 
-  set(key_value_indices_to_remove "")
-
-  list(LENGTH ARGS___INPUT__ input_length)
-  math(EXPR last_index "${input_length} - 1")
-
-  foreach (key IN LISTS ARGS___ONE_VALUE_KEYS__)
-    list(FIND ARGS___INPUT__ "${key}" key_index)
-    if (key_index EQUAL "-1")
-      unset(${ARGS___PREFIX__}${key} PARENT_SCOPE)
-    elseif (key_index GREATER_EQUAL last_index)
-      message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
-        "`${key}` cannot be the last parameter, "
-        "because a value is expected after it."
-      )
-    else()
-      math(EXPR value_index "${key_index} + 1")
-      list(GET ARGS___INPUT__ ${value_index} value)
-      set(${ARGS___PREFIX__}${key} "${value}" PARENT_SCOPE)
-      list(APPEND key_value_indices_to_remove ${key_index} ${value_index})
-    endif()
-  endforeach()
-
-  if (NOT key_value_indices_to_remove STREQUAL "")
-    list(REMOVE_AT ARGS___INPUT__ ${key_value_indices_to_remove})
+  if (NOT found_one_value_key_indices STREQUAL "")
+    list(REMOVE_AT __ARGS___ONE_VALUE_KEYS__ ${found_one_value_key_indices})
+    foreach (key IN LISTS __ARGS___ONE_VALUE_KEYS__)
+      unset(${__ARGS___PREFIX__}_${key} PARENT_SCOPE)
+    endforeach()
   endif()
 
-  if (NOT DEFINED ARGS___OUTPUT_VARIABLE__)
+  if (NOT arg_indices_to_remove STREQUAL "")
+    list(REMOVE_AT __ARGS___INPUT__ ${arg_indices_to_remove})
+  endif()
+
+  if (NOT DEFINED __ARGS___OUTPUT_VARIABLE__)
     set(output_variable ${variable})
   else()
-    set(output_variable ${ARGS___OUTPUT_VARIABLE__})
+    set(output_variable ${__ARGS___OUTPUT_VARIABLE__})
   endif()
 
-  if (NOT DEFINED ARGS___INPUT__ OR ARGS___INPUT__ STREQUAL "")
+  if (NOT DEFINED __ARGS___INPUT__ OR __ARGS___INPUT__ STREQUAL "")
     set(${output_variable} "" PARENT_SCOPE)
   else()
-    set(${output_variable} ${ARGS___INPUT__} PARENT_SCOPE)
+    set(${output_variable} ${__ARGS___INPUT__} PARENT_SCOPE)
   endif()
 endfunction()
 
