@@ -52,8 +52,7 @@ include_guard(GLOBAL)
 macro(@FCM_COMMAND_PREFIX@internal_get_configuration_variable
   variable
 )
-  set(__fcm_version "0")
-  set(__fcm_cache_dir "${PROJECT_BINARY_DIR}/FCM_cache/v${__fcm_version}")
+  set(__fcm_cache_dir "${PROJECT_BINARY_DIR}/FCM_cache/v@__FCM_VERSION__@")
   set(__c_id_pattern "^[_A-Za-z][_0-9A-Za-z]*$")
 
   if (EXISTS "${__fcm_cache_dir}/override/${variable}")

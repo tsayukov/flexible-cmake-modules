@@ -127,7 +127,7 @@ if (NOT PROJECT_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
 endif()
 
 
-set(__fcm_version "0")
+set(__FCM_VERSION__ "0")
 
 set(__c_id_pattern "^[_A-Za-z][_0-9A-Za-z]*$")
 
@@ -168,7 +168,7 @@ foreach (variable IN ITEMS
     message(FATAL_ERROR "`FCM_COMMAND_PREFIX` must be non-empty.")
   endif()
 
-  set(__fcm_cache_dir "${PROJECT_BINARY_DIR}/FCM_cache/v${__fcm_version}")
+  set(__fcm_cache_dir "${PROJECT_BINARY_DIR}/FCM_cache/v${__FCM_VERSION__}")
   set(__fcm_overridden_variable_file "${__fcm_cache_dir}/override/${variable}")
   set(__fcm_variable_file "${__fcm_cache_dir}/${variable}")
 
