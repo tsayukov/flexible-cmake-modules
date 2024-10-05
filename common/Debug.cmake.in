@@ -23,7 +23,8 @@
 
   Create a symbolic link in the [`PROJECT_SOURCE_DIR`][1]`/build/` directory
   to `compile_commands.json` if `PROJECT_SOURCE_DIR/build/` itself
-  is not [`PROJECT_BINARY_DIR`][2].
+  is not [`PROJECT_BINARY_DIR`][2]. See [`CMAKE_EXPORT_COMPILE_COMMANDS`][3]
+  for details.
 
   ## fcm_print
 
@@ -52,6 +53,7 @@
 
   [1]: https://cmake.org/cmake/help/latest/variable/PROJECT_SOURCE_DIR.html
   [2]: https://cmake.org/cmake/help/latest/variable/PROJECT_BINARY_DIR.html
+  [3]: https://cmake.org/cmake/help/latest/variable/CMAKE_EXPORT_COMPILE_COMMANDS.html
 
 #]=================================================================]#github/wiki
 
