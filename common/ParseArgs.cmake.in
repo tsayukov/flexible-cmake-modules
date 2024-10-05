@@ -111,6 +111,16 @@
   fcm_only_one_of_variables_is_true(<variables>...)
   ```
 
+  Usage:
+
+  ```cmake
+  function(foo)
+    cmake_parse_arguments(PARSE_ARGV 0 "ARGS" "O1;O2;O3" "" "")
+    fcm_only_one_of_variables_is_true(ARGS_O1 ARGS_O2 ARGS_O3)
+    # ...
+  endfunction()
+  ```
+
   ## fcm_only_one_of_variables_is_defined
 
   Check if only one of the passed variables is [defined][4]. Use to test mutual
@@ -118,6 +128,16 @@
 
   ```
   fcm_only_one_of_variables_is_defined(<variables>...)
+  ```
+
+  Usage:
+
+  ```cmake
+  function(foo)
+    cmake_parse_arguments(PARSE_ARGV 0 "ARGS" "" "K1;K2" "L1")
+    fcm_only_one_of_variables_is_defined(ARGS_K1 ARGS_K2 ARGS_L1)
+    # ...
+  endfunction()
   ```
 
   ## fcm_is_pair
@@ -243,15 +263,15 @@ function(@FCM_COMMAND_PREFIX@only_one_of_variables_is_true)
     if (true_count GREATER "1")
       break()
     endif()
-    if (variable)
+    if (${variable})
       math(EXPR true_count "${true_count} + 1")
     endif()
   endforeach()
 
-  if (NOT true_count EQUAL "1")
-    list(JOIN ARGN ", " arguments)
+  if (NOT ARGC EQUAL "0" AND NOT true_count EQUAL "1")
+    list(JOIN ARGN ", " fmt_argn)
     message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
-      "Only one of ${arguments} arguments can be true."
+      "Only one of ${fmt_argn} arguments can be true."
     )
   endif()
 endfunction()
@@ -262,15 +282,15 @@ function(@FCM_COMMAND_PREFIX@only_one_of_variables_is_defined)
     if (true_count GREATER "1")
       break()
     endif()
-    if (DEFINED variable)
+    if (DEFINED ${variable})
       math(EXPR true_count "${true_count} + 1")
     endif()
   endforeach()
 
-  if (NOT true_count EQUAL "1")
-    list(JOIN ARGN ", " arguments)
+  if (NOT ARGC EQUAL "0" AND NOT true_count EQUAL "1")
+    list(JOIN ARGN ", " fmt_argn)
     message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
-      "Only one of ${arguments} arguments can be defined."
+      "Only one of ${fmt_argn} arguments can be defined."
     )
   endif()
 endfunction()
@@ -278,8 +298,9 @@ endfunction()
 function(@FCM_COMMAND_PREFIX@is_pair variable)
   list(LENGTH ${variable} length)
   if (NOT length EQUAL "2")
+    list(JOIN ${variable} ", " fmt_variable)
     message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
-      "A pair are expected, but got a list of size ${length}: \"${${variable}}\"."
+      "A pair are expected, but got a list of size ${length}: \"${fmt_variable}\"."
     )
   endif()
 endfunction()
