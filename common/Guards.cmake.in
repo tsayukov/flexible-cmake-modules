@@ -81,7 +81,7 @@ function(@FCM_COMMAND_PREFIX@requires_cmake
   reason
 )
   if (CMAKE_VERSION VERSION_LESS "${version}")
-    message(FATAL_ERROR
+    message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
       "CMake ${version}+ is required because of the reason \"${reason}\", but "
       "the current version is ${CMAKE_VERSION}."
     )
@@ -96,35 +96,9 @@ function(@FCM_COMMAND_PREFIX@no_in_source_builds_guard)
 
   cmake_parse_arguments(PARSE_ARGV 0 "ARGS" "" "" "RECURSIVE")
 
-  set(error_message
-    "In-source builds are not allowed. Instead, provide a path to build tree "
-    "like so:\n"
-
-    "cmake -B <binary-directory>\n"
-
-    "Or use presets with an out-of-source build configuration like so:\n"
-
-    "cmake --preset <preset-name>\n"
-
-    "To remove files you accidentally created execute:\n"
-
-    "NOTE: be careful if you had you own directory and files with same names! "
-    "Use your version control system to restore your data.\n"
-
-    "Linux: rm -rf CMakeFiles CMakeCache.txt cmake_install.cmake\n"
-
-    "Windows (PowerShell): "
-    "Remove-Item CMakeFiles, CMakeCache.txt, cmake_install.cmake -Force -Recurse\n"
-
-    "Windows (Command Prompt): "
-    "rmdir CMakeFiles /s /q && del /q CMakeCache.txt cmake_install.cmake\n"
-
-    "NOTE: Build generator files may also remain, that is, 'Makefile', "
-    "'build.ninja' and so forth."
-  )
-
+  set(raise_error OFF)
   if (CMAKE_CURRENT_LIST_DIR STREQUAL PROJECT_BINARY_DIR)
-    message(FATAL_ERROR ${error_message})
+    set(raise_error ON)
   endif()
 
   foreach (dir IN LISTS ARGS_RECURSIVE)
@@ -132,7 +106,36 @@ function(@FCM_COMMAND_PREFIX@no_in_source_builds_guard)
       set(dir "${CMAKE_CURRENT_LIST_DIR}/${dir}")
     endif()
     if (PROJECT_BINARY_DIR MATCHES "^${dir}/?")
-      message(FATAL_ERROR ${error_message})
+      set(raise_error ON)
     endif()
   endforeach()
+
+  if (raise_error)
+    message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+      "In-source builds are not allowed. Instead, provide a path to build tree "
+      "like so:\n"
+
+      "cmake -B <binary-directory>\n"
+
+      "Or use presets with an out-of-source build configuration like so:\n"
+
+      "cmake --preset <preset-name>\n"
+
+      "To remove files you accidentally created execute:\n"
+
+      "NOTE: be careful if you had you own directory and files with same names! "
+      "Use your version control system to restore your data.\n"
+
+      "Linux: rm -rf CMakeFiles CMakeCache.txt cmake_install.cmake\n"
+
+      "Windows (PowerShell): "
+      "Remove-Item CMakeFiles, CMakeCache.txt, cmake_install.cmake -Force -Recurse\n"
+
+      "Windows (Command Prompt): "
+      "rmdir CMakeFiles /s /q && del /q CMakeCache.txt cmake_install.cmake\n"
+
+      "NOTE: Build generator files may also remain, that is, 'Makefile', "
+      "'build.ninja' and so forth."
+    )
+  endif()
 endfunction()
