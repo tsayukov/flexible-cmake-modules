@@ -116,6 +116,7 @@
   ```cmake
   function(foo)
     cmake_parse_arguments(PARSE_ARGV 0 "ARGS" "O1;O2;O3" "" "")
+    fcm_only_one_of_variables_is_true() # Always true
     fcm_only_one_of_variables_is_true(ARGS_O1 ARGS_O2 ARGS_O3)
     # ...
   endfunction()
@@ -135,6 +136,7 @@
   ```cmake
   function(foo)
     cmake_parse_arguments(PARSE_ARGV 0 "ARGS" "" "K1;K2" "L1")
+    fcm_only_one_of_variables_is_defined() # Always true
     fcm_only_one_of_variables_is_defined(ARGS_K1 ARGS_K2 ARGS_L1)
     # ...
   endfunction()
@@ -143,9 +145,29 @@
   ## fcm_is_pair
 
   Check if the variable holds a pair, that is, a list of two elements.
+  Otherwise, raise an error.
 
   ```
   fcm_is_pair(<variable>)
+  ```
+
+  Usage:
+
+  ```cmake
+  set(empty_pair ";")
+  fcm_is_pair(empty_pair)
+
+  set(pair 1 2)
+  fcm_is_pair(pair)
+
+  set(empty_list "")
+  fcm_is_pair(empty_list) # Error
+
+  set(single_element 42)
+  fcm_is_pair(single_element) # Error
+
+  set(xs 1 2 3 4 5)
+  fcm_is_pair(xs) # Error
   ```
 
   ## fcm_extract_pair
