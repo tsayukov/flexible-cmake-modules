@@ -41,22 +41,22 @@
   ## Prefixes
 
   The control variables that define a prefix for commands, targets, and cached
-  entries must be set to a proper C identifier. If they are not, they will
-  be forcibly [converted][1] to that identifier. Moreover, when the prefixes
+  entries must be set to a [proper][1] C identifier. Moreover, when the prefixes
   need to be read, they are checked, if they are still a proper C identifier,
   preventing execution of arbitrary code after configuring template CMake files.
   The check takes place using the `if` command, which cannot be overridden.
 
   An underscore will be added to each non-empty prefix. Note, that these control
-  variables can be set to an empty string. It is the same if there are
-  no prefixes at all. It is not allowed to remove the prefix for FCM's
-  commands, because then they will override some CMake commands.
+  variables can be set to an empty string, except `FCM_COMMAND_PREFIX_CONTROL`.
+  It is the same if there are no prefixes at all. It is not allowed to remove
+  the prefix for FCM's commands, because then they will override some CMake
+  commands.
 
   ### FCM_COMMAND_PREFIX_CONTROL
 
   The `FCM_COMMAND_PREFIX_CONTROL` variable defines a prefix for FCM's commands.
   By default, its value is `fcm`. To get the prefix, call
-  the [`fcm_get_command_prefix()`][9] command and use the `FCM_COMMAND_PREFIX`
+  the [`fcm_get_command_prefixes()`][9] command and use the `FCM_COMMAND_PREFIX`
   variable.
 
   ### FCM_PROJECT_COMMAND_PREFIX_CONTROL
@@ -65,7 +65,7 @@
   is reserved for custom commands defined by the project's maintainers.
   By default, its value is a project name in lower case, converted to a proper
   C identifier. To get the prefix, call
-  the [`fcm_get_project_command_prefix()`][10] command and use
+  the [`fcm_get_command_prefixes()`][9] command and use
   the `FCM_PROJECT_COMMAND_PREFIX` variable. It can be used in template CMake
   files, e.g., `*.cmake.in`, to define commands and call them:
 
@@ -110,103 +110,218 @@
   [6]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-specific-commands#fcm_cache_entry
   [7]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-specific-commands#fcm_option
   [8]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-specific-commands#fcm_dev_option
-  [9]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_command_prefix
-  [10]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_project_command_prefix
+  [9]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_command_prefixes
   [11]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_project_target_prefix
   [12]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_project_cache_prefix
 #]=================================================================]#github/wiki
 
-include_guard(DIRECTORY)
+cmake_policy(PUSH)
+cmake_policy(VERSION 3.14)
+
+
+# Set the next major version after the release
+set(__FCM_MAJOR_VERSION__ "0")
+set(__FCM_RELATIVE_CACHE_DIR__ "FcmCache/v${__FCM_MAJOR_VERSION__}")
+unset(__FCM_MAJOR_VERSION__)
 
 
 if (NOT PROJECT_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-  message(FATAL_ERROR
+  message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
     "Flexible CMake Modules must be included in a listfile "
     "that sets the project's name after the `project()` call."
   )
 endif()
 
 
-set(__FCM_VERSION__ "0")
+if (DEFINED FCM_COMMAND_PREFIX_CONTROL AND FCM_COMMAND_PREFIX_CONTROL STREQUAL "")
+  message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+    "`FCM_COMMAND_PREFIX_CONTROL` must be non-empty."
+  )
+endif()
 
-set(__c_id_pattern "^[_A-Za-z][_0-9A-Za-z]*$")
+
+# `FCM_PREFIXES` the cache file's structure
+
+set(__FCM_PREFIXES_VARIABLES__
+  "FCM_PROJECT_TARGET_PREFIX"
+  "FCM_PROJECT_CACHE_PREFIX"
+)
+set(__FCM_PREFIXES_LENGTH__ 4)
 
 string(MAKE_C_IDENTIFIER "${PROJECT_NAME}" __project_name_id)
-string(TOLOWER "${__project_name_id}" __default_FCM_PROJECT_TARGET_PREFIX)
-string(TOUPPER "${__project_name_id}" __default_FCM_PROJECT_CACHE_PREFIX)
 
-set(__default_FCM_COMMAND_PREFIX "fcm")
-set(__default_FCM_PROJECT_COMMAND_PREFIX ${__default_FCM_PROJECT_TARGET_PREFIX})
+set(__FCM_PROJECT_TARGET_PREFIX_INDEX__ 1)
+string(TOLOWER "${__project_name_id}" __FCM_PROJECT_TARGET_PREFIX_DEFAULT__)
+set(__FCM_PROJECT_CACHE_PREFIX_INDEX__ 3)
+string(TOUPPER "${__project_name_id}" __FCM_PROJECT_CACHE_PREFIX_DEFAULT__)
 
-foreach (variable IN ITEMS
-  FCM_COMMAND_PREFIX
-  FCM_PROJECT_COMMAND_PREFIX
-  FCM_PROJECT_TARGET_PREFIX
-  FCM_PROJECT_CACHE_PREFIX
+unset(__project_name_id)
+
+# `FCM_TEMPLATE_PREFIXES` the cache file's structure
+
+set(__FCM_TEMPLATE_PREFIXES_VARIABLES__
+  "FCM_COMMAND_PREFIX"
+  "FCM_PROJECT_COMMAND_PREFIX"
 )
-  if (DEFINED CACHE{${variable}_CONTROL})
-    message(WARNING
-      "Found the `${variable}_CONTROL` cached entry; "
-      "make sure that Flexible CMake Modules are adjusted via the normal variable."
-    )
-  endif()
+set(__FCM_TEMPLATE_PREFIXES_LENGTH__ 4)
 
-  if (NOT DEFINED ${variable}_CONTROL)
-    set(${variable}_CONTROL "${__default_${variable}}")
-  endif()
+set(__FCM_COMMAND_PREFIX_INDEX__ 1)
+set(__FCM_COMMAND_PREFIX_DEFAULT__ "fcm")
+set(__FCM_PROJECT_COMMAND_PREFIX_INDEX__ 3)
+set(__FCM_PROJECT_COMMAND_PREFIX_DEFAULT__ "${__FCM_PROJECT_TARGET_PREFIX_DEFAULT__}")
 
-  if (NOT ${variable}_CONTROL STREQUAL "")
-    string(MAKE_C_IDENTIFIER "${${variable}_CONTROL}_" __control_value_id)
-    if (NOT __control_value_id MATCHES "${__c_id_pattern}")
-      message(FATAL_ERROR
-        "The `string()` or `set()` commands are corrupted, "
-        "probably because someone overrode them !!! "
-        "${variable}_CONTROL must be a proper C identifier."
+# FCM origins
+
+set(__FCM_NO_ORIGIN__ 0)
+set(__FCM_ORIGIN_THIS_PROJECT__ 1)
+set(__FCM_ORIGIN_MESSAGE_${__FCM_ORIGIN_THIS_PROJECT__}__
+  "(in the \"${PROJECT_NAME}\" project)"
+)
+set(__FCM_ORIGIN_OUTER_PROJECT__ 2)
+set(__FCM_ORIGIN_MESSAGE_${__FCM_ORIGIN_OUTER_PROJECT__}__
+  "(in the \"${PROJECT_NAME}\" project by the outer project)"
+)
+
+# Check/Init FCM cache files
+
+set(__FCM_CACHE_DIR__ "${PROJECT_BINARY_DIR}/${__FCM_RELATIVE_CACHE_DIR__}")
+
+foreach (file IN ITEMS
+  "FCM_TEMPLATE_PREFIXES"
+  "FCM_PREFIXES"
+)
+  foreach (variable IN LISTS __${file}_VARIABLES__)
+    if (DEFINED CACHE{${variable}_CONTROL})
+      message(WARNING
+        "Found the `${variable}_CONTROL` cached entry "
+        "with the value \"$CACHE{${variable}_CONTROL}\"; "
+        "make sure that Flexible CMake Modules are adjusted via the normal variable."
       )
     endif()
-  elseif ("${variable}_CONTROL" STREQUAL "FCM_COMMAND_PREFIX")
-    message(FATAL_ERROR "`FCM_COMMAND_PREFIX` must be non-empty.")
-  endif()
 
-  set(__fcm_cache_dir "${PROJECT_BINARY_DIR}/FCM_cache/v${__FCM_VERSION__}")
-  set(__fcm_overridden_variable_file "${__fcm_cache_dir}/override/${variable}")
-  set(__fcm_variable_file "${__fcm_cache_dir}/${variable}")
+    if (NOT DEFINED ${variable}_CONTROL)
+      set(${variable}_CONTROL "${__${variable}_DEFAULT__}")
+    endif()
 
-  foreach (prefix IN ITEMS __fcm_overridden __fcm)
-    if (EXISTS "${prefix}_variable_file")
-      file(READ "${prefix}_variable_file" ${prefix}_value_id)
-      if (NOT ${prefix}_value_id MATCHES "${__c_id_pattern}")
-        message(FATAL_ERROR
-          "${variable} is corrupted, probably because someone changed it !!! "
-          "${variable} must be a proper C identifier."
-        )
-      endif()
-      set(__does_${prefix}_variable_file_exist ON)
-    else()
-      set(__does_${prefix}_variable_file_exist OFF)
+    if (NOT ${variable}_CONTROL STREQUAL "")
+      string(CONCAT ${variable}_CONTROL "${${variable}_CONTROL}" "_")
     endif()
   endforeach()
 
-  if (__does_fcm_overridden_variable_file_exist)
-    if (NOT __does_fcm_variable_file_exist)
-      file(WRITE "${__fcm_variable_file}" "${__control_value_id}")
-      message(STATUS "FCM: found overridden ${variable}: \"${__fcm_overridden_value_id}\"")
-    endif()
-    set(${variable} ${__fcm_overridden_value_id})
-  elseif (__does_fcm_variable_file_exist)
-    if (NOT __control_value_id STREQUAL __fcm_value_id)
-      file(WRITE "${__fcm_variable_file}" "${__control_value_id}")
-      message(STATUS "FCM: found ${variable}: \"${__control_value_id}\"")
-    endif()
-    set(${variable} ${__control_value_id})
+  set(__override OFF)
+
+  if (NOT EXISTS "${__FCM_CACHE_DIR__}/${file}")
+    set(__override ON)
+    foreach (variable IN LISTS __${file}_VARIABLES__)
+      set(__${variable}_ORIGIN__ "${__FCM_ORIGIN_THIS_PROJECT__}")
+    endforeach()
   else()
-    file(WRITE "${__fcm_variable_file}" "${__control_value_id}")
-    message(STATUS "FCM: found default ${variable}: \"${__control_value_id}\"")
-    set(${variable} ${__control_value_id})
+    file(READ "${__FCM_CACHE_DIR__}/${file}" __content)
+
+    list(LENGTH __content __content_length)
+    if (NOT __content_length EQUAL __${file}_LENGTH__)
+      message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+        "FCM cache file \"${file}\" are corrupted !!!"
+      )
+    endif()
+    unset(__content_length)
+
+    foreach (variable IN LISTS __${file}_VARIABLES__)
+      math(EXPR __position "${__${variable}_INDEX__} - 1")
+      list(GET __content ${__position} __${variable}_ORIGIN__)
+      list(GET __content ${__${variable}_INDEX__} __${variable}_VALUE__)
+      unset(__position)
+
+      if (__${variable}_ORIGIN__ EQUAL __FCM_NO_ORIGIN__)
+        set(__override ON)
+        set(__${variable}_ORIGIN__ "${__FCM_ORIGIN_THIS_PROJECT__}")
+      elseif (__${variable}_ORIGIN__ EQUAL __FCM_ORIGIN_THIS_PROJECT__
+                AND NOT ${variable}_CONTROL STREQUAL __${variable}_VALUE__)
+        set(__override ON)
+      elseif (__${variable}_ORIGIN__ EQUAL __FCM_ORIGIN_OUTER_PROJECT__)
+        set(${variable}_CONTROL "${__${variable}_VALUE__}")
+      endif()
+
+      unset(__${variable}_VALUE__)
+    endforeach()
   endif()
 
-  unset(${variable}_CONTROL)
+  foreach (variable IN LISTS __${file}_VARIABLES__)
+    if (NOT ${variable}_CONTROL STREQUAL ""
+          AND NOT ${variable}_CONTROL MATCHES "^[_A-Za-z][_0-9A-Za-z]*$")
+      message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+        "`${variable}` must be a proper C identifier, "
+        "but its value is \"${${variable}_CONTROL}\"."
+      )
+    endif()
+  endforeach()
+
+  if (NOT __override)
+    set_property(DIRECTORY
+        "${PROJECT_SOURCE_DIR}"
+      PROPERTY
+        __FCM_RECONFIGURE_TEMPLATES__ OFF
+    )
+  else()
+    set(__content "")
+    foreach (variable IN LISTS __${file}_VARIABLES__)
+      list(APPEND __content "${__${variable}_ORIGIN__}" "${${variable}_CONTROL}")
+    endforeach()
+
+    file(WRITE "${__FCM_CACHE_DIR__}/${file}" "${__content}")
+
+    set_property(DIRECTORY
+        "${PROJECT_SOURCE_DIR}"
+      PROPERTY
+        __FCM_RECONFIGURE_TEMPLATES__ ON
+    )
+  endif()
+
+  unset(__override)
+
+  foreach (variable IN LISTS __${file}_VARIABLES__)
+    message(STATUS
+      "FCM: set ${variable}: \"${${variable}_CONTROL}\" "
+      "${__FCM_ORIGIN_MESSAGE_${__${variable}_ORIGIN__}__}"
+    )
+
+    set(${variable} "${${variable}_CONTROL}")
+
+    unset(${variable}_CONTROL)
+    unset(__${variable}_DEFAULT__)
+    unset(__${variable}_ORIGIN__)
+  endforeach()
+
+  unset(__content)
+  unset(__${file}_VARIABLES__)
 endforeach()
+
+unset(__FCM_NO_ORIGIN__)
+unset(__FCM_ORIGIN_MESSAGE_${__FCM_ORIGIN_THIS_PROJECT__}__)
+unset(__FCM_ORIGIN_THIS_PROJECT__)
+unset(__FCM_ORIGIN_MESSAGE_${__FCM_ORIGIN_OUTER_PROJECT__}__)
+unset(__FCM_ORIGIN_OUTER_PROJECT__)
+unset(__FCM_CACHE_DIR__)
+
+
+if (FCM_COMMAND_PREFIX STREQUAL "")
+  message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+    "`FCM_COMMAND_PREFIX` must be non-empty."
+  )
+endif()
+
+# Removing CMakeCache.txt causes reconfiguring all templates
+# E.g., via `--fresh`
+set(__FCM_FORCE_RECONFIGURE_TEMPLATES__ ON CACHE BOOL "")
+if ($CACHE{__FCM_FORCE_RECONFIGURE_TEMPLATES__})
+  set_property(DIRECTORY
+      "${PROJECT_SOURCE_DIR}"
+    PROPERTY
+      __FCM_RECONFIGURE_TEMPLATES__ ON
+  )
+  set(__FCM_FORCE_RECONFIGURE_TEMPLATES__ OFF CACHE BOOL "" FORCE)
+endif()
+mark_as_advanced(__FCM_FORCE_RECONFIGURE_TEMPLATES__)
 
 
 set(${FCM_PROJECT_CACHE_PREFIX}_CMAKE_MODULE_PATH
@@ -218,13 +333,46 @@ set(${FCM_PROJECT_CACHE_PREFIX}_CMAKE_MODULE_PATH
 set(CMAKE_MODULE_PATH ${${FCM_PROJECT_CACHE_PREFIX}_CMAKE_MODULE_PATH})
 
 
-file(RELATIVE_PATH __fcm_dir "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_LIST_DIR}")
+if (__FCM_SKIP_INCLUDING__ OR __FCM_SKIP_INCLUDING_AND_FAIL__)
+  if (__FCM_SKIP_INCLUDING_AND_FAIL__)
+    message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+      "`__FCM_DEBUG_SKIP_INCLUDING_AND_FAIL__` is turned on."
+    )
+  endif()
 
-foreach (module IN ITEMS FcmInclude Common)
+  cmake_policy(POP)
+  return()
+endif()
+
+
+file(RELATIVE_PATH __FCM_TEMPLATE_DIR__
+  "${PROJECT_SOURCE_DIR}"
+  "${CMAKE_CURRENT_LIST_DIR}"
+)
+foreach (module IN ITEMS
+  common/FcmConfigVariables
+  common/ParseArgs
+  FcmInclude
+  Common
+)
   configure_file(
-    "${PROJECT_SOURCE_DIR}/${__fcm_dir}/${module}.cmake.in"
-    "${PROJECT_BINARY_DIR}/${__fcm_dir}/${module}.cmake"
+    "${PROJECT_SOURCE_DIR}/${__FCM_TEMPLATE_DIR__}/${module}.cmake.in"
+    "${PROJECT_BINARY_DIR}/${__FCM_TEMPLATE_DIR__}/${module}.cmake"
     @ONLY
   )
-  include("${PROJECT_BINARY_DIR}/${__fcm_dir}/${module}.cmake")
+  include("${PROJECT_BINARY_DIR}/${__FCM_TEMPLATE_DIR__}/${module}.cmake")
 endforeach()
+
+unset(__FCM_TEMPLATE_DIR__)
+
+unset(__FCM_PREFIXES_LENGTH__)
+unset(__FCM_PROJECT_TARGET_PREFIX_INDEX__)
+unset(__FCM_PROJECT_CACHE_PREFIX_INDEX__)
+
+unset(__FCM_TEMPLATE_PREFIXES_LENGTH__)
+unset(__FCM_COMMAND_PREFIX_INDEX__)
+unset(__FCM_PROJECT_COMMAND_PREFIX_INDEX__)
+
+unset(__FCM_RELATIVE_CACHE_DIR__)
+
+cmake_policy(POP)

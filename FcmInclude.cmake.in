@@ -38,12 +38,15 @@
 
 include_guard(GLOBAL)
 
+# Require "common/FcmConfigVariables.cmake.in"
+# Require "common/ParseArgs.cmake.in"
+
 
 macro(@FCM_COMMAND_PREFIX@include
   file
 )
-  set(__ARGN ${ARGN})
-  @FCM_COMMAND_PREFIX@parse_and_remove_arguments_from(__ARGN
+  set(__ARGN "")
+  @FCM_COMMAND_PREFIX@parse_and_remove_arguments_from(__ARGN __INPUT__ ${ARGN}
     __OPTIONS__ "TEMPLATE"
   )
 
@@ -52,13 +55,16 @@ macro(@FCM_COMMAND_PREFIX@include
   else()
     @FCM_COMMAND_PREFIX@internal_include_template("${file}" ${__ARGN})
   endif()
+
+  unset(ARGS_TEMPLATE)
+  unset(__ARGN)
 endmacro()
 
 macro(@FCM_COMMAND_PREFIX@internal_include_template
   file
 )
-  set(__ARGN ${ARGN})
-  @FCM_COMMAND_PREFIX@parse_and_remove_arguments_from(__ARGN
+  set(__ARGN "")
+  @FCM_COMMAND_PREFIX@parse_and_remove_arguments_from(__ARGN __INPUT__ ${ARGN}
     __OPTIONS__ "OPTIONAL"
     __ONE_VALUE_KEYS__ "RESULT_VARIABLE"
   )
@@ -79,6 +85,8 @@ macro(@FCM_COMMAND_PREFIX@internal_include_template
     ${__module_path_with_cmake_ext}
     ${__module_path_with_cmake_in_ext}
   )
+  unset(__module_path_with_cmake_ext)
+  unset(__module_path_with_cmake_in_ext)
 
   set(${ARGS_RESULT_VARIABLE} NOTFOUND)
   foreach (path IN LISTS __search_list)
@@ -87,8 +95,17 @@ macro(@FCM_COMMAND_PREFIX@internal_include_template
       string(REGEX REPLACE "\.in$" "" __generated_file "${__generated_file}")
       set(__generated_file "${PROJECT_BINARY_DIR}/${__generated_file}")
 
+      get_property(__FCM_RECONFIGURE_TEMPLATES__
+        DIRECTORY "${PROJECT_SOURCE_DIR}"
+        PROPERTY __FCM_RECONFIGURE_TEMPLATES__
+      )
+      if (__FCM_RECONFIGURE_TEMPLATES__)
+        file(REMOVE "${__generated_file}")
+        unset(__FCM_RECONFIGURE_TEMPLATES__)
+      endif()
+
       if ("${path}" IS_NEWER_THAN "${__generated_file}")
-        @FCM_COMMAND_PREFIX@get_all_configuration_variables()
+        @FCM_COMMAND_PREFIX@get_command_prefixes()
         configure_file("${path}" "${__generated_file}" @ONLY)
       endif()
 
@@ -97,16 +114,18 @@ macro(@FCM_COMMAND_PREFIX@internal_include_template
     endif()
   endforeach()
 
-  if (${ARGS_RESULT_VARIABLE})
+  unset(__search_list)
+
+  if (DEFINED ARGS_RESULT_VARIABLE)
     include("${__generated_file}" ${__ARGN})
   elseif (NOT ARGS_OPTIONAL)
-    message(FATAL_ERROR
+    message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
       "@FCM_COMMAND_PREFIX@include could not find requested template file:\n"
       "  ${file}"
     )
   endif()
+
+  unset(ARGS_OPTIONAL)
+  unset(ARGS_RESULT_VARIABLE)
+  unset(__ARGN)
 endmacro()
-
-
-@FCM_COMMAND_PREFIX@include("common/FcmConfigVariables" TEMPLATE)
-@FCM_COMMAND_PREFIX@include("common/ParseArgs" TEMPLATE)
