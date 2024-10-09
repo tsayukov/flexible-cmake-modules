@@ -96,8 +96,7 @@ macro(@FCM_COMMAND_PREFIX@internal_include_template
       set(__generated_file "${PROJECT_BINARY_DIR}/${__generated_file}")
 
       get_property(__FCM_RECONFIGURE_TEMPLATES__
-        DIRECTORY "${PROJECT_SOURCE_DIR}"
-        PROPERTY __FCM_RECONFIGURE_TEMPLATES__
+        GLOBAL PROPERTY __FCM_RECONFIGURE_TEMPLATES__
       )
       if (__FCM_RECONFIGURE_TEMPLATES__)
         file(REMOVE "${__generated_file}")

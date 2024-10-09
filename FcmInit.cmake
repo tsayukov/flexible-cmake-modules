@@ -276,11 +276,7 @@ foreach (file IN ITEMS
   endforeach()
 
   if (NOT __override)
-    set_property(DIRECTORY
-        "${PROJECT_SOURCE_DIR}"
-      PROPERTY
-        __FCM_RECONFIGURE_TEMPLATES__ OFF
-    )
+    set_property(GLOBAL PROPERTY __FCM_RECONFIGURE_TEMPLATES__ OFF)
   else()
     set(__content "")
     foreach (variable IN LISTS __${file}_VARIABLES__)
@@ -289,11 +285,7 @@ foreach (file IN ITEMS
 
     file(WRITE "${__FCM_CACHE_DIR__}/${file}" "${__content}")
 
-    set_property(DIRECTORY
-        "${PROJECT_SOURCE_DIR}"
-      PROPERTY
-        __FCM_RECONFIGURE_TEMPLATES__ ON
-    )
+    set_property(GLOBAL PROPERTY __FCM_RECONFIGURE_TEMPLATES__ ON)
   endif()
 
   unset(__override)
@@ -339,11 +331,7 @@ endif()
 # E.g., via `--fresh`
 set(__FCM_FORCE_RECONFIGURE_TEMPLATES__ ON CACHE BOOL "")
 if ($CACHE{__FCM_FORCE_RECONFIGURE_TEMPLATES__})
-  set_property(DIRECTORY
-      "${PROJECT_SOURCE_DIR}"
-    PROPERTY
-      __FCM_RECONFIGURE_TEMPLATES__ ON
-  )
+  set_property(GLOBAL PROPERTY __FCM_RECONFIGURE_TEMPLATES__ ON)
   set(__FCM_FORCE_RECONFIGURE_TEMPLATES__ OFF CACHE BOOL "" FORCE)
 endif()
 mark_as_advanced(__FCM_FORCE_RECONFIGURE_TEMPLATES__)
