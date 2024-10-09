@@ -211,6 +211,14 @@ foreach (file IN ITEMS
     endif()
 
     if (NOT ${variable}_CONTROL STREQUAL "")
+      if (NOT ${variable}_CONTROL MATCHES "^[_A-Za-z][_0-9A-Za-z]*$")
+        message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+          "`${variable}_CONTROL` must be a proper C identifier, "
+          "but its value is \"${${variable}_CONTROL}\"."
+        )
+        cmake_policy(POP)
+        return()
+      endif()
       string(CONCAT ${variable}_CONTROL "${${variable}_CONTROL}" "_")
     endif()
   endforeach()
@@ -229,7 +237,9 @@ foreach (file IN ITEMS
     list(LENGTH __content __content_length)
     if (NOT __content_length EQUAL __${file}_LENGTH__)
       message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
-        "FCM cache file \"${file}\" are corrupted !!!"
+        "FCM cache file \"${file}\" contains "
+        "the wrong amount of elements: ${__content_length}. "
+        "Expected length: ${__${file}_LENGTH__}."
       )
       cmake_policy(POP)
       return()
@@ -239,17 +249,19 @@ foreach (file IN ITEMS
     foreach (variable IN LISTS __${file}_VARIABLES__)
       math(EXPR __position "${__${variable}_INDEX__} - 1")
       list(GET __content ${__position} __${variable}_ORIGIN__)
-      list(GET __content ${__${variable}_INDEX__} __${variable}_VALUE__)
       unset(__position)
+
+      list(GET __content ${__${variable}_INDEX__} __${variable}_VALUE__)
 
       if (__${variable}_ORIGIN__ EQUAL __FCM_NO_ORIGIN__)
         set(__override ON)
         set(__${variable}_OVERRIDDEN__ ON)
         set(__${variable}_ORIGIN__ "${__FCM_ORIGIN_THIS_PROJECT__}")
-      elseif (__${variable}_ORIGIN__ EQUAL __FCM_ORIGIN_THIS_PROJECT__
-                AND NOT ${variable}_CONTROL STREQUAL __${variable}_VALUE__)
-        set(__override ON)
-        set(__${variable}_OVERRIDDEN__ ON)
+      elseif (__${variable}_ORIGIN__ EQUAL __FCM_ORIGIN_THIS_PROJECT__)
+        if (NOT ${variable}_CONTROL STREQUAL __${variable}_VALUE__)
+          set(__override ON)
+          set(__${variable}_OVERRIDDEN__ ON)
+        endif()
       elseif (__${variable}_ORIGIN__ EQUAL __FCM_ORIGIN_OUTER_PROJECT__)
         set(__override ON)
         set(__${variable}_OVERRIDDEN__ ON)
@@ -257,6 +269,13 @@ foreach (file IN ITEMS
         set(__${variable}_ORIGIN__ "${__FCM_ORIGIN_THIS_PROJECT_FROM_OUTER_PROJECT__}")
       elseif (__${variable}_ORIGIN__ EQUAL __FCM_ORIGIN_THIS_PROJECT_FROM_OUTER_PROJECT__)
         set(${variable}_CONTROL "${__${variable}_VALUE__}")
+      else()
+        message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+          "Unknown FCM origin in FCM cache file \"${file}\": "
+          "\"${__${variable}_ORIGIN__}\""
+        )
+        cmake_policy(POP)
+        return()
       endif()
 
       unset(__${variable}_VALUE__)
@@ -349,7 +368,7 @@ set(CMAKE_MODULE_PATH ${${FCM_PROJECT_CACHE_PREFIX}_CMAKE_MODULE_PATH})
 if (__FCM_SKIP_INCLUDING__ OR __FCM_SKIP_INCLUDING_AND_FAIL__)
   if (__FCM_SKIP_INCLUDING_AND_FAIL__)
     message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
-      "`__FCM_DEBUG_SKIP_INCLUDING_AND_FAIL__` is turned on."
+      "`__FCM_SKIP_INCLUDING_AND_FAIL__` is turned on."
     )
   endif()
 
