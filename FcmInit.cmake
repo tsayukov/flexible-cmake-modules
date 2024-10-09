@@ -178,7 +178,8 @@ set(__FCM_ORIGIN_MESSAGE_${__FCM_ORIGIN_THIS_PROJECT__}__
   "(in the \"${PROJECT_NAME}\" project)"
 )
 set(__FCM_ORIGIN_OUTER_PROJECT__ 2)
-set(__FCM_ORIGIN_MESSAGE_${__FCM_ORIGIN_OUTER_PROJECT__}__
+set(__FCM_ORIGIN_THIS_PROJECT_FROM_OUTER_PROJECT__ 3)
+set(__FCM_ORIGIN_MESSAGE_${__FCM_ORIGIN_THIS_PROJECT_FROM_OUTER_PROJECT__}__
   "(in the \"${PROJECT_NAME}\" project by the outer project)"
 )
 
@@ -191,6 +192,8 @@ foreach (file IN ITEMS
   "FCM_PREFIXES"
 )
   foreach (variable IN LISTS __${file}_VARIABLES__)
+    set(__${variable}_OVERRIDDEN__ OFF)
+
     if (DEFINED CACHE{${variable}_CONTROL})
       message(WARNING
         "Found the `${variable}_CONTROL` cached entry "
@@ -213,6 +216,7 @@ foreach (file IN ITEMS
   if (NOT EXISTS "${__FCM_CACHE_DIR__}/${file}")
     set(__override ON)
     foreach (variable IN LISTS __${file}_VARIABLES__)
+      set(__${variable}_OVERRIDDEN__ ON)
       set(__${variable}_ORIGIN__ "${__FCM_ORIGIN_THIS_PROJECT__}")
     endforeach()
   else()
@@ -234,11 +238,18 @@ foreach (file IN ITEMS
 
       if (__${variable}_ORIGIN__ EQUAL __FCM_NO_ORIGIN__)
         set(__override ON)
+        set(__${variable}_OVERRIDDEN__ ON)
         set(__${variable}_ORIGIN__ "${__FCM_ORIGIN_THIS_PROJECT__}")
       elseif (__${variable}_ORIGIN__ EQUAL __FCM_ORIGIN_THIS_PROJECT__
                 AND NOT ${variable}_CONTROL STREQUAL __${variable}_VALUE__)
         set(__override ON)
+        set(__${variable}_OVERRIDDEN__ ON)
       elseif (__${variable}_ORIGIN__ EQUAL __FCM_ORIGIN_OUTER_PROJECT__)
+        set(__override ON)
+        set(__${variable}_OVERRIDDEN__ ON)
+        set(${variable}_CONTROL "${__${variable}_VALUE__}")
+        set(__${variable}_ORIGIN__ "${__FCM_ORIGIN_THIS_PROJECT_FROM_OUTER_PROJECT__}")
+      elseif (__${variable}_ORIGIN__ EQUAL __FCM_ORIGIN_THIS_PROJECT_FROM_OUTER_PROJECT__)
         set(${variable}_CONTROL "${__${variable}_VALUE__}")
       endif()
 
@@ -280,16 +291,19 @@ foreach (file IN ITEMS
   unset(__override)
 
   foreach (variable IN LISTS __${file}_VARIABLES__)
-    message(STATUS
-      "FCM: set ${variable}: \"${${variable}_CONTROL}\" "
-      "${__FCM_ORIGIN_MESSAGE_${__${variable}_ORIGIN__}__}"
-    )
+    if (__${variable}_OVERRIDDEN__)
+      message(STATUS
+        "FCM: set ${variable}: \"${${variable}_CONTROL}\" "
+        "${__FCM_ORIGIN_MESSAGE_${__${variable}_ORIGIN__}__}"
+      )
+    endif()
 
     set(${variable} "${${variable}_CONTROL}")
 
     unset(${variable}_CONTROL)
     unset(__${variable}_DEFAULT__)
     unset(__${variable}_ORIGIN__)
+    unset(__${variable}_OVERRIDDEN__)
   endforeach()
 
   unset(__content)
@@ -299,8 +313,9 @@ endforeach()
 unset(__FCM_NO_ORIGIN__)
 unset(__FCM_ORIGIN_MESSAGE_${__FCM_ORIGIN_THIS_PROJECT__}__)
 unset(__FCM_ORIGIN_THIS_PROJECT__)
-unset(__FCM_ORIGIN_MESSAGE_${__FCM_ORIGIN_OUTER_PROJECT__}__)
 unset(__FCM_ORIGIN_OUTER_PROJECT__)
+unset(__FCM_ORIGIN_MESSAGE_${__FCM_ORIGIN_THIS_PROJECT_FROM_OUTER_PROJECT__}__)
+unset(__FCM_ORIGIN_THIS_PROJECT_FROM_OUTER_PROJECT__)
 unset(__FCM_CACHE_DIR__)
 
 
