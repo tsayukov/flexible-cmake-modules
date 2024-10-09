@@ -130,6 +130,8 @@ if (NOT PROJECT_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     "Flexible CMake Modules must be included in a listfile "
     "that sets the project's name after the `project()` call."
   )
+  cmake_policy(POP)
+  return()
 endif()
 
 
@@ -137,6 +139,8 @@ if (DEFINED FCM_COMMAND_PREFIX_CONTROL AND FCM_COMMAND_PREFIX_CONTROL STREQUAL "
   message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
     "`FCM_COMMAND_PREFIX_CONTROL` must be non-empty."
   )
+  cmake_policy(POP)
+  return()
 endif()
 
 
@@ -227,6 +231,8 @@ foreach (file IN ITEMS
       message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
         "FCM cache file \"${file}\" are corrupted !!!"
       )
+      cmake_policy(POP)
+      return()
     endif()
     unset(__content_length)
 
@@ -264,6 +270,8 @@ foreach (file IN ITEMS
         "`${variable}` must be a proper C identifier, "
         "but its value is \"${${variable}_CONTROL}\"."
       )
+      cmake_policy(POP)
+      return()
     endif()
   endforeach()
 
@@ -323,6 +331,8 @@ if (FCM_COMMAND_PREFIX STREQUAL "")
   message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
     "`FCM_COMMAND_PREFIX` must be non-empty."
   )
+  cmake_policy(POP)
+  return()
 endif()
 
 # Removing CMakeCache.txt causes reconfiguring all templates

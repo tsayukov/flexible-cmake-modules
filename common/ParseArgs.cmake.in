@@ -295,6 +295,7 @@ function(@FCM_COMMAND_PREFIX@only_one_of_variables_is_true)
     message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
       "Only one of ${fmt_argn} arguments can be true."
     )
+    return()
   endif()
 endfunction()
 
@@ -314,6 +315,7 @@ function(@FCM_COMMAND_PREFIX@only_one_of_variables_is_defined)
     message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
       "Only one of ${fmt_argn} arguments can be defined."
     )
+    return()
   endif()
 endfunction()
 
@@ -324,6 +326,7 @@ function(@FCM_COMMAND_PREFIX@is_pair variable)
     message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
       "A pair are expected, but got a list of size ${length}: \"${fmt_variable}\"."
     )
+    return()
   endif()
 endfunction()
 

@@ -85,6 +85,7 @@ function(@FCM_COMMAND_PREFIX@requires_cmake
       "CMake ${version}+ is required because of the reason \"${reason}\", but "
       "the current version is ${CMAKE_VERSION}."
     )
+    return()
   endif()
 endfunction()
 
@@ -137,5 +138,6 @@ function(@FCM_COMMAND_PREFIX@no_in_source_builds_guard)
       "NOTE: Build generator files may also remain, that is, 'Makefile', "
       "'build.ninja' and so forth."
     )
+    return()
   endif()
 endfunction()
