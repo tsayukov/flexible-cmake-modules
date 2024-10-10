@@ -69,16 +69,13 @@ macro(@FCM_COMMAND_PREFIX@internal_include_template
     __ONE_VALUE_KEYS__ "RESULT_VARIABLE"
   )
 
-  set(__search_list
-    "${file}"
-    "${CMAKE_CURRENT_SOURCE_DIR}/${file}"
-  )
+  set(__search_list "${file}")
   list(TRANSFORM CMAKE_MODULE_PATH
-    APPEND "${file}.cmake"
+    APPEND "/${file}.cmake"
     OUTPUT_VARIABLE __module_path_with_cmake_ext
   )
   list(TRANSFORM CMAKE_MODULE_PATH
-    APPEND "${file}.cmake.in"
+    APPEND "/${file}.cmake.in"
     OUTPUT_VARIABLE __module_path_with_cmake_in_ext
   )
   list(APPEND __search_list
@@ -88,11 +85,16 @@ macro(@FCM_COMMAND_PREFIX@internal_include_template
   unset(__module_path_with_cmake_ext)
   unset(__module_path_with_cmake_in_ext)
 
-  set(${ARGS_RESULT_VARIABLE} NOTFOUND)
+  set(__result "NOTFOUND")
   foreach (path IN LISTS __search_list)
+    if (NOT IS_ABSOLUTE "${path}")
+      set(path "${CMAKE_CURRENT_SOURCE_DIR}/${path}")
+    endif()
+
     if (EXISTS "${path}")
       file(RELATIVE_PATH __generated_file "${PROJECT_SOURCE_DIR}" "${path}")
       string(REGEX REPLACE "\.in$" "" __generated_file "${__generated_file}")
+      string(REPLACE "../" "two-dots/" __generated_file "${__generated_file}")
       set(__generated_file "${PROJECT_BINARY_DIR}/${__generated_file}")
 
       get_property(__FCM_RECONFIGURE_TEMPLATES__
@@ -100,22 +102,22 @@ macro(@FCM_COMMAND_PREFIX@internal_include_template
       )
       if (__FCM_RECONFIGURE_TEMPLATES__)
         file(REMOVE "${__generated_file}")
-        unset(__FCM_RECONFIGURE_TEMPLATES__)
       endif()
+      unset(__FCM_RECONFIGURE_TEMPLATES__)
 
       if ("${path}" IS_NEWER_THAN "${__generated_file}")
         @FCM_COMMAND_PREFIX@get_command_prefixes()
         configure_file("${path}" "${__generated_file}" @ONLY)
       endif()
 
-      set(${ARGS_RESULT_VARIABLE} "${__generated_file}")
+      set(__result "${__generated_file}")
       break()
     endif()
   endforeach()
 
   unset(__search_list)
 
-  if (DEFINED ARGS_RESULT_VARIABLE)
+  if (__result)
     include("${__generated_file}" ${__ARGN})
   elseif (NOT ARGS_OPTIONAL)
     message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
@@ -124,6 +126,12 @@ macro(@FCM_COMMAND_PREFIX@internal_include_template
     )
   endif()
 
+  if (DEFINED ARGS_RESULT_VARIABLE)
+    set(${ARGS_RESULT_VARIABLE} "${__result}")
+  endif()
+
+  unset(__generated_file)
+  unset(__result)
   unset(ARGS_OPTIONAL)
   unset(ARGS_RESULT_VARIABLE)
   unset(__ARGN)
