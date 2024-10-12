@@ -10,46 +10,46 @@
 # FOR COAUTHORS AND CONTRIBUTORS: fill in your name, contacts, and changes above
 #
 #[=================================================================[#github/wiki
-  # Watchers
+# Watchers
 
-  Watchers of deprecated commands and normal variables.
+Watchers of deprecated commands and normal variables.
 
-  ## Table of Contents
+## Table of Contents
 
-  - [fcm_mark_command_as_deprecated](#fcm_mark_command_as_deprecated)
-  - [fcm_mark_normal_variable_as_deprecated](#fcm_mark_normal_variable_as_deprecated)
+- [fcm_mark_command_as_deprecated](#fcm_mark_command_as_deprecated)
+- [fcm_mark_normal_variable_as_deprecated](#fcm_mark_normal_variable_as_deprecated)
 
-  ## fcm_mark_command_as_deprecated
+## fcm_mark_command_as_deprecated
 
-  For CMake version 3.18+, mark the `<command>` command as deprecated because
-  of `"<reason>"`.
+For CMake version 3.18+, mark the `<command>` command as deprecated because
+of `"<reason>"`.
 
-  ```
-  fcm_mark_command_as_deprecated(<command> "<reason>")
-  ```
+```
+fcm_mark_command_as_deprecated(<command> "<reason>")
+```
 
-  Before CMake 3.18, a corresponding macro may be written manually after each
-  definition of a deprecated command:
+Before CMake 3.18, a corresponding macro may be written manually after each
+definition of a deprecated command:
 
-  ```cmake
-  # E.g., `foo` is a deprecated command now
-  macro(foo)
-    message(DEPRECATION "The `foo` command is deprecated.")
-    _foo(${ARGV})
-  endmacro()
-  ```
+```cmake
+# E.g., `foo` is a deprecated command now
+macro(foo)
+  message(DEPRECATION "The `foo` command is deprecated.")
+  _foo(${ARGV})
+endmacro()
+```
 
-  ## fcm_mark_normal_variable_as_deprecated
+## fcm_mark_normal_variable_as_deprecated
 
-  Mark the `<variable>` normal variable as deprecated because of `"<reason>"`.
+Mark the `<variable>` normal variable as deprecated because of `"<reason>"`.
 
-  ```
-  fcm_mark_normal_variable_as_deprecated(<variable> "<reason>")
-  ```
+```
+fcm_mark_normal_variable_as_deprecated(<variable> "<reason>")
+```
 
-  Even though this macro can be used only for normal variables, since
-  all project cached entries have aliases, these aliases can be used as normal
-  variables in this macro.
+Even though this macro can be used only for normal variables, since
+all project cached entries have aliases, these aliases can be used as normal
+variables in this macro.
 
 #]=================================================================]#github/wiki
 
