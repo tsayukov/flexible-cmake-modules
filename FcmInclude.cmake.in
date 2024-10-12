@@ -10,29 +10,30 @@
 # FOR COAUTHORS AND CONTRIBUTORS: fill in your name, contacts, and changes above
 #
 #[=================================================================[#github/wiki
-  # fcm_include
+# fcm_include
 
-  An extended version of the [`include()`][1] command.
+An extended version of the [`include()`][304] command.
 
-  ```
-  fcm_include(<file|module|template> [TEMPLATE] [<cmake_include_parameters>...])
-  ```
+```
+fcm_include(<file|module|template> [TEMPLATE] [<cmake_include_parameters>...])
+```
 
-  If the `TEMPLATE` option is present and a module is specified instead
-  of a file, then the files named `<module_name>.cmake`
-  and `<module_name>.cmake.in` are searched in [`CMAKE_MODULE_PATH`][2],
-  but not in the CMake builtin module directory. If the template file is found
-  in [`PROJECT_SOURCE_DIR`][3]`/<dirs>/`, then it will be copied
-  to [`PROJECT_BINARY_DIR`][4]`/<dirs>/` while performing [transformations][5]
-  of the template file using [FCM configuration variables][6],
-  and a `.in` extension will be removed, if any.
+If the `TEMPLATE` option is present and a module is specified instead
+of a file, then the files named `<module_name>.cmake`
+and `<module_name>.cmake.in` are searched in [`CMAKE_MODULE_PATH`][301],
+but not in the CMake builtin module directory. If the template file is found
+in [`PROJECT_SOURCE_DIR`][302]`/<dirs>/`, then it will be copied
+to [`PROJECT_BINARY_DIR`][303]`/<dirs>/` while performing [transformations][305]
+of the template file using [FCM configuration variables][101],
+and a `.in` extension will be removed, if any.
 
-  [1]: https://cmake.org/cmake/help/latest/command/include.html
-  [2]: https://cmake.org/cmake/help/latest/variable/CMAKE_MODULE_PATH.html
-  [3]: https://cmake.org/cmake/help/latest/variable/PROJECT_SOURCE_DIR.html
-  [4]: https://cmake.org/cmake/help/latest/variable/PROJECT_BINARY_DIR.html
-  [5]: https://cmake.org/cmake/help/latest/command/configure_file.html#transformations
-  [6]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables
+[101]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables
+
+[301]: https://cmake.org/cmake/help/latest/variable/CMAKE_MODULE_PATH.html
+[302]: https://cmake.org/cmake/help/latest/variable/PROJECT_SOURCE_DIR.html
+[303]: https://cmake.org/cmake/help/latest/variable/PROJECT_BINARY_DIR.html
+[304]: https://cmake.org/cmake/help/latest/command/include.html
+[305]: https://cmake.org/cmake/help/latest/command/configure_file.html#transformations
 
 #]=================================================================]#github/wiki
 
