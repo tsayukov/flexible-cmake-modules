@@ -10,28 +10,28 @@
 # FOR COAUTHORS AND CONTRIBUTORS: fill in your name, contacts, and changes above
 #
 #[=================================================================[#github/wiki
-  # Getters of FCM Configuration Variables
+# Getters of FCM Configuration Variables
 
-  ## Table of Contents
+## Table of Contents
 
-  - [fcm_get_command_prefixes](#fcm_get_command_prefixes)
-  - [fcm_get_project_target_prefix](#fcm_get_project_target_prefix)
-  - [fcm_get_project_cache_prefix](#fcm_get_project_cache_prefix)
+- [fcm_get_command_prefixes](#fcm_get_command_prefixes)
+- [fcm_get_project_target_prefix](#fcm_get_project_target_prefix)
+- [fcm_get_project_cache_prefix](#fcm_get_project_cache_prefix)
 
-  ## fcm_get_command_prefixes
+## fcm_get_command_prefixes
 
-  Use an `FCM_COMMAND_PREFIX` and `FCM_PROJECT_COMMAND_PREFIX` variables after
-  calling this command to get their values.
+Use an `FCM_COMMAND_PREFIX` and `FCM_PROJECT_COMMAND_PREFIX` variables after
+calling this command to get their values.
 
-  ## fcm_get_project_target_prefix
+## fcm_get_project_target_prefix
 
-  Use an `FCM_PROJECT_TARGET_PREFIX` variable after calling this command
-  to get its value.
+Use an `FCM_PROJECT_TARGET_PREFIX` variable after calling this command
+to get its value.
 
-  ## fcm_get_project_cache_prefix
+## fcm_get_project_cache_prefix
 
-  Use an `FCM_PROJECT_CACHE_PREFIX` variable after calling this command
-  to get its value.
+Use an `FCM_PROJECT_CACHE_PREFIX` variable after calling this command
+to get its value.
 
 #]=================================================================]#github/wiki
 

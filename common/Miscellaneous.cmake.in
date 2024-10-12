@@ -10,15 +10,15 @@
 # FOR COAUTHORS AND CONTRIBUTORS: fill in your name, contacts, and changes above
 #
 #[=================================================================[#github/wiki
-  # Miscellaneous
+# Miscellaneous
 
-  ## fcm_get_version
+## fcm_get_version
 
-  Call `${program_path} --version` and put the version into `<output_variable>`.
+Call `${program_path} --version` and put the version into `<output_variable>`.
 
-  ```
-  fcm_get_version(<program_path> <output_variable>)
-  ```
+```
+fcm_get_version(<program_path> <output_variable>)
+```
 
 #]=================================================================]#github/wiki
 

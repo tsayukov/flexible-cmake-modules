@@ -10,51 +10,51 @@
 # FOR COAUTHORS AND CONTRIBUTORS: fill in your name, contacts, and changes above
 #
 #[=================================================================[#github/wiki
-  # Guards
+# Guards
 
-  ## Table of Contents
+## Table of Contents
 
-  - [fcm_get_project_is_top_level](#fcm_get_project_is_top_level)
-  - [fcm_requires_cmake](#fcm_requires_cmake)
-  - [fcm_no_in_source_builds_guard](#fcm_no_in_source_builds_guard)
+- [fcm_get_project_is_top_level](#fcm_get_project_is_top_level)
+- [fcm_requires_cmake](#fcm_requires_cmake)
+- [fcm_no_in_source_builds_guard](#fcm_no_in_source_builds_guard)
 
-  ## fcm_get_project_is_top_level
+## fcm_get_project_is_top_level
 
-  Before CMake 3.21, set `PROJECT_IS_TOP_LEVEL` as described in the variable
-  [documentation][3], otherwise, do nothing.
+Before CMake 3.21, set `PROJECT_IS_TOP_LEVEL` as described in the variable
+[documentation][303], otherwise, do nothing.
 
-  ## fcm_requires_cmake
+## fcm_requires_cmake
 
-  Check if CMake's version is not less than `<version>`, otherwise, print
-  the error message with `"<reason>"`.
+Check if CMake's version is not less than `<version>`, otherwise, print
+the error message with `"<reason>"`.
 
-  ```
-  fcm_requires_cmake(<version> "<reason>")
-  ```
+```
+fcm_requires_cmake(<version> "<reason>")
+```
 
-  It may be useful if building in the developer mode needs a higher CMake's
-  version than building to install only the project.
+It may be useful if building in the developer mode needs a higher CMake's
+version than building to install only the project.
 
-  ## fcm_no_in_source_builds_guard
+## fcm_no_in_source_builds_guard
 
-  Prevent in-source builds.
+Prevent in-source builds.
 
-  ```
-  fcm_no_in_source_builds_guard([RECURSIVE <directories>...])
-  ```
+```
+fcm_no_in_source_builds_guard([RECURSIVE <directories>...])
+```
 
-  Check if [`CMAKE_CURRENT_LIST_DIR`][1] is not [`PROJECT_BINARY_DIR`][2].
-  If `<directories>` following `RECURSIVE` are passed, check
-  if `PROJECT_BINARY_DIR` doesn't include any of `<directories>`'s paths.
-  If some of `<directories>`'s paths are a relative path, prepend
-  `CMAKE_CURRENT_LIST_DIR` to them.
+Check if [`CMAKE_CURRENT_LIST_DIR`][301] is not [`PROJECT_BINARY_DIR`][302].
+If `<directories>` following `RECURSIVE` are passed, check
+if `PROJECT_BINARY_DIR` doesn't include any of `<directories>`'s paths.
+If some of `<directories>`'s paths are a relative path, prepend
+`CMAKE_CURRENT_LIST_DIR` to them.
 
-  However, if the project is included as a subproject, the outer project
-  is allowed to build wherever it wants.
+However, if the project is included as a subproject, the outer project
+is allowed to build wherever it wants.
 
-  [1]: https://cmake.org/cmake/help/latest/variable/CMAKE_CURRENT_LIST_DIR.html
-  [2]: https://cmake.org/cmake/help/latest/variable/PROJECT_BINARY_DIR.html
-  [3]: https://cmake.org/cmake/help/latest/variable/PROJECT_IS_TOP_LEVEL.html
+[301]: https://cmake.org/cmake/help/latest/variable/CMAKE_CURRENT_LIST_DIR.html
+[302]: https://cmake.org/cmake/help/latest/variable/PROJECT_BINARY_DIR.html
+[303]: https://cmake.org/cmake/help/latest/variable/PROJECT_IS_TOP_LEVEL.html
 
 #]=================================================================]#github/wiki
 

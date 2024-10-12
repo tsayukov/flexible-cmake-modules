@@ -10,18 +10,18 @@
 # FOR COAUTHORS AND CONTRIBUTORS: fill in your name, contacts, and changes above
 #
 #[=================================================================[#github/wiki
-  # Debugging
+# Debugging
 
-  ## fcm_create_symlink_to_compile_commands
+## fcm_create_symlink_to_compile_commands
 
-  Create a symbolic link in the [`PROJECT_SOURCE_DIR`][1]`/build/` directory
-  to `compile_commands.json` if `PROJECT_SOURCE_DIR/build/` itself
-  is not [`PROJECT_BINARY_DIR`][2]. See [`CMAKE_EXPORT_COMPILE_COMMANDS`][3]
-  for details.
+Create a symbolic link in the [`PROJECT_SOURCE_DIR`][301]`/build/` directory
+to `compile_commands.json` if `PROJECT_SOURCE_DIR/build/` itself
+is not [`PROJECT_BINARY_DIR`][302]. See [`CMAKE_EXPORT_COMPILE_COMMANDS`][303]
+for details.
 
-  [1]: https://cmake.org/cmake/help/latest/variable/PROJECT_SOURCE_DIR.html
-  [2]: https://cmake.org/cmake/help/latest/variable/PROJECT_BINARY_DIR.html
-  [3]: https://cmake.org/cmake/help/latest/variable/CMAKE_EXPORT_COMPILE_COMMANDS.html
+[301]: https://cmake.org/cmake/help/latest/variable/PROJECT_SOURCE_DIR.html
+[302]: https://cmake.org/cmake/help/latest/variable/PROJECT_BINARY_DIR.html
+[303]: https://cmake.org/cmake/help/latest/variable/CMAKE_EXPORT_COMPILE_COMMANDS.html
 
 #]=================================================================]#github/wiki
 
