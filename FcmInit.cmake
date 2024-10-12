@@ -10,109 +10,111 @@
 # FOR COAUTHORS AND CONTRIBUTORS: fill in your name, contacts, and changes above
 #
 #[=================================================================[#github/wiki
-  # Initialization of Flexible CMake Modules
+# Initialization of Flexible CMake Modules
 
-  ## Table of Contents
+## Table of Contents
 
-  - [Usage](#Usage)
-  - [Prefixes](#Prefixes)
-    - [FCM_COMMAND_PREFIX_CONTROL](#FCM_COMMAND_PREFIX_CONTROL)
-    - [FCM_PROJECT_COMMAND_PREFIX_CONTROL](#FCM_PROJECT_COMMAND_PREFIX_CONTROL)
-    - [FCM_PROJECT_TARGET_PREFIX_CONTROL](#FCM_PROJECT_TARGET_PREFIX_CONTROL)
-    - [FCM_PROJECT_CACHE_PREFIX_CONTROL](#FCM_PROJECT_CACHE_PREFIX_CONTROL)
+- [Usage](#Usage)
+- [Prefixes](#Prefixes)
+  - [FCM_COMMAND_PREFIX_CONTROL](#FCM_COMMAND_PREFIX_CONTROL)
+  - [FCM_PROJECT_COMMAND_PREFIX_CONTROL](#FCM_PROJECT_COMMAND_PREFIX_CONTROL)
+  - [FCM_PROJECT_TARGET_PREFIX_CONTROL](#FCM_PROJECT_TARGET_PREFIX_CONTROL)
+  - [FCM_PROJECT_CACHE_PREFIX_CONTROL](#FCM_PROJECT_CACHE_PREFIX_CONTROL)
 
-  ## Usage
+## Usage
 
-  ```cmake
-  # CMakeLists.txt
-  cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
+```cmake
+# CMakeLists.txt
+cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 
-  project(library-name CXX)
+project(library-name CXX)
 
-  include(cmake/FcmInit.cmake)
-  ```
+include(cmake/FcmInit.cmake)
+```
 
-  You may adjust Flexible CMake Modules by setting control variables before
-  including the `FcmInit` module. These control variables will be unset after
-  the initialization, so they won't affect any sub-projects using FCM as well.
-  Thus, be careful when using cached entries with the same names; they will be
-  used by each `FcmInit` module if the normal variables are not defined.
+You may adjust Flexible CMake Modules by setting control variables before
+including the `FcmInit` module. These control variables will be unset after
+the initialization, so they won't affect any sub-projects using FCM as well.
+Thus, be careful when using cached entries with the same names; they will be
+used by each `FcmInit` module if the normal variables are not defined.
 
-  ## Prefixes
+## Prefixes
 
-  The control variables that define a prefix for commands, targets, and cached
-  entries must be set to a [proper][1] C identifier. Moreover, when the prefixes
-  need to be read, they are checked, if they are still a proper C identifier,
-  preventing execution of arbitrary code after configuring template CMake files.
-  The check takes place using the `if` command, which cannot be overridden.
+The control variables that define a prefix for commands, targets, and cached
+entries must be set to a [proper][301] C identifier. Moreover, when the prefixes
+need to be read, they are checked, if they are still a proper C identifier,
+preventing execution of arbitrary code after configuring template CMake files.
+The check takes place using the `if` command, which cannot be overridden.
 
-  An underscore will be added to each non-empty prefix. Note, that these control
-  variables can be set to an empty string, except `FCM_COMMAND_PREFIX_CONTROL`.
-  It is the same if there are no prefixes at all. It is not allowed to remove
-  the prefix for FCM's commands, because then they will override some CMake
-  commands.
+An underscore will be added to each non-empty prefix. Note, that these control
+variables can be set to an empty string, except `FCM_COMMAND_PREFIX_CONTROL`.
+It is the same if there are no prefixes at all. It is not allowed to remove
+the prefix for FCM's commands, because then they will override some CMake
+commands.
 
-  ### FCM_COMMAND_PREFIX_CONTROL
+### FCM_COMMAND_PREFIX_CONTROL
 
-  The `FCM_COMMAND_PREFIX_CONTROL` variable defines a prefix for FCM's commands.
-  By default, its value is `fcm`. To get the prefix, call
-  the [`fcm_get_command_prefixes()`][9] command and use the `FCM_COMMAND_PREFIX`
-  variable.
+The `FCM_COMMAND_PREFIX_CONTROL` variable defines a prefix for FCM's commands.
+By default, its value is `fcm`. To get the prefix, call
+the [`fcm_get_command_prefixes()`][107] command and use the `FCM_COMMAND_PREFIX`
+variable.
 
-  ### FCM_PROJECT_COMMAND_PREFIX_CONTROL
+### FCM_PROJECT_COMMAND_PREFIX_CONTROL
 
-  The `FCM_PROJECT_COMMAND_PREFIX_CONTROL` variable defines a prefix that
-  is reserved for custom commands defined by the project's maintainers.
-  By default, its value is a project name in lower case, converted to a proper
-  C identifier. To get the prefix, call
-  the [`fcm_get_command_prefixes()`][9] command and use
-  the `FCM_PROJECT_COMMAND_PREFIX` variable. It can be used in template CMake
-  files, e.g., `*.cmake.in`, to define commands and call them:
+The `FCM_PROJECT_COMMAND_PREFIX_CONTROL` variable defines a prefix that
+is reserved for custom commands defined by the project's maintainers.
+By default, its value is a project name in lower case, converted to a proper
+C identifier. To get the prefix, call
+the [`fcm_get_command_prefixes()`][107] command and use
+the `FCM_PROJECT_COMMAND_PREFIX` variable. It can be used in template CMake
+files, e.g., `*.cmake.in`, to define commands and call them:
 
-  ```cmake
-  # CustomCommands.cmake.in
-  function(@FCM_PROJECT_COMMAND_PREFIX@do_work)
-    # do some work
-  endfunction()
+```cmake
+# CustomCommands.cmake.in
+function(@FCM_PROJECT_COMMAND_PREFIX@do_work)
+  # do some work
+endfunction()
 
-  function(@FCM_PROJECT_COMMAND_PREFIX@do_more_work)
-    # do more work
-    @FCM_PROJECT_COMMAND_PREFIX@do_work()
-  endfunction()
-  ```
+function(@FCM_PROJECT_COMMAND_PREFIX@do_more_work)
+  # do more work
+  @FCM_PROJECT_COMMAND_PREFIX@do_work()
+endfunction()
+```
 
-  These template files can be configured and included by calling the
-  [`fcm_include()`][2] command.
+These template files can be configured and included by calling the
+[`fcm_include()`][101] command.
 
-  ### FCM_PROJECT_TARGET_PREFIX_CONTROL
+### FCM_PROJECT_TARGET_PREFIX_CONTROL
 
-  The `FCM_PROJECT_TARGET_PREFIX_CONTROL` defines a prefix for project-specific
-  targets that is set by calling the [`fcm_add_library()`][3]
-  and [`fcm_add_executable()`][4]  commands.
-  By default, its value is a project name in lower case, converted to a proper
-  C identifier. To get the prefix, call
-  the [`fcm_get_project_target_prefix()`][11] command and use
-  the `FCM_PROJECT_TARGET_PREFIX` variable.
+The `FCM_PROJECT_TARGET_PREFIX_CONTROL` defines a prefix for project-specific
+targets that is set by calling the [`fcm_add_library()`][102]
+and [`fcm_add_executable()`][103]  commands.
+By default, its value is a project name in lower case, converted to a proper
+C identifier. To get the prefix, call
+the [`fcm_get_project_target_prefix()`][108] command and use
+the `FCM_PROJECT_TARGET_PREFIX` variable.
 
-  ### FCM_PROJECT_CACHE_PREFIX_CONTROL
+### FCM_PROJECT_CACHE_PREFIX_CONTROL
 
-  The `FCM_PROJECT_CACHE_PREFIX_CONTROL` defines a prefix for project-specific
-  cached entries that is set by calling the [`fcm_cache_entry()`][6],
-  [`fcm_option()`][7], and [`fcm_dev_option()`][8] commands. By default,
-  its value is a project name in upper case, converted to a proper C identifier.
-  To get the prefix, call the [`fcm_get_project_cache_prefix()`][12] command
-  and use the `FCM_PROJECT_CACHE_PREFIX` variable.
+The `FCM_PROJECT_CACHE_PREFIX_CONTROL` defines a prefix for project-specific
+cached entries that is set by calling the [`fcm_set_cache_entry()`][104],
+[`fcm_option()`][105], and [`fcm_dev_option()`][106] commands. By default,
+its value is a project name in upper case, converted to a proper C identifier.
+To get the prefix, call the [`fcm_get_project_cache_prefix()`][109] command
+and use the `FCM_PROJECT_CACHE_PREFIX` variable.
 
-  [1]: https://cmake.org/cmake/help/latest/command/string.html#make-c-identifier
-  [2]: https://github.com/tsayukov/flexible-cmake-modules/wiki/fcm_include
-  [3]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-specific-commands#fcm_add_library
-  [4]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-specific-commands#fcm_add_executable
-  [6]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-specific-commands#fcm_cache_entry
-  [7]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-specific-commands#fcm_option
-  [8]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-specific-commands#fcm_dev_option
-  [9]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_command_prefixes
-  [11]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_project_target_prefix
-  [12]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_project_cache_prefix
+[101] https://github.com/tsayukov/flexible-cmake-modules/wiki/fcm_include
+[102] https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-targets#fcm_add_library
+[103] https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-targets#fcm_add_executable
+[104] https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-cache#fcm_set_cache_entry
+[105] https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-cache#fcm_option
+[106] https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-cache#fcm_dev_option
+[107] https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_command_prefixes
+[108] https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_project_target_prefix
+[109] https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_project_cache_prefix
+
+[301] https://cmake.org/cmake/help/latest/command/string.html#make-c-identifier
+
 #]=================================================================]#github/wiki
 
 cmake_policy(PUSH)
