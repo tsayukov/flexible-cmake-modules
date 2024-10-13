@@ -168,7 +168,11 @@ calculations (see compiler documentation).
 #[=================================================================[#github/wiki
 ## ENABLE_DEVELOPER_MODE
 
-TODO: add description
+Enable the developer mode that causes enabling testing, benchmarking,
+formatting, etc, until some of those options are not turned off
+manually. If the developer mode is enabled and [`PROJECT_IS_TOP_LEVEL`][306]
+is false, raise a warning, because this mode is intended for the project's
+developers, not consumers.
 
 #]=================================================================]#github/wiki
 @FCM_COMMAND_PREFIX@option(ENABLE_DEVELOPER_MODE "Enable developer mode" OFF)
@@ -342,6 +346,7 @@ endfunction()
 [303]: https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_RPATH.html
 [304]: https://cmake.org/cmake/help/latest/prop_tgt/INSTALL_RPATH.html
 [305]: https://cmake.org/cmake/help/latest/command/target_include_directories.html
+[306]: https://cmake.org/cmake/help/latest/variable/PROJECT_IS_TOP_LEVEL.html
 
 [501]: https://ccache.dev/
 
