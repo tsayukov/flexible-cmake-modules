@@ -190,7 +190,7 @@ endif()
 ## ENABLE_TESTING
 
 Enable testing. The required library is included in the `DeveloperMode`
-template module. By default, it is Google Test.
+template module. By default, it is [Google Test][502].
 
 #]=================================================================]#github/wiki
 @FCM_COMMAND_PREFIX@dev_option(ENABLE_TESTING "Enable testing")
@@ -201,15 +201,18 @@ endif()
 #[=================================================================[#github/wiki
 ## ENABLE_BENCHMARKING
 
-TODO: add description
+Enable benchmarking. The required library is included in the `DeveloperMode`
+template module. By default, it is [Google Benchmark][503].
 
 ## ENABLE_BENCHMARK_TOOLS
 
-TODO: add description
+Find Google Benchmark [tools][504].
 
 #]=================================================================]#github/wiki
 @FCM_COMMAND_PREFIX@dev_option(ENABLE_BENCHMARKING "Enable benchmarking")
-@FCM_COMMAND_PREFIX@dev_option(ENABLE_BENCHMARK_TOOLS "Enable benchmark tools")
+@FCM_COMMAND_PREFIX@option(ENABLE_BENCHMARK_TOOLS "Enable benchmark tools"
+  ON IF ENABLE_BENCHMARKING
+)
 
 #[=================================================================[#github/wiki
 ## ENABLE_COVERAGE
@@ -266,7 +269,7 @@ TODO: add description
 @FCM_COMMAND_PREFIX@option(ENABLE_PYTHON_VENV
   "Enable creating of Python virtual environment"
   # Specify other conditions, if any
-  ON IF ENABLE_BENCHMARKING
+  ON IF ENABLE_BENCHMARK_TOOLS
 )
 @FCM_COMMAND_PREFIX@set_cache_entry(PYTHON_VENV_DIR
   "${PROJECT_SOURCE_DIR}/.venv" CACHE PATH
@@ -361,5 +364,8 @@ endfunction()
 [309]: https://cmake.org/cmake/help/latest/command/find_package.html
 
 [501]: https://ccache.dev/
+[502]: https://github.com/google/googletest
+[503]: https://github.com/google/benchmark
+[504]: https://github.com/google/benchmark/blob/main/docs/tools.md
 
 #]=================================================================]#github/wiki
