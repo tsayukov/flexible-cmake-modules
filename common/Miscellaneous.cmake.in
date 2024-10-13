@@ -12,6 +12,11 @@
 #[=================================================================[#github/wiki
 # Miscellaneous
 
+## Table of Contents
+
+- [fcm_get_version](#fcm_get_version)
+- [fcm_git_first_hash](#fcm_git_first_hash)
+
 ## fcm_get_version
 
 Call `${program_path} --version` and put the version into `<output_variable>`.
@@ -19,6 +24,44 @@ Call `${program_path} --version` and put the version into `<output_variable>`.
 ```
 fcm_get_version(<program_path> <output_variable>)
 ```
+
+## fcm_git_first_hash
+
+After a [`git ls-remote`][501] call, get the name (hash) of the object
+the first reference points at.
+
+```
+fcm_git_first_hash(<output_variable> <repository_url>
+                   [BRANCHES] [TAGS] [ASCEND | DESCEND]
+                   [OPTIONS <options>...]
+                   [PATTERNS <patterns>...])
+```
+
+The full call is as follows:
+
+```
+git ls-remote [<options>] <repository_url> [<patterns>]
+```
+
+The `BRANCHES` option put `--branches` in `<options>`.
+The `TAGS` option put `--tags` in `<options>`.
+The `ASCEND` option put `--sort=version:refname` in `<options>`.
+The `DESCEND` option put `--sort=-version:refname` in `<options>`.
+
+The result, which can be `NOTFOUND` if no reference is found,
+is set to `<output_variable>`.
+
+Usage:
+
+```cmake
+# `last_version_hash` is equal to the name of the object pointed to by the tag
+# named by the latest version
+fcm_git_first_hash(last_version_hash
+  "https://github.com/google/googletest" TAGS DESCEND
+)
+```
+
+[501]: https://git-scm.com/docs/git-ls-remote
 
 #]=================================================================]#github/wiki
 
@@ -33,4 +76,57 @@ function(@FCM_COMMAND_PREFIX@get_version program_path output_variable)
   )
   string(REGEX MATCH "[0-9]+(\.[0-9]+(\.[0-9]+)?)?" version "${version}")
   set(${output_variable} ${version} PARENT_SCOPE)
+endfunction()
+
+function(@FCM_COMMAND_PREFIX@git_first_hash
+  output_variable
+  repository_url
+)
+  find_package(Git REQUIRED)
+
+  cmake_parse_arguments(PARSE_ARGV 2 "ARGS"
+    "BRANCHES;TAGS;ASCEND;DESCEND"
+    ""
+    "PATTERNS;OPTIONS"
+  )
+
+  set(options "")
+
+  if (ARGS_BRANCHES)
+    list(APPEND options "--branches")
+  endif()
+
+  if (ARGS_TAGS)
+    list(APPEND options "--tags")
+  endif()
+
+  if (ARGS_ASCEND AND ARGS_DESCEND)
+    message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+      "`ASCEND` and `DESCEND` are mutual exclusive options."
+    )
+  elseif (ARGS_ASCEND)
+    list(APPEND options "--sort=version:refname")
+  elseif (ARGS_DESCEND)
+    list(APPEND options "--sort=-version:refname")
+  endif()
+
+  if (DEFINED ARGS_OPTIONS)
+    list(APPEND options ${ARGS_OPTIONS})
+  endif()
+
+  execute_process(COMMAND
+      ${GIT_EXECUTABLE} ls-remote
+        ${options}
+        ${repository_url}
+        ${ARGS_PATTERNS}
+    OUTPUT_VARIABLE
+      output
+  )
+
+  string(SUBSTRING "${output}" 0 40 hash)
+  if (NOT hash)
+    set(${output_variable} "NOTFOUND" PARENT_SCOPE)
+  else()
+    set(${output_variable} ${hash} PARENT_SCOPE)
+  endif()
 endfunction()
