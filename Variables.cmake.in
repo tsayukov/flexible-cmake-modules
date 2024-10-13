@@ -47,16 +47,16 @@ include_guard(GLOBAL)
 #[=================================================================[#github/wiki
 ## FETCH_DEPENDENCIES
 
-Allow fetching all external dependencies locally, e.g., using the `FetchContent`
-or `ExternalProject` modules and downloading external sources into the binary
-directory, except for those that are not allowed explicitly by setting
-`<FCM_PROJECT_CACHE_PREFIX>FETCH_<dependency_name>` where
-`<dependency_name>` is just a name using by a `find_package()` call.
+Allow fetching all external dependencies locally, e.g., using
+the [`FetchContent`][307] or [`ExternalProject`][308] modules and downloading
+external sources into the binary directory, except for those that
+are not allowed explicitly by setting
+`<FCM_PROJECT_CACHE_PREFIX>FETCH_<dependency_name>` where `<dependency_name>`
+is just a name using by a [`find_package()`][309] call. To learn how to manage
+external dependencies, see [this module][105].
 
 #]=================================================================]#github/wiki
-@FCM_COMMAND_PREFIX@option(FETCH_DEPENDENCIES
-  "Fetch external dependencies locally" OFF
-)
+@FCM_COMMAND_PREFIX@option(FETCH_DEPENDENCIES "Fetch external dependencies" OFF)
 
 #[=================================================================[#github/wiki
 ## ENABLE_INSTALL
@@ -340,6 +340,7 @@ endfunction()
 [102]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Ccache
 [103]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-targets#fcm_target_include_directories
 [104]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Debugging#create_symlink_to_compile_commands
+[105]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Dependency-management
 
 [301]: https://cmake.org/cmake/help/latest/variable/BUILD_SHARED_LIBS.html
 [302]: https://cmake.org/cmake/help/latest/module/GenerateExportHeader.html
@@ -347,6 +348,9 @@ endfunction()
 [304]: https://cmake.org/cmake/help/latest/prop_tgt/INSTALL_RPATH.html
 [305]: https://cmake.org/cmake/help/latest/command/target_include_directories.html
 [306]: https://cmake.org/cmake/help/latest/variable/PROJECT_IS_TOP_LEVEL.html
+[307]: https://cmake.org/cmake/help/latest/module/FetchContent.html
+[308]: https://cmake.org/cmake/help/latest/module/ExternalProject.html
+[309]: https://cmake.org/cmake/help/latest/command/find_package.html
 
 [501]: https://ccache.dev/
 
