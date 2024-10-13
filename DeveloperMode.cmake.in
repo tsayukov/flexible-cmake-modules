@@ -1,0 +1,18 @@
+#[=============================================================================[
+  Developer mode dependencies
+  ------------------------------------------------------------------------------
+  It is orthogonal to `Dependencies.cmake`. These dependencies are only enabled
+  in the developer mode and are not used directly by the current project.
+  It's expected that this listfile will be included after definitions of the
+  project targets, because some of these dependencies may link against the
+  project targets.
+#]=============================================================================]
+
+include_guard(GLOBAL)
+
+@FCM_COMMAND_PREFIX@include("dependencies/PythonVenv" TEMPLATE)
+@FCM_COMMAND_PREFIX@include("dependencies/MemoryCheck" TEMPLATE)
+@FCM_COMMAND_PREFIX@include("dependencies/GoogleTest" TEMPLATE)
+@FCM_COMMAND_PREFIX@include("dependencies/Benchmarking" TEMPLATE)
+@FCM_COMMAND_PREFIX@include("dependencies/Coverage" TEMPLATE)
+@FCM_COMMAND_PREFIX@include("dependencies/Formatting" TEMPLATE)
