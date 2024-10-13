@@ -1,0 +1,83 @@
+# Flexible CMake Modules
+# ------------------------------------------------------------------------------
+# Author: Pavel Tsayukov
+# Repository: https://github.com/tsayukov/flexible-cmake-modules
+# Distributed under the MIT License. See the accompanying file LICENSE or
+# https://opensource.org/license/mit for details.
+# ------------------------------------------------------------------------------
+#
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# FOR COAUTHORS AND CONTRIBUTORS: fill in your name, contacts, and changes above
+#
+#[=================================================================[#github/wiki
+# Ccache
+
+Ccache support for fast recompilation. See supported [languages][501].
+
+Enable [`<FCM_PROJECT_CACHE_PREFIX>ENABLE_CCACHE`][201] to try to find `ccache`.
+Raise a warning if `ccache` is not found. In that case, pass
+`-DCCACHE_PATH=path/to/bin` to specify the path to the `ccache` binary file.
+The [`compiler/Common`][101] template module makes
+a [`fcm_use_ccache()`](#fcm_use_ccache) call if `ccache` is enabled.
+
+## fcm_use_ccache
+
+Set the [`CMAKE_<LANG>_COMPILER_LAUNCHER`][301] cache entry if `ccache` is found
+and supports the `<lang>` language. If that cache entry is already set,
+do nothing.
+
+```
+fcm_use_ccache(<lang>)
+```
+
+[101]: TODO(add_link)
+
+[201]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Variables#ENABLE_CCACHE
+
+[301]: https://cmake.org/cmake/help/latest/envvar/CMAKE_LANG_COMPILER_LAUNCHER.html
+
+[501]: https://ccache.dev/
+
+#]=================================================================]#github/wiki
+
+include_guard(GLOBAL)
+
+@FCM_COMMAND_PREFIX@enable_if(ENABLE_CCACHE)
+
+
+function(@FCM_COMMAND_PREFIX@use_ccache
+  lang
+)
+  string(TOUPPER "${lang}" LANG)
+  if (NOT LANG MATCHES "^((OBJ)?C(XX)?|ASM.*|CUDA)$")
+    message(AUTHOR_WARNING "${LANG} is not supported by ccache.")
+    return()
+  endif()
+
+  if (CCACHE_PATH)
+    if (NOT DEFINED CACHE{CMAKE_${LANG}_COMPILER_LAUNCHER})
+      message(STATUS
+        "Set CMAKE_${LANG}_COMPILER_LAUNCHER: \"${CCACHE_PATH}\""
+      )
+    endif()
+
+    set(CMAKE_${LANG}_COMPILER_LAUNCHER
+      "${CCACHE_PATH}" CACHE FILEPATH
+      "${LANG} compiler launcher"
+    )
+  endif()
+endfunction()
+
+
+################################# Ccache init ##################################
+
+find_program(CCACHE_PATH ccache)
+mark_as_advanced(CCACHE_PATH)
+if (NOT CCACHE_PATH)
+  message(AUTHOR_WARNING
+    "Ccache is not found, that will may increase the re-compilation time. "
+    "Pass `-DCCACHE_PATH=path/to/bin` to specify the path to the `ccache` "
+    "binary file."
+  )
+  return()
+endif()

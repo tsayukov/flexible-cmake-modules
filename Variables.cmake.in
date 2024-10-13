@@ -140,8 +140,9 @@ Enable generating documentation.
 #[=================================================================[#github/wiki
 ## ENABLE_CCACHE
 
-If set, try to find [`ccache`][501]. See the [`Ccache`][102] module for details.
-It is useless for small project to enable `ccache`.
+If set, try to find [`ccache`][501] for fast recompilation.
+See the [`Ccache`][102] module for details. It is useless for small project
+to enable `ccache`.
 
 #]=================================================================]#github/wiki
 @FCM_COMMAND_PREFIX@option(ENABLE_CCACHE "Enable ccache" OFF)
@@ -332,7 +333,7 @@ endfunction()
 
 #[=================================================================[#github/wiki
 [101]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-targets#fcm_generate_export_header
-[102]: TODO(add_link)
+[102]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Ccache
 [103]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-targets#fcm_target_include_directories
 [104]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Debugging#create_symlink_to_compile_commands
 
