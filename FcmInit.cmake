@@ -127,6 +127,13 @@ set(__FCM_RELATIVE_CACHE_DIR__ "FcmCache/v${__FCM_MAJOR_VERSION__}")
 unset(__FCM_MAJOR_VERSION__)
 
 
+if (CMAKE_VERSION VERSION_LESS "3.14")
+  message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+    "Flexible CMake Modules are supported only by CMake 3.14+"
+  )
+endif()
+
+
 if (NOT PROJECT_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
   message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
     "Flexible CMake Modules must be included in a listfile "
