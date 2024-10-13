@@ -19,10 +19,12 @@
 
 ## fcm_get_version
 
-Call `${program_path} --version` and put the version into `<output_variable>`.
+Call `<program_path> <version_getter>` (`--version`, by default)
+and put the version or `NOTFOUND` into `<output_variable>`.
 
 ```
-fcm_get_version(<program_path> <output_variable>)
+fcm_get_version(<output_variable> <program_path>
+                [VERSION_GETTER <version_getter>])
 ```
 
 ## fcm_git_first_hash
@@ -68,14 +70,27 @@ fcm_git_first_hash(last_version_hash
 include_guard(GLOBAL)
 
 
-function(@FCM_COMMAND_PREFIX@get_version program_path output_variable)
+function(@FCM_COMMAND_PREFIX@get_version
+  output_variable
+  program_path
+)
+  cmake_parse_arguments(PARSE_ARGV 2 "ARGS" "" "VERSION_GETTER" "")
+
+  if (NOT DEFINED ARGS_VERSION_GETTER)
+    set(ARGS_VERSION_GETTER "--version")
+  endif()
+
   execute_process(COMMAND
-      ${program_path} --version
+      ${program_path} ${ARGS_VERSION_GETTER}
     OUTPUT_VARIABLE
-      version
+      output
   )
-  string(REGEX MATCH "[0-9]+(\.[0-9]+(\.[0-9]+)?)?" version "${version}")
-  set(${output_variable} ${version} PARENT_SCOPE)
+  string(REGEX MATCH "[0-9]+(\.[0-9]+(\.[0-9]+)?)?" version "${output}")
+  if (NOT version)
+    set(${output_variable} "NOTFOUND" PARENT_SCOPE)
+  else()
+    set(${output_variable} ${version} PARENT_SCOPE)
+  endif()
 endfunction()
 
 function(@FCM_COMMAND_PREFIX@git_first_hash
