@@ -370,7 +370,12 @@ function(@FCM_COMMAND_PREFIX@add_library
   endif()
 
   if (ENABLE_INSTALL AND NOT ARGS_EXCLUDE_FROM_INSTALL)
-    @FCM_COMMAND_PREFIX@internal_append_install_project_target(${target})
+    @FCM_COMMAND_PREFIX@get_project_cache_prefix()
+    set_property(DIRECTORY
+        "${PROJECT_SOURCE_DIR}"
+      APPEND PROPERTY
+        ${FCM_PROJECT_CACHE_PREFIX}INSTALL_PROJECT_TARGETS ${target}
+    )
   endif()
 endfunction()
 
@@ -398,7 +403,12 @@ function(@FCM_COMMAND_PREFIX@add_executable
   )
 
   if (ENABLE_INSTALL AND NOT ARGS_EXCLUDE_FROM_INSTALL)
-    @FCM_COMMAND_PREFIX@internal_append_install_project_target(${target})
+    @FCM_COMMAND_PREFIX@get_project_cache_prefix()
+    set_property(DIRECTORY
+        "${PROJECT_SOURCE_DIR}"
+      APPEND PROPERTY
+        ${FCM_PROJECT_CACHE_PREFIX}INSTALL_PROJECT_TARGETS ${target}
+    )
   endif()
 endfunction()
 
