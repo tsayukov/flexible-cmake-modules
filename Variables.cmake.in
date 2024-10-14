@@ -242,8 +242,6 @@ via the [`Valgrind`][108].
 #]=================================================================]#github/wiki
 @FCM_COMMAND_PREFIX@dev_option(ENABLE_MEMORY_CHECKING "Enable memory checking tools")
 
-# TODO: implement other developer options
-
 #[=================================================================[#github/wiki
 ## CMAKE_EXPORT_COMPILE_COMMANDS
 
@@ -287,27 +285,23 @@ Set the Python virtual environment directory.
 #[=================================================================[#github/wiki
 ## PACKAGE_NAME
 
-TODO: add description
+The package name used by a [`find_package()`][309] call.
 
 ## PACKAGE_EXPORT_TARGET_NAME
 
-TODO: add description
+The name without extension of a file exporting targets for consuming projects.
 
 ## INSTALL_CMAKE_DIR
 
-TODO: add description
+The installation directory for CMake configuration files.
 
 ## INSTALL_LICENSE_DIR
 
-TODO: add description
-
-## INSTALL_LICENSE_DIR
-
-TODO: add description
+The installation directory for the LICENSE file.
 
 ## INSTALL_DOC_DIR
 
-TODO: add description
+The installation directory for the documentation.
 
 #]=================================================================]#github/wiki
 if (ENABLE_INSTALL)
@@ -317,7 +311,7 @@ if (ENABLE_INSTALL)
 
   @FCM_COMMAND_PREFIX@set_cache_entry(PACKAGE_NAME
     "${PROJECT_NAME}" CACHE STRING
-    "The package name used by the `find_package` command"
+    "The package name used by a `find_package()` call"
   )
 
   @FCM_COMMAND_PREFIX@set_cache_entry(PACKAGE_EXPORT_TARGET_NAME
