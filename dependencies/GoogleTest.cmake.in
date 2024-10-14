@@ -12,6 +12,7 @@
 # ==============================================================================
 
 include_guard(GLOBAL)
+@FCM_COMMAND_PREFIX@internal_variable_init_guard()
 
 
 ############################### Google Test init ###############################
