@@ -1,0 +1,117 @@
+# Flexible CMake Modules
+# ------------------------------------------------------------------------------
+# Author: Pavel Tsayukov
+# Repository: https://github.com/tsayukov/flexible-cmake-modules
+# Distributed under the MIT License. See the accompanying file LICENSE or
+# https://opensource.org/license/mit for details.
+# ------------------------------------------------------------------------------
+#
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# FOR COAUTHORS AND CONTRIBUTORS: fill in your name, contacts, and changes above
+#
+#[=================================================================[#github/wiki
+# Valgrind
+
+Enable the [`<FCM_PROJECT_CACHE_PREFIX>ENABLE_MEMORY_CHECKING`][201] option
+to use [`valgrind`][501]. If `valgrind` cannot be found, pass the path
+to its binary file to the `VALGRIND_PATH` variable.
+
+## Table of Contents
+
+- [fcm_valgrind_add_memcheck](#fcm_valgrind_add_memcheck)
+- [fcm_valgrind_add_unity_memcheck](#fcm_valgrind_add_unity_memcheck)
+
+## fcm_valgrind_add_memcheck
+
+After [resolving][101] the `<target>` name, create a `<target>` custom target
+that runs memory checking on the binary file corresponding to `<target>`.
+
+```
+fcm_valgrind_add_memcheck(<target>)
+```
+
+## fcm_valgrind_add_unity_memcheck
+
+Add `<unity_target>` (by default, `<FCM_PROJECT_TARGET_PREFIX>memcheck`)
+to run all memory checkings that were added by `fcm_valgrind_add_memcheck()`
+calls.
+
+```
+fcm_valgrind_add_unity_memcheck([<unity_target>])
+```
+
+[101]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-targets#fcm_get_target
+
+[201]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Variables#ENABLE_MEMORY_CHECKING
+
+[501]: https://valgrind.org
+
+#]=================================================================]#github/wiki
+
+include_guard(GLOBAL)
+@FCM_COMMAND_PREFIX@internal_variable_init_guard()
+
+@FCM_COMMAND_PREFIX@enable_if(ENABLE_MEMORY_CHECKING)
+
+
+function(@FCM_COMMAND_PREFIX@valgrind_add_memcheck
+  target
+)
+  @FCM_COMMAND_PREFIX@get_target(${target} FULL_NAME_TO target)
+
+  add_custom_target(${target}_memcheck
+    COMMAND ${VALGRIND_PATH}
+      --leak-check=yes
+      "$<TARGET_FILE:${target}>"
+    WORKING_DIRECTORY
+      "${PROJECT_BINARY_DIR}"
+  )
+
+  @FCM_COMMAND_PREFIX@get_project_cache_prefix()
+  set_property(DIRECTORY
+      "${PROJECT_SOURCE_DIR}"
+    APPEND PROPERTY
+      ${FCM_PROJECT_CACHE_PREFIX}MEMCHECK_TARGETS
+      ${target}_memcheck
+  )
+endfunction()
+
+function(@FCM_COMMAND_PREFIX@valgrind_add_unity_memcheck)
+  @FCM_COMMAND_PREFIX@get_project_cache_prefix()
+
+  get_property(memcheck_targets
+    DIRECTORY
+      "${PROJECT_SOURCE_DIR}"
+    PROPERTY
+      ${FCM_PROJECT_TARGET_PREFIX}MEMCHECK_TARGETS
+  )
+
+  if (ARGC EQUAL "0")
+    set(unity_target ${FCM_PROJECT_TARGET_PREFIX}memcheck)
+  else()
+    set(unity_target ${ARGV0})
+  endif()
+
+  add_custom_target(${unity_target}
+    COMMAND ${CMAKE_COMMAND}
+      --build "${PROJECT_BINARY_DIR}"
+      --target ${memcheck_targets}
+  )
+endfunction()
+
+
+################################ Valgrind init #################################
+
+find_program(VALGRIND_PATH valgrind REQUIRED)
+mark_as_advanced(VALGRIND_PATH)
+
+if ((CMAKE_C_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS "14")
+    OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "14"))
+  @FCM_COMMAND_PREFIX@get_version(__valgrind_version ${VALGRIND_PATH})
+  if (__valgrind_version VERSION_LESS "3.20")
+    message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+      "Only Valgrind 3.20+ works properly with Clang 14+."
+    )
+  endif()
+  unset(__valgrind_version)
+endif()
