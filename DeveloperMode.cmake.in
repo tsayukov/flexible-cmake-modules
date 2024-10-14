@@ -11,7 +11,7 @@
 include_guard(GLOBAL)
 
 @FCM_COMMAND_PREFIX@include("dependencies/PythonVenv" TEMPLATE)
-@FCM_COMMAND_PREFIX@include("dependencies/MemoryCheck" TEMPLATE)
+@FCM_COMMAND_PREFIX@include("dependencies/Valgrind" TEMPLATE)
 @FCM_COMMAND_PREFIX@include("dependencies/GoogleTest" TEMPLATE)
 @FCM_COMMAND_PREFIX@include("dependencies/GoogleBenchmark" TEMPLATE)
 @FCM_COMMAND_PREFIX@include("dependencies/Coverage" TEMPLATE)
