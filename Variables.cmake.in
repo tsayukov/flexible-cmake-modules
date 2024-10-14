@@ -248,7 +248,6 @@ may create a symbolic link in the `${PROJECT_SOURCE_DIR}/build` directory to it.
 See the [`create_symlink_to_compile_commands()`][104] command for details.
 
 #]=================================================================]#github/wiki
-
 if (ENABLE_DEVELOPER_MODE)
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
   if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -259,11 +258,13 @@ endif()
 #[=================================================================[#github/wiki
 ## ENABLE_PYTHON_VENV
 
-TODO: add description
+Enable creating of Python virtual environment.
+The [`dependencies/PythonVenv`][106] template module is included
+in the `DeveloperMode` template module.
 
 ## PYTHON_VENV_DIR
 
-TODO: add description
+Set the Python virtual environment directory.
 
 #]=================================================================]#github/wiki
 @FCM_COMMAND_PREFIX@option(ENABLE_PYTHON_VENV
@@ -352,6 +353,7 @@ endfunction()
 [103]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-targets#fcm_target_include_directories
 [104]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Debugging#create_symlink_to_compile_commands
 [105]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Dependency-management
+[106]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Python-virtual-environment
 
 [301]: https://cmake.org/cmake/help/latest/variable/BUILD_SHARED_LIBS.html
 [302]: https://cmake.org/cmake/help/latest/module/GenerateExportHeader.html

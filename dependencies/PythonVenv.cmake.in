@@ -1,0 +1,122 @@
+# Flexible CMake Modules
+# ------------------------------------------------------------------------------
+# Author: Pavel Tsayukov
+# Repository: https://github.com/tsayukov/flexible-cmake-modules
+# Distributed under the MIT License. See the accompanying file LICENSE or
+# https://opensource.org/license/mit for details.
+# ------------------------------------------------------------------------------
+#
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# FOR COAUTHORS AND CONTRIBUTORS: fill in your name, contacts, and changes above
+#
+#[=================================================================[#github/wiki
+# Python virtual environment
+
+Enable [`<FCM_PROJECT_CACHE_PREFIX>ENABLE_PYTHON_VENV`][201] to turn on this
+module. Requires CMake 3.15+.
+
+## fcm_init_python_venv
+
+Try to find Python virtual environment in `${PYTHON_VENV_DIR}`.
+If there's no any, find [Python 2][301] or [Python 3][302] and create
+its virtual environment.
+
+```
+fcm_init_python_venv([<version>] [<find_package_parameters>...])
+```
+
+By default, use Python 3 that was found by a [`find_package()`][303] call.
+Otherwise, pass the specific `<version>`.
+While passing arguments to this command, Python version must be the first
+one, otherwise, an error will be raised.
+
+[201]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Variables#ENABLE_PYTHON_VENV
+
+[301]: https://cmake.org/cmake/help/latest/module/FindPython2.html
+[302]: https://cmake.org/cmake/help/latest/module/FindPython3.html
+[303]: https://cmake.org/cmake/help/latest/command/find_package.html
+
+#]=================================================================]#github/wiki
+
+include_guard(GLOBAL)
+
+
+@FCM_COMMAND_PREFIX@enable_if(ENABLE_PYTHON_VENV)
+@FCM_COMMAND_PREFIX@requires_cmake(3.15
+  "Using `*_FIND_VIRTUALENV` in FindPython2 or FindPython3 modules"
+)
+
+
+macro(@FCM_COMMAND_PREFIX@init_python_venv)
+  set(__python "Python3")
+  set(__version "")
+  set(__options ${ARGV})
+
+  if (NOT "${ARGC}" EQUAL "0")
+    if ("${ARGV0}" MATCHES "^2")
+      set(__python "Python2")
+    elseif (NOT "${ARGV0}" MATCHES "^3")
+      message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+        "Python version must be the first argument."
+      )
+    endif()
+
+    set(__version "${ARGV0}")
+    list(SUBLIST __options 1 -1 __options)
+  endif()
+
+  @FCM_COMMAND_PREFIX@internal_init_python_venv(
+    ${__python} ${__version} REQUIRED ${__options}
+  )
+
+  unset(__python)
+  unset(__version)
+  unset(__options)
+endmacro()
+
+function(@FCM_COMMAND_PREFIX@internal_init_venv_variable)
+  file(TO_NATIVE_PATH "${PYTHON_VENV_DIR}" python_venv_native_path)
+  # Mimic the `bin/activate` script to help `find_package()` find the venv
+  # See: https://docs.python.org/3/library/venv.html#how-venvs-work
+  set(ENV{VIRTUAL_ENV} "${python_venv_native_path}")
+endfunction()
+
+macro(@FCM_COMMAND_PREFIX@internal_init_python_venv
+  python
+)
+  if ("${python}" MATCHES "^Python(2|3)$")
+    message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+      "Missing \"Python2\" or \"Python3\" argument!"
+    )
+  endif()
+
+  @FCM_COMMAND_PREFIX@internal_init_venv_variable()
+  find_package(${ARGV})
+
+  if (NOT ${python}_EXECUTABLE MATCHES "^$ENV{VIRTUAL_ENV}/")
+    message(STATUS
+      "Creating ${python} virtual environment in \"$ENV{VIRTUAL_ENV}\""
+    )
+    execute_process(COMMAND
+        ${${python}_EXECUTABLE} -m venv "$ENV{VIRTUAL_ENV}"
+    )
+    message(STATUS
+      "Creating ${python} virtual environment in \"$ENV{VIRTUAL_ENV}\" - done"
+    )
+
+    # Force `find_package()` to run another search
+    unset(${python}_EXECUTABLE)
+
+    # Change the context of search
+    set(${python}_FIND_VIRTUALENV "FIRST")
+
+    find_package(${ARGV})
+    if (NOT ${python}_EXECUTABLE MATCHES "^$ENV{VIRTUAL_ENV}/")
+      message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+        "${python} virtual environment is not found!"
+      )
+    endif()
+
+    message(STATUS "Found ${python} (venv): ${${python}_EXECUTABLE}")
+  endif()
+endmacro()
