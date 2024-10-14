@@ -11,11 +11,10 @@
 include_guard(GLOBAL)
 
 
-include_project_module(dependencies/Docs)
+@FCM_COMMAND_PREFIX@include("dependencies/Doxygen" TEMPLATE)
+@FCM_COMMAND_PREFIX@get(ENABLE_DOCS)
 if (ENABLE_DOCS)
-  add_docs(docs FORMAT html
-    INPUTS
-      include
-      README.md
+  @FCM_COMMAND_PREFIX@doxygen_add_docs(docs FORMAT html
+    INPUTS "include" "README.md"
   )
 endif()
