@@ -1,0 +1,239 @@
+# Flexible CMake Modules
+# ------------------------------------------------------------------------------
+# Author: Pavel Tsayukov
+# Repository: https://github.com/tsayukov/flexible-cmake-modules
+# Distributed under the MIT License. See the accompanying file LICENSE or
+# https://opensource.org/license/mit for details.
+# ------------------------------------------------------------------------------
+#
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# FOR COAUTHORS AND CONTRIBUTORS: fill in your name, contacts, and changes above
+#
+#[=================================================================[#github/wiki
+# Doxygen
+
+Enable the [`<FCM_PROJECT_CACHE_PREFIX>ENABLE_DOCS`][201] option to turn on
+[Doxygen][501] (improved by [Doxygen Awesome][502]) as a documentation
+generator via the [`FindDoxygen`][301] module.
+
+## fcm_doxygen_add_docs
+
+Add a target to build the documentation.
+
+```
+fcm_doxygen_add_docs(<target_suffix> FORMAT <format>
+                     INPUTS <input_files_or_directories>...
+                     [OUTPUT <output_directory>])
+```
+
+Add an `<FCM_PROJECT_TARGET_PREFIX><target_suffix>` target for building
+the `<format>` documentation of files that can be recursively found
+in `<input_files_or_directories>` and to place the result
+in `<output_directory>`. By default, `<output_directory>`
+is `${DOXYGEN_OUTPUT_DIRECTORY}/<format>`. If `<output_directory>`
+is not an absolute path, prepend it with `${DOXYGEN_OUTPUT_DIRECTORY}`.
+See supported [formats][503].
+Also, generate install rules for documentation,
+add an `<FCM_PROJECT_TARGET_PREFIX>docs` install component,
+and an `install_<FCM_PROJECT_TARGET_PREFIX>docs` custom target to install
+the documentation if [`<FCM_PROJECT_CACHE_PREFIX>ENABLE_INSTALL`][202] is set.
+
+Usage:
+
+```cmake
+fcm_include("dependencies/Docs" TEMPLATE)
+fcm_doxygen_add_docs(docs FORMAT html
+  INPUTS "include" "README.md"
+)
+```
+
+[201]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Variables#ENABLE_DOCS
+[202]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Variables#ENABLE_INSTALL
+
+[301]: https://cmake.org/cmake/help/latest/module/FindDoxygen.html
+
+[501]: https://www.doxygen.nl/
+[502]: https://jothepro.github.io/doxygen-awesome-css
+[503]: https://www.doxygen.nl/manual/starting.html#step2
+
+#]=================================================================]#github/wiki
+
+include_guard(GLOBAL)
+@FCM_COMMAND_PREFIX@internal_variable_init_guard()
+
+@FCM_COMMAND_PREFIX@enable_if(ENABLE_DOCS)
+
+
+function(@FCM_COMMAND_PREFIX@doxygen_add_docs
+  target_suffix
+)
+  cmake_parse_arguments(PARSE_ARGV 1 "ARGS" "" "FORMAT;OUTPUT" "INPUTS")
+
+  if (NOT DEFINED ARGS_INPUTS)
+    message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+      "Missing the `INPUTS` keyword."
+    )
+  endif()
+
+  if (NOT DEFINED ARGS_FORMAT)
+    message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+      "Missing the `FORMAT` keyword."
+    )
+  endif()
+
+  if (NOT DEFINED ARGS_OUTPUT)
+    string(TOLOWER "${ARGS_FORMAT}" ARGS_OUTPUT)
+  endif()
+
+  if (IS_ABSOLUTE "${ARGS_OUTPUT}")
+    set(output "${ARGS_OUTPUT}")
+  else()
+    set(output "${DOXYGEN_OUTPUT_DIRECTORY}/${ARGS_OUTPUT}")
+  endif()
+
+  string(TOUPPER "${ARGS_FORMAT}" ARGS_FORMAT)
+
+  set(DOXYGEN_GENERATE_${ARGS_FORMAT} YES)
+  set(DOXYGEN_${ARGS_FORMAT}_OUTPUT "${output}")
+
+  @FCM_COMMAND_PREFIX@get_project_target_prefix()
+  doxygen_add_docs(
+    ${FCM_PROJECT_TARGET_PREFIX}${target_suffix} ${ARGS_INPUTS}
+    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+    COMMENT "Generate ${ARGS_FORMAT} documentation"
+  )
+
+  @FCM_COMMAND_PREFIX@get(ENABLE_INSTALL)
+  if(ENABLE_INSTALL)
+    set(docs_component "${FCM_PROJECT_TARGET_PREFIX}docs")
+    @FCM_COMMAND_PREFIX@get(INSTALL_DOC_DIR)
+    install(DIRECTORY
+        "${output}"
+      DESTINATION
+        "${INSTALL_DOC_DIR}"
+      COMPONENT ${docs_component} EXCLUDE_FROM_ALL
+    )
+    @FCM_COMMAND_PREFIX@add_component_target(${docs_component})
+  endif()
+endfunction()
+
+
+################################# Doxygen init #################################
+
+find_package(Doxygen REQUIRED OPTIONAL_COMPONENTS dot)
+
+# Get the path to the executable file
+get_target_property(DOXYGEN_EXECUTABLE Doxygen::doxygen IMPORTED_LOCATION)
+
+# Configuration
+# See: https://www.doxygen.nl/manual/config.html
+
+# Project related configuration options
+set(DOXYGEN_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/docs")
+
+# Build related configuration options
+set(DOXYGEN_EXTRACT_ALL YES)
+
+# Configuration options related to the input files
+set(DOXYGEN_RECURSIVE YES)
+set(DOXYGEN_USE_MDFILE_AS_MAINPAGE
+  "${PROJECT_SOURCE_DIR}/README.md"
+)
+
+# Configuration options related to the HTML output
+set(DOXYGEN_GENERATE_TREEVIEW YES)
+set(DOXYGEN_DISABLE_INDEX NO)
+set(DOXYGEN_FULL_SIDEBAR NO)
+set(DOXYGEN_HTML_COLORSTYLE "LIGHT")
+
+# Configuration options related to diagram generator tools
+if (Doxygen_dot_FOUND)
+  set(DOXYGEN_HAVE_DOT YES)
+  set(DOXYGEN_DOT_IMAGE_FORMAT "svg")
+  set(DOXYGEN_DOT_TRANSPARENT YES)
+endif()
+
+
+############################## Generate templates ##############################
+
+set(DOXYGEN_TEMPLATE_DIR "${PROJECT_BINARY_DIR}/docs/template")
+
+file(MAKE_DIRECTORY "${DOXYGEN_TEMPLATE_DIR}")
+
+execute_process(COMMAND
+    ${DOXYGEN_EXECUTABLE} -w html
+      "header.html"
+      "footer.html"
+      "customdoxygen.html"
+  WORKING_DIRECTORY "${DOXYGEN_TEMPLATE_DIR}"
+  ERROR_VARIABLE __doxygen_generation_error
+)
+
+if (__doxygen_generation_error)
+  message(FATAL_ERROR
+    "An error occurred while generating Doxygen template files: "
+    "${__doxygen_generation_error}"
+  )
+endif()
+unset(__doxygen_generation_error)
+
+set(DOXYGEN_HTML_HEADER
+  "${DOXYGEN_TEMPLATE_DIR}/header.html"
+)
+
+
+############################# Doxygen Awesome init #############################
+
+find_path(doxygen_awesome_SOURCE_DIR
+    "doxygen-awesome.css"
+  PATH_SUFFIXES
+    "share/doxygen-awesome-css"
+)
+mark_as_advanced(doxygen_awesome_SOURCE_DIR)
+
+if (NOT doxygen_awesome_SOURCE_DIR)
+  @FCM_COMMAND_PREFIX@can_fetch_dependency(doxygen_awesome)
+
+  @FCM_COMMAND_PREFIX@git_first_hash(__last_version_hash
+    "https://github.com/jothepro/doxygen-awesome-css" TAGS DESCEND
+  )
+
+  include(FetchContent)
+  FetchContent_Declare(doxygen_awesome
+    GIT_REPOSITORY "https://github.com/jothepro/doxygen-awesome-css"
+    GIT_TAG ${__last_version_hash}
+  )
+  unset(__last_version_hash)
+
+  FetchContent_MakeAvailable(doxygen_awesome)
+endif()
+
+# Configuration
+
+set(DOXYGEN_HTML_EXTRA_STYLESHEET
+  "${doxygen_awesome_SOURCE_DIR}/doxygen-awesome.css"
+  "${doxygen_awesome_SOURCE_DIR}/doxygen-awesome-sidebar-only.css"
+  "${doxygen_awesome_SOURCE_DIR}/doxygen-awesome-sidebar-only-darkmode-toggle.css"
+)
+
+# See: https://jothepro.github.io/doxygen-awesome-css/md_docs_2extensions.html#extension-dark-mode-toggle
+set(DOXYGEN_HTML_EXTRA_FILES
+  "${doxygen_awesome_SOURCE_DIR}/doxygen-awesome-darkmode-toggle.js"
+)
+
+if (NOT DEFINED DOXYGEN_TEMPLATE_DIR)
+  message(FATAL_ERROR
+    "`DOXYGEN_TEMPLATE_DIR` is not defined, "
+    "call the `generate_doxygen_html_templates` command before."
+  )
+endif()
+
+file(APPEND "${DOXYGEN_HTML_HEADER}"
+[[
+<!-- Dark Mode Toggle -->
+<script type="text/javascript" src="$relpath^doxygen-awesome-darkmode-toggle.js"></script>
+<script type="text/javascript">
+  DoxygenAwesomeDarkModeToggle.init()
+</script>
+]]
+)
