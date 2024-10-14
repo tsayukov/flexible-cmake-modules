@@ -1,0 +1,353 @@
+# Flexible CMake Modules
+# ------------------------------------------------------------------------------
+# Author: Pavel Tsayukov
+# Repository: https://github.com/tsayukov/flexible-cmake-modules
+# Distributed under the MIT License. See the accompanying file LICENSE or
+# https://opensource.org/license/mit for details.
+# ------------------------------------------------------------------------------
+#
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# FOR COAUTHORS AND CONTRIBUTORS: fill in your name, contacts, and changes above
+#
+#[=================================================================[#github/wiki
+# Compiler
+
+Define commands, variables, and targets to work with enabled languages.
+`<lang>` is a language name in lower case, e.g., `c`, `cxx`.
+`<LANG>` is a language name in upper case, e.g., `C`, `CXX`.
+See supported [languages][303].
+
+## Table of Contents:
+
+- C/C++:
+  - Project targets:
+    - [\<lang\>_standard](#\<lang\>_standard)
+  - Commands:
+    - [fcm_use_\<lang\>_standard_at_least](#fcm_use_\<lang\>_standard_at_least)
+    - [fcm_enable_\<lang\>_extensions](#fcm_enable_\<lang\>_extensions)
+    - [fcm_disable_\<lang\>_extensions](#fcm_enable_\<lang\>_extensions)
+  - [Variables](#Variables):
+    - [\<LANG\>_OPTIONS](#\<LANG\>_OPTIONS)
+    - [\<LANG\>_WARNING_OPTIONS](#\<LANG\>_WARNING_OPTIONS)
+    - [\<LANG\>_ERROR_OPTIONS](#\<LANG\>_ERROR_OPTIONS)
+    - [\<LANG\>_LANGUAGE_OPTIONS](#\<LANG\>_LANGUAGE_OPTIONS)
+    - [\<LANG\>_DIAGNOSTIC_OPTIONS](#\<LANG\>_DIAGNOSTIC_OPTIONS)
+
+## \<lang\>_standard
+
+A `<FCM_PROJECT_TARGET_PREFIX><lang>_standard` target is an interface library
+with added the compiler feature indicating [C][306] or [C++][307] standard.
+This target is defined by the first
+[`fcm_use_\<lang\>_standard_at_least()`](#fcm_use_\<lang\>_standard_at_least)
+call until that call is not in the project's root CMakeLists.txt and
+`CMAKE_<LANG>_STANDARD` is not defined.
+
+In general, this target should be treated as a target with the least supported
+standard of the project. Still, toggling between different
+`CMAKE_<LANG>_STANDARD` for different builds is a good way to test the project
+against different standards, no less than the least required.
+
+Usage:
+
+```cmake
+# CMakeLists.txt
+cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
+
+project(my-project CXX)
+
+include(cmake/FcmInit.cmake)
+
+fcm_use_cxx_standard_at_least(17)
+
+fcm_add_library(my_library)
+fcm_target_link_libraries(my_library
+  PUBLIC my_project::cxx_standard
+)
+```
+
+## fcm_use_\<lang\>_standard_at_least
+
+Set the project's required `<lang>` standard or check its compatibility with
+dependent parts of the project.
+
+```
+fcm_use_\<lang\>_standard_at_least(<standard> [NAME <dependent_part_name>])
+```
+
+Check if `CMAKE_<LANG>_STANDARD` (for [C][304] and [C++][305] languages)
+is set to at least `<standard>` and in the very first call define
+the [`<FCM_PROJECT_TARGET_PREFIX><lang>_standard`](#\<lang\>_standard) target
+with the standard set to the maximum of `CMAKE_<LANG>_STANDARD`
+and `<standard>`, which other targets can link against.
+
+If `CMAKE_<LANG>_STANDARD` is not defined, the first call of the command
+set its compile feature to `<lang>_std_<standard>`.
+
+The first time this command should be called in the current project's
+root listfile to define `<FCM_PROJECT_TARGET_PREFIX><lang>_standard`.
+If there's no such call, but `CMAKE_<LANG>_STANDARD` is defined,
+the `<FCM_PROJECT_TARGET_PREFIX><lang>_standard` target will have the standard
+that is set in `CMAKE_<LANG>_STANDARD`.
+
+If there's no such call and `CMAKE_<LANG>_STANDARD` is not defined,
+then this command is no-op.
+
+Use next calls of this command to check if `<dependent_part_name>`'s requirement
+is not greater than the standard
+in `<FCM_PROJECT_TARGET_PREFIX><lang>_standard`.
+
+Usage:
+
+```cmake
+# CMakeLists.txt
+cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
+
+project(my-project CXX)
+
+include(cmake/FcmInit.cmake)
+
+fcm_use_cxx_standard_at_least(20)
+
+add_subdirectory(externals)
+
+fcm_add_library(my_library)
+fcm_target_link_libraries(my_library
+  PUBLIC my_project::cxx_standard
+)
+```
+
+```cmake
+# externals/CMakeLists.txt
+
+use_cxx_standard_at_least(17) # okay
+# include an external library that requires at least the standard C++17
+
+use_cxx_standard_at_least(20) # okay
+# include an external library that requires at least the standard C++20
+
+use_cxx_standard_at_least(23) # error!
+# include an external library that requires at least the standard C++23
+```
+
+Setting `CMAKE_CXX_STANDARD` to `23` before the first
+`fcm_use_cxx_standard_at_least()` call can eliminate that error, but probably
+this is not what you want. If an external library your project depends on
+requires at least the standard C++23, your project should requires the same.
+
+## fcm_enable_\<lang\>_extensions
+## fcm_disable_\<lang\>_extensions
+
+C/C++ extensions toggle.
+
+```
+fcm_enable_\<lang\>_extensions()
+
+fcm_disable_\<lang\>_extensions()
+```
+
+Set `CMAKE_<LANG>_EXTENSIONS` for [C][308]
+or [C++][309].
+If the [`<FCM_PROJECT_TARGET_PREFIX><lang>_standard`](#\<lang\>_standard)
+is defined, then set its `<LANG>_EXTENSIONS` property for [C][310]
+or [C++][311].
+
+## Variables
+
+Semicolon lists with `<lang>` compiler's options.
+
+Support `Clang`, `GCC`, and `MSVC`.
+See the `compiler/<Gnu|Msvc>.<LANG>.Options.cmake` files to look at the default
+set. It is intended that the project's maintainers change those files by their
+discretion.
+
+> [!WARNING]
+> The default set of `C` options has not been implemented yet.
+
+### \<LANG\>_OPTIONS
+
+Include:
+- [`<LANG>_WARNING_OPTIONS`](#\<LANG\>_WARNING_OPTIONS);
+- [`<LANG>_LANGUAGE_OPTIONS`](#\<LANG\>_LANGUAGE_OPTIONS);
+- [`<LANG>_DIAGNOSTIC_OPTIONS`](#\<LANG\>_DIAGNOSTIC_OPTIONS).
+
+[`<LANG>_ERROR_OPTIONS`](#\<LANG\>_ERROR_OPTIONS) is not included intentionally.
+
+### \<LANG\>_WARNING_OPTIONS
+### \<LANG\>_ERROR_OPTIONS
+### \<LANG\>_LANGUAGE_OPTIONS
+### \<LANG\>_DIAGNOSTIC_OPTIONS
+
+[301]: https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_VERSION.html
+[302]: https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_ID.html
+[303]: https://cmake.org/cmake/help/latest/command/project.html
+[304]: https://cmake.org/cmake/help/latest/variable/CMAKE_C_STANDARD.html
+[305]: https://cmake.org/cmake/help/latest/variable/CMAKE_CXX_STANDARD.html
+[306]: https://cmake.org/cmake/help/latest/prop_gbl/CMAKE_C_KNOWN_FEATURES.html#high-level-meta-features-indicating-c-standard-support
+[307]: https://cmake.org/cmake/help/latest/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html#high-level-meta-features-indicating-c-standard-support
+[308]: https://cmake.org/cmake/help/latest/variable/CMAKE_C_EXTENSIONS.html
+[309]: https://cmake.org/cmake/help/latest/variable/CMAKE_CXX_EXTENSIONS.html
+[310]: https://cmake.org/cmake/help/latest/prop_tgt/C_EXTENSIONS.html
+[311]: https://cmake.org/cmake/help/latest/prop_tgt/CXX_EXTENSIONS.html
+
+#]=================================================================]#github/wiki
+
+include_guard(GLOBAL)
+@FCM_COMMAND_PREFIX@internal_variable_init_guard()
+
+@FCM_COMMAND_PREFIX@include("dependencies/Ccache" TEMPLATE)
+
+
+get_property(__languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+foreach (__lang IN LISTS __languages)
+  string(TOUPPER "${__lang}" __LANG)
+  string(TOLOWER "${__lang}" __lang)
+
+  if (__LANG MATCHES "^C(XX)?$")
+
+    function(@FCM_COMMAND_PREFIX@internal_compare_${__lang}_standards
+      output_variable
+      lhs
+      rhs
+    )
+      if (NOT lhs MATCHES "^9[0-9]$")
+        set(lhs ${lhs}00)
+      endif()
+      if (NOT rhs MATCHES "^9[0-9]$")
+        set(rhs ${rhs}00)
+      endif()
+
+      if (lhs LESS rhs)
+        set(result "LESS")
+      elseif (lhs GREATER rhs)
+        set(result "GREATER")
+      else() # lhs EQUAL rhs
+        set(result "EQUAL")
+      endif()
+
+      set(${output_variable} ${result} PARENT_SCOPE)
+    endfunction()
+
+    function(@FCM_COMMAND_PREFIX@internal_check_${__lang}_standard_consistency
+      required_standard
+    )
+      cmake_parse_arguments(PARSE_ARGV 1 "ARGS" "" "NAME" "")
+
+      @FCM_COMMAND_PREFIX@internal_compare_${__lang}_standards(
+        compare_standards_result
+        ${required_standard}
+        ${CMAKE_${__LANG}_STANDARD}
+      )
+      if (NOT compare_standards_result STREQUAL "GREATER")
+        return()
+      endif()
+
+      if (CMAKE_CURRENT_LIST_DIR STREQUAL PROJECT_SOURCE_DIR)
+        message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+          "The project \"${PROJECT_NAME}\" requires at least "
+          "the ${__LANG} standard ${required_standard}, "
+          "but CMAKE_${__LANG}_STANDARD is set to ${CMAKE_${__LANG}_STANDARD}."
+        )
+        return()
+      endif()
+
+      if (ARGS_NAME)
+        set(dependent_part_name "\"${ARGS_NAME}\"")
+      else()
+        file(RELATIVE_PATH relative_file_path
+          "${PROJECT_SOURCE_DIR}"
+          "${CMAKE_CURRENT_LIST_FILE}"
+        )
+        set(dependent_part_name "defined in \"${relative_file_path}\"")
+      endif()
+
+      message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+        "The project \"${PROJECT_NAME}\" is built against "
+        "the ${__LANG} standard ${CMAKE_${__LANG}_STANDARD}, "
+        "but its dependent part ${dependent_part_name} "
+        "requires at least ${required_standard}."
+      )
+    endfunction()
+
+    function(@FCM_COMMAND_PREFIX@use_${__lang}_standard_at_least
+      standard
+    )
+      if (NOT DEFINED CMAKE_${__LANG}_STANDARD)
+        if (CMAKE_CURRENT_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
+          set(CMAKE_${__LANG}_STANDARD ${standard})
+          set(CMAKE_${__LANG}_STANDARD ${CMAKE_${__LANG}_STANDARD} PARENT_SCOPE)
+        else()
+          return()
+        endif()
+      endif()
+
+      cmake_parse_arguments(PARSE_ARGV 1 "ARGS" "" "NAME" "")
+
+      @FCM_COMMAND_PREFIX@internal_check_${__lang}_standard_consistency(
+        ${standard} NAME "${ARGS_NAME}"
+      )
+
+      set(target_suffix ${__lang}_standard)
+
+      @FCM_COMMAND_PREFIX@get_project_target_prefix()
+      set(target ${FCM_PROJECT_TARGET_PREFIX}${target_suffix})
+
+      if (NOT TARGET ${target})
+        @FCM_COMMAND_PREFIX@add_library(${target_suffix} INTERFACE)
+        project_target_compile_features(${target_suffix}
+          INTERFACE
+            ${__lang}_std_${CMAKE_${__LANG}_STANDARD}
+        )
+        set(CMAKE_${__LANG}_STANDARD_REQUIRED ON PARENT_SCOPE)
+      endif()
+    endfunction()
+
+    function(@FCM_COMMAND_PREFIX@enable_${__lang}_extensions)
+      @FCM_COMMAND_PREFIX@get_target(${__lang}_standard FULL_NAME_TO target)
+      if (TARGET ${target})
+        set_target_properties(${target}
+          PROPERTIES
+            ${__LANG}_EXTENSIONS ON
+        )
+      endif()
+      set(CMAKE_${__LANG}_EXTENSIONS ON PARENT_SCOPE)
+    endfunction()
+
+    function(@FCM_COMMAND_PREFIX@disable_${__lang}_extensions)
+      @FCM_COMMAND_PREFIX@get_target(${__lang}_standard FULL_NAME_TO target)
+      if (TARGET ${target})
+        set_target_properties(${target}
+          PROPERTIES
+            ${__LANG}_EXTENSIONS OFF
+        )
+      endif()
+      set(CMAKE_${__LANG}_EXTENSIONS OFF PARENT_SCOPE)
+    endfunction()
+
+    # So far, support only C++ options
+    include("compiler/${__LANG}.Options")
+
+  endif(__LANG MATCHES "^C(XX)?$")
+
+
+  @FCM_COMMAND_PREFIX@get(ENABLE_EXPORT_HEADER)
+  if (ENABLE_EXPORT_HEADER)
+    # See: https://cmake.org/cmake/help/latest/prop_tgt/VISIBILITY_INLINES_HIDDEN.html
+    set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
+    if (__LANG MATCHES "^C(XX)?$")
+      # See: https://cmake.org/cmake/help/latest/prop_tgt/LANG_VISIBILITY_PRESET.html
+      set(CMAKE_${__LANG}_VISIBILITY_PRESET "hidden")
+    endif()
+  endif()
+
+
+  @FCM_COMMAND_PREFIX@get(ENABLE_CCACHE)
+  if (ENABLE_CCACHE)
+    if (__LANG MATCHES "^((OBJ)?C(XX)?|ASM.*|CUDA)$")
+      @FCM_COMMAND_PREFIX@use_ccache(${__LANG})
+    endif()
+  endif()
+endforeach()
+
+unset(__LANG)
+unset(__lang)
+unset(__languages)
