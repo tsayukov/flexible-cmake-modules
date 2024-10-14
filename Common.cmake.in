@@ -17,7 +17,8 @@ include_guard(GLOBAL)
 @FCM_COMMAND_PREFIX@include("common/Watchers" TEMPLATE)
 @FCM_COMMAND_PREFIX@include("common/Guards" TEMPLATE)
 @FCM_COMMAND_PREFIX@include("common/Debug" TEMPLATE)
-@FCM_COMMAND_PREFIX@include("common/Project" TEMPLATE)
+@FCM_COMMAND_PREFIX@include("common/Project.Cache" TEMPLATE)
+@FCM_COMMAND_PREFIX@include("common/Project.Targets" TEMPLATE)
 @FCM_COMMAND_PREFIX@include("common/Miscellaneous" TEMPLATE)
 
 # Initialize the project cached entries
