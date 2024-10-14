@@ -194,6 +194,10 @@ include_guard(GLOBAL)
 macro(@FCM_COMMAND_PREFIX@parse_and_remove_arguments_from
   variable
 )
+  # NOTE: suppress a warning about the variable with the empty name, because
+  # `${}` is interpreted as expanding of the variable with the empty name
+  unset("")
+
   @FCM_COMMAND_PREFIX@internal_parse_and_remove_arguments_from(${variable}
     __INPUT__ ${${}${variable}}
     ${ARGN}
