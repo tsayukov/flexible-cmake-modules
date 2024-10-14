@@ -184,6 +184,7 @@ function(@FCM_COMMAND_PREFIX@set_cache_entry
     message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
       "Missing the `CACHE` keyword."
     )
+    return()
   endif()
 
   list(SUBLIST ARGN 0 ${index} values)
@@ -193,6 +194,7 @@ function(@FCM_COMMAND_PREFIX@set_cache_entry
     message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
       "Some arguments may be missing: `CACHE <type> \"<docstring>\" [FORCE]`"
     )
+    return()
   endif()
 
   list(GET parameters 1 type)

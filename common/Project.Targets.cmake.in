@@ -324,6 +324,7 @@ function(@FCM_COMMAND_PREFIX@get_target
       "Neither the \"${FCM_PROJECT_TARGET_PREFIX}${target}\" nor \"${target}\" "
       "target exists."
     )
+    return()
   else()
     set(full_name ${target})
   endif()

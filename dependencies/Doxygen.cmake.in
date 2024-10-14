@@ -73,12 +73,14 @@ function(@FCM_COMMAND_PREFIX@doxygen_add_docs
     message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
       "Missing the `INPUTS` keyword."
     )
+    return()
   endif()
 
   if (NOT DEFINED ARGS_FORMAT)
     message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
       "Missing the `FORMAT` keyword."
     )
+    return()
   endif()
 
   if (NOT DEFINED ARGS_OUTPUT)
@@ -174,6 +176,7 @@ if (__doxygen_generation_error)
     "An error occurred while generating Doxygen template files: "
     "${__doxygen_generation_error}"
   )
+  return()
 endif()
 unset(__doxygen_generation_error)
 
@@ -226,6 +229,7 @@ if (NOT DEFINED DOXYGEN_TEMPLATE_DIR)
     "`DOXYGEN_TEMPLATE_DIR` is not defined, "
     "call the `generate_doxygen_html_templates` command before."
   )
+  return()
 endif()
 
 file(APPEND "${DOXYGEN_HTML_HEADER}"

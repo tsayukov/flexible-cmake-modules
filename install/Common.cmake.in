@@ -210,6 +210,7 @@ function(@FCM_COMMAND_PREFIX@install
       "Only the CONFIGS, HEADERS, EXPORT_HEADERS, TARGETS, and LICENSE modes "
       "are supported."
     )
+    return()
   endif()
 endfunction()
 
@@ -361,6 +362,7 @@ function(@FCM_COMMAND_PREFIX@internal_instal_targets)
       message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
         "\"${target}\" is not a target."
       )
+      return()
     endif()
     list(APPEND target_list ${target})
   endforeach()
@@ -376,6 +378,7 @@ function(@FCM_COMMAND_PREFIX@internal_instal_targets)
     message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
       "There are no targets to install."
     )
+    return()
   endif()
 
   @FCM_COMMAND_PREFIX@get_project_target_prefix()

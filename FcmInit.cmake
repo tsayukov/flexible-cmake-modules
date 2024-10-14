@@ -131,6 +131,8 @@ if (CMAKE_VERSION VERSION_LESS "3.14")
   message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
     "Flexible CMake Modules are supported only by CMake 3.14+"
   )
+  cmake_policy(POP)
+  return()
 endif()
 
 

@@ -112,6 +112,7 @@ if ((CMAKE_C_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_C_COMPILER_VERSION VERSI
     message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
       "Only Valgrind 3.20+ works properly with Clang 14+."
     )
+    return()
   endif()
   unset(__valgrind_version)
 endif()
