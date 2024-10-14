@@ -56,18 +56,22 @@ macro(@FCM_COMMAND_PREFIX@init_python_venv)
     if ("${ARGV0}" MATCHES "^2")
       set(__python "Python2")
     elseif (NOT "${ARGV0}" MATCHES "^3")
-      message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
-        "Python version must be the first argument."
-      )
+      set(__python "")
     endif()
 
     set(__version "${ARGV0}")
     list(SUBLIST __options 1 -1 __options)
   endif()
 
-  @FCM_COMMAND_PREFIX@internal_init_python_venv(
-    ${__python} ${__version} REQUIRED ${__options}
-  )
+  if (__python)
+    @FCM_COMMAND_PREFIX@internal_init_python_venv(
+      ${__python} ${__version} REQUIRED ${__options}
+    )
+  else()
+    message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+      "Python version must be the first argument."
+    )
+  endif()
 
   unset(__python)
   unset(__version)
@@ -84,12 +88,6 @@ endfunction()
 macro(@FCM_COMMAND_PREFIX@internal_init_python_venv
   python
 )
-  if ("${python}" MATCHES "^Python(2|3)$")
-    message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
-      "Missing \"Python2\" or \"Python3\" argument!"
-    )
-  endif()
-
   @FCM_COMMAND_PREFIX@internal_init_venv_variable()
   find_package(${ARGV})
 
@@ -111,12 +109,12 @@ macro(@FCM_COMMAND_PREFIX@internal_init_python_venv
     set(${python}_FIND_VIRTUALENV "FIRST")
 
     find_package(${ARGV})
-    if (NOT ${python}_EXECUTABLE MATCHES "^$ENV{VIRTUAL_ENV}/")
+    if (${python}_EXECUTABLE MATCHES "^$ENV{VIRTUAL_ENV}/")
+      message(STATUS "Found ${python} (venv): ${${python}_EXECUTABLE}")
+    else()
       message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
         "${python} virtual environment is not found!"
       )
     endif()
-
-    message(STATUS "Found ${python} (venv): ${${python}_EXECUTABLE}")
   endif()
 endmacro()
