@@ -72,12 +72,12 @@ endif()
 @FCM_COMMAND_PREFIX@get(BENCHMARK_TOOLS_DEPENDENCIES_ARE_INSTALLED)
 if (NOT BENCHMARK_TOOLS_DEPENDENCIES_ARE_INSTALLED)
   message(STATUS "Installing Google Benchmark tools' dependencies")
-  execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install
+  execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install --quiet
     -r "${BENCHMARK_TOOLS}/requirements.txt"
   )
   # Even though, `requirements.txt` doesn't have `pandas`,
   # `compare.py` still requires it
-  execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install
+  execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install --quiet
     wheel
     pandas
   )
