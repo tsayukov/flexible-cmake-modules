@@ -141,6 +141,10 @@ If the target is a shared library, also set the following target properties:
 Pass the `EXCLUDE_FROM_INSTALL` option to exclude the target from installation
 via [`fcm_install(TARGETS)`][103].
 
+Set the [`INTERPROCEDURAL_OPTIMIZATION_RELEASE`][322] target property
+if [`<FCM_PROJECT_CACHE_PREFIX>ENABLE_INTERPROCEDURAL_OPTIMIZATION_RELEASE`][202]
+is enabled and the compiler supports IPO.
+
 ## fcm_add_executable
 
 Add a project [executable][311] target.
@@ -162,6 +166,10 @@ to `<target_suffix>`.
 Pass the `EXCLUDE_FROM_INSTALL` option to exclude the target from installation
 via [`fcm_install(TARGETS)`][103].
 
+Set the [`INTERPROCEDURAL_OPTIMIZATION_RELEASE`][322] target property
+if [`<FCM_PROJECT_CACHE_PREFIX>ENABLE_INTERPROCEDURAL_OPTIMIZATION_RELEASE`][202]
+is enabled and the compiler supports IPO.
+
 ## fcm_generate_export_header
 
 An extended version of the [`generate_export_header()`][301] command.
@@ -182,7 +190,7 @@ otherwise, use the [`BINARY_DIR`][305] target property. If `<include_dir>`
 is a relative path, then prepend it with `BINARY_DIR`.
 Set `<include_dir>` as the `<FCM_PROJECT_CACHE_PREFIX>EXPORT_HEADER_DIR`
 target property's value, so the export header can be installed
-via the [`fcm_install(HEADERS)`][104] command.
+via the [`fcm_install(EXPORT_HEADERS)`][104] command.
 
 If `BASE_NAME` is not defined, use the target suffix by default.
 
@@ -272,10 +280,11 @@ fcm_target_sources(<target> <target_sources_arguments>...)
 
 [101]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_project_target_prefix
 [102]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_project_cache_prefix
-[103]: TODO(add_link)
-[104]: TODO(add_link)
+[103]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Install#fcm_install(TARGETS)
+[104]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Install#fcm_install(EXPORT_HEADERS)
 
 [201]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Variables#ENABLE_TREATING_INCLUDES_AS_SYSTEM
+[202]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Variables#ENABLE_INTERPROCEDURAL_OPTIMIZATION_RELEASE
 
 [301] https://cmake.org/cmake/help/latest/module/GenerateExportHeader.html
 [302] https://cmake.org/cmake/help/latest/variable/PROJECT_VERSION_MAJOR.html
@@ -298,6 +307,7 @@ fcm_target_sources(<target> <target_sources_arguments>...)
 [319] https://cmake.org/cmake/help/latest/command/target_link_options.html
 [320] https://cmake.org/cmake/help/latest/command/target_precompile_headers.html
 [321] https://cmake.org/cmake/help/latest/command/target_sources.html
+[322]: https://cmake.org/cmake/help/latest/prop_tgt/INTERPROCEDURAL_OPTIMIZATION_CONFIG.html
 
 #]=================================================================]#github/wiki
 
@@ -370,12 +380,20 @@ function(@FCM_COMMAND_PREFIX@add_library
     )
   endif()
 
+  @FCM_COMMAND_PREFIX@get(ENABLE_INSTALL)
   if (ENABLE_INSTALL AND NOT ARGS_EXCLUDE_FROM_INSTALL)
     @FCM_COMMAND_PREFIX@get_project_cache_prefix()
     set_property(DIRECTORY
         "${PROJECT_SOURCE_DIR}"
       APPEND PROPERTY
         ${FCM_PROJECT_CACHE_PREFIX}INSTALL_PROJECT_TARGETS ${target}
+    )
+  endif()
+
+  @FCM_COMMAND_PREFIX@get(INTERPROCEDURAL_OPTIMIZATION_RELEASE)
+  if (INTERPROCEDURAL_OPTIMIZATION_RELEASE)
+    set_target_properties(${target}
+      PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE ON
     )
   endif()
 endfunction()
@@ -403,12 +421,20 @@ function(@FCM_COMMAND_PREFIX@add_executable
       OUTPUT_NAME ${target_suffix}
   )
 
+  @FCM_COMMAND_PREFIX@get(ENABLE_INSTALL)
   if (ENABLE_INSTALL AND NOT ARGS_EXCLUDE_FROM_INSTALL)
     @FCM_COMMAND_PREFIX@get_project_cache_prefix()
     set_property(DIRECTORY
         "${PROJECT_SOURCE_DIR}"
       APPEND PROPERTY
         ${FCM_PROJECT_CACHE_PREFIX}INSTALL_PROJECT_TARGETS ${target}
+    )
+  endif()
+
+  @FCM_COMMAND_PREFIX@get(INTERPROCEDURAL_OPTIMIZATION_RELEASE)
+  if (INTERPROCEDURAL_OPTIMIZATION_RELEASE)
+    set_target_properties(${target}
+      PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE ON
     )
   endif()
 endfunction()

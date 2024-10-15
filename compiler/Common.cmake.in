@@ -194,8 +194,6 @@ Include:
 include_guard(GLOBAL)
 @FCM_COMMAND_PREFIX@internal_variable_init_guard()
 
-@FCM_COMMAND_PREFIX@include("dependencies/Ccache" TEMPLATE)
-
 
 function(@FCM_COMMAND_PREFIX@internal_compare_c_cxx_standards
   output_variable
@@ -334,6 +332,26 @@ endmacro()
 
 
 ############### Define compiler commands, variables, and targets ###############
+
+@FCM_COMMAND_PREFIX@get(ENABLE_INTERPROCEDURAL_OPTIMIZATION_RELEASE)
+if (ENABLE_INTERPROCEDURAL_OPTIMIZATION_RELEASE
+      AND CMAKE_BUILD_TYPE STREQUAL "Release")
+  include(CheckIPOSupported)
+  check_ipo_supported(RESULT __result OUTPUT __output LANGUAGES)
+
+  if (NOT __result)
+    message(AUTHOR_WARNING "IPO is not supported: ${__output}")
+  else()
+    @FCM_COMMAND_PREFIX@set_cache_entry(INTERPROCEDURAL_OPTIMIZATION_RELEASE
+      ON CACHE INTERNAL ""
+    )
+  endif()
+
+  unset(__result)
+  unset(__output)
+endif()
+
+@FCM_COMMAND_PREFIX@include("dependencies/Ccache" TEMPLATE)
 
 get_property(__languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 foreach (__lang IN LISTS __languages)

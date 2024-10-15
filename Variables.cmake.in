@@ -15,6 +15,7 @@
   - [ENABLE_DOCS](#ENABLE_DOCS)
   - [ENABLE_CCACHE](#ENABLE_CCACHE)
   - [ENABLE_TREATING_INCLUDES_AS_SYSTEM](#ENABLE_TREATING_INCLUDES_AS_SYSTEM)
+  - [ENABLE_INTERPROCEDURAL_OPTIMIZATION_RELEASE](#ENABLE_INTERPROCEDURAL_OPTIMIZATION_RELEASE)
 - Developer options:
   - [ENABLE_DEVELOPER_MODE](#ENABLE_DEVELOPER_MODE)
   - [ENABLE_TESTING](#ENABLE_TESTING)
@@ -162,6 +163,18 @@ calculations (see compiler documentation).
 @FCM_COMMAND_PREFIX@option(ENABLE_TREATING_INCLUDES_AS_SYSTEM
   "Use the `SYSTEM` option for the project's includes, compilers may disable warnings"
   ON IF (NOT PROJECT_IS_TOP_LEVEL)
+)
+
+#[=================================================================[#github/wiki
+## ENABLE_INTERPROCEDURAL_OPTIMIZATION_RELEASE
+
+Enable interprocedural optimization for the project's targets in the Release
+build if the compiler supports IPO.
+
+#]=================================================================]#github/wiki
+@FCM_COMMAND_PREFIX@option(ENABLE_INTERPROCEDURAL_OPTIMIZATION_RELEASE
+  "Enable IPO for the project's targets in the Release build"
+  ON IF CMAKE_BUILD_TYPE STREQUAL [[Release]]
 )
 
 
