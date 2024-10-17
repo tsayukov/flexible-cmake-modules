@@ -1,20 +1,17 @@
 #[=============================================================================[
   External dependencies
-  ------------------------------------------------------------------------------
-  Dependencies in this listfile is not related with those that are enabled
-  under the developer mode. These dependencies are used directly by the current
-  project and usually cannot be excluded. It's expected that this listfile will
-  be included before definitions of the project targets, because some of those
-  targets may link against these dependencies.
 #]=============================================================================]
 
 include_guard(GLOBAL)
 
 
 @FCM_COMMAND_PREFIX@include("dependencies/Doxygen" TEMPLATE)
-@FCM_COMMAND_PREFIX@get(ENABLE_DOCS)
-if (ENABLE_DOCS)
-  @FCM_COMMAND_PREFIX@doxygen_add_docs(docs FORMAT html
-    INPUTS "include" "README.md"
-  )
-endif()
+
+################################ Developer Mode ################################
+
+@FCM_COMMAND_PREFIX@include("dependencies/PythonVenv" TEMPLATE)
+@FCM_COMMAND_PREFIX@include("dependencies/Valgrind" TEMPLATE)
+@FCM_COMMAND_PREFIX@include("dependencies/GoogleTest" TEMPLATE)
+@FCM_COMMAND_PREFIX@include("dependencies/GoogleBenchmark" TEMPLATE)
+# @FCM_COMMAND_PREFIX@include("dependencies/Coverage" TEMPLATE)
+# @FCM_COMMAND_PREFIX@include("dependencies/Formatting" TEMPLATE)

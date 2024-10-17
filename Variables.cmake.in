@@ -190,7 +190,7 @@ is false, raise a warning, because this mode is intended for the project's
 developers, not consumers.
 
 Required libraries and programs are included and initialized
-in the `DeveloperMode` template module. The user should include this module
+in the `Dependencies` template module. The user should include this module
 after all project's targets are defined.
 
 #]=================================================================]#github/wiki
@@ -204,7 +204,7 @@ endif()
 #[=================================================================[#github/wiki
 ## ENABLE_TESTING
 
-Enable testing. The required library is included in the `DeveloperMode`
+Enable testing. The required library is included in the `Dependencies`
 template module. By default, it is [Google Test][502].
 
 #]=================================================================]#github/wiki
@@ -216,7 +216,7 @@ endif()
 #[=================================================================[#github/wiki
 ## ENABLE_BENCHMARKING
 
-Enable benchmarking. The required library is included in the `DeveloperMode`
+Enable benchmarking. The required library is included in the `Dependencies`
 template module. By default, it is [Google Benchmark][503].
 
 ## ENABLE_BENCHMARK_TOOLS
@@ -248,9 +248,8 @@ TODO: add description
 #[=================================================================[#github/wiki
 ## ENABLE_MEMORY_CHECKING
 
-Enable memory checking. The required program is included
-in the `DeveloperMode` template module. By default, it is [`valgrind`][507]
-via the [`Valgrind`][108].
+Enable memory checking. The required program is included in the `Dependencies`
+template module. By default, it is [`valgrind`][507] via the [`Valgrind`][108].
 
 #]=================================================================]#github/wiki
 @FCM_COMMAND_PREFIX@dev_option(ENABLE_MEMORY_CHECKING "Enable memory checking tools")
@@ -275,7 +274,7 @@ endif()
 
 Enable creating of Python virtual environment.
 The [`dependencies/PythonVenv`][106] template module is included
-in the `DeveloperMode` template module.
+in the `Dependencies` template module.
 
 ## PYTHON_VENV_DIR
 
