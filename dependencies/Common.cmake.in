@@ -1,0 +1,74 @@
+# Flexible CMake Modules
+# ------------------------------------------------------------------------------
+# Author: Pavel Tsayukov
+# Repository: https://github.com/tsayukov/flexible-cmake-modules
+# Distributed under the MIT License. See the accompanying file LICENSE or
+# https://opensource.org/license/mit for details.
+# ------------------------------------------------------------------------------
+#
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# FOR COAUTHORS AND CONTRIBUTORS: fill in your name, contacts, and changes above
+#
+#[=================================================================[#github/wiki
+# Dependency management
+
+Prefer to get dependencies by a [`find_package()`][301] call first.
+If it failed, then use the [`FetchContent`][302] module. It would be nice
+if the project's maintainers let users decide whether they want
+to use `FetchContent` or not.
+Use the [`<FCM_PROJECT_CACHE_PREFIX>FETCH_DEPENDENCIES`][201] option
+to control it. If necessary, set there your own option named by
+`<FCM_PROJECT_CACHE_PREFIX>FETCH_<dependency_name>` where `<dependency_name>`
+is a package case-sensitive name using in a `find_package()` call.
+
+## fcm_can_fetch_dependency
+
+Raise an error, if `<dependency_name>` is not allowed to be fetched.
+
+```
+fcm_can_fetch_dependency(<dependency_name>)
+```
+
+Usage:
+
+```cmake
+find_package(GTest)
+if (NOT GTest_FOUND)
+  fcm_can_fetch_dependency(GTest)
+  include(FetchContent)
+  # fetch GTest from its github repo via the `FetchContent` module
+endif()
+```
+
+[201]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Variables#FETCH_DEPENDENCIES
+
+[301]: https://cmake.org/cmake/help/latest/command/find_package.html
+[302]: https://cmake.org/cmake/help/latest/module/FetchContent.html
+
+#]=================================================================]#github/wiki
+
+include_guard(GLOBAL)
+@FCM_COMMAND_PREFIX@internal_variable_init_guard()
+
+
+function(@FCM_COMMAND_PREFIX@can_fetch_dependency
+  dependency_name
+)
+  @FCM_COMMAND_PREFIX@get_project_cache_prefix()
+  if (DEFINED ${FCM_PROJECT_CACHE_PREFIX}FETCH_${dependency_name})
+    set(is_allowed ${${FCM_PROJECT_CACHE_PREFIX}FETCH_${dependency_name}})
+  else()
+    set(is_allowed ${${FCM_PROJECT_CACHE_PREFIX}FETCH_DEPENDENCIES})
+  endif()
+
+  if (NOT is_allowed)
+    message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+      "'${dependency_name}' is not allowed to install locally. "
+      "Pass `-D${FCM_PROJECT_CACHE_PREFIX}FETCH_${dependency_name}=ON` "
+      "if you want otherwise. "
+      "Passing `-D${FCM_PROJECT_CACHE_PREFIX}FETCH_DEPENDENCIES=ON` allows that "
+      "for all of the external dependencies, except for those "
+      "that are already set to `OFF`."
+    )
+  endif()
+endfunction()
