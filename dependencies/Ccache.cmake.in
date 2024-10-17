@@ -43,12 +43,12 @@ fcm_use_ccache(<lang>)
 include_guard(GLOBAL)
 @FCM_COMMAND_PREFIX@internal_variable_init_guard()
 
-@FCM_COMMAND_PREFIX@enable_if(ENABLE_CCACHE)
-
 
 function(@FCM_COMMAND_PREFIX@use_ccache
   lang
 )
+  @FCM_COMMAND_PREFIX@enable_if(ENABLE_CCACHE)
+
   string(TOUPPER "${lang}" LANG)
   if (NOT LANG MATCHES "^((OBJ)?C(XX)?|ASM.*|CUDA)$")
     message(AUTHOR_WARNING "${LANG} is not supported by ccache.")
@@ -71,6 +71,8 @@ endfunction()
 
 
 ################################# Ccache init ##################################
+
+@FCM_COMMAND_PREFIX@enable_if(ENABLE_CCACHE)
 
 find_program(CCACHE_PATH ccache)
 mark_as_advanced(CCACHE_PATH)

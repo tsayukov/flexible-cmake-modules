@@ -183,13 +183,6 @@ cmake --build --preset install_docs
 include_guard(GLOBAL)
 @FCM_COMMAND_PREFIX@internal_variable_init_guard()
 
-@FCM_COMMAND_PREFIX@enable_if(ENABLE_INSTALL)
-
-# Helper functions for creating config files that can be included by other
-# projects to find and use a package.
-# See: https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html
-include(CMakePackageConfigHelpers)
-
 
 function(@FCM_COMMAND_PREFIX@install
   mode
@@ -215,6 +208,8 @@ function(@FCM_COMMAND_PREFIX@install
 endfunction()
 
 function(@FCM_COMMAND_PREFIX@internal_instal_configs)
+  @FCM_COMMAND_PREFIX@enable_if(ENABLE_INSTALL)
+
   cmake_parse_arguments(PARSE_ARGV 0 "ARGS"
     "NO_SET_AND_CHECK_MACRO;NO_CHECK_REQUIRED_COMPONENTS_MACRO;ARCH_INDEPENDENT"
     "VERSION;COMPATIBILITY"
@@ -312,6 +307,8 @@ function(@FCM_COMMAND_PREFIX@internal_instal_headers)
 endfunction()
 
 function(@FCM_COMMAND_PREFIX@internal_instal_export_headers)
+  @FCM_COMMAND_PREFIX@enable_if(ENABLE_INSTALL)
+
   cmake_parse_arguments(PARSE_ARGV 0 "ARGS" "" "" "PATTERNS")
 
   list(APPEND ARGS_PATTERNS
@@ -353,6 +350,8 @@ function(@FCM_COMMAND_PREFIX@internal_instal_export_headers)
 endfunction()
 
 function(@FCM_COMMAND_PREFIX@internal_instal_targets)
+  @FCM_COMMAND_PREFIX@enable_if(ENABLE_INSTALL)
+
   cmake_parse_arguments(PARSE_ARGV 0 "ARGS" "HEADER_ONLY" "NAMESPACE" "TARGETS")
 
   set(target_list "")
@@ -435,6 +434,8 @@ function(@FCM_COMMAND_PREFIX@internal_instal_targets)
 endfunction()
 
 function(@FCM_COMMAND_PREFIX@internal_instal_license)
+  @FCM_COMMAND_PREFIX@enable_if(ENABLE_INSTALL)
+
   if (ARGC EQUAL "0")
     set(source_license_paths "${PROJECT_SOURCE_DIR}/LICENSE")
   else()
@@ -463,3 +464,11 @@ function(@FCM_COMMAND_PREFIX@add_component_target
     )
   endif()
 endfunction()
+
+
+@FCM_COMMAND_PREFIX@enable_if(ENABLE_INSTALL)
+
+# Helper functions for creating config files that can be included by other
+# projects to find and use a package.
+# See: https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html
+include(CMakePackageConfigHelpers)

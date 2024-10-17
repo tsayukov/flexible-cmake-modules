@@ -12,7 +12,7 @@
 #[=================================================================[#github/wiki
 # Doxygen
 
-Enable the [`<FCM_PROJECT_CACHE_PREFIX>ENABLE_DOCS`][201] option to turn on
+Enable the [`<FCM_PROJECT_CACHE_PREFIX>ENABLE_DOCS`][201] option to use
 [Doxygen][501] (improved by [Doxygen Awesome][502]) as a documentation
 generator via the [`FindDoxygen`][301] module.
 
@@ -61,12 +61,12 @@ fcm_doxygen_add_docs(docs FORMAT html
 include_guard(GLOBAL)
 @FCM_COMMAND_PREFIX@internal_variable_init_guard()
 
-@FCM_COMMAND_PREFIX@enable_if(ENABLE_DOCS)
-
 
 function(@FCM_COMMAND_PREFIX@doxygen_add_docs
   target_suffix
 )
+  @FCM_COMMAND_PREFIX@enable_if(ENABLE_DOCS)
+
   cmake_parse_arguments(PARSE_ARGV 1 "ARGS" "" "FORMAT;OUTPUT" "INPUTS")
 
   if (NOT DEFINED ARGS_INPUTS)
@@ -105,22 +105,23 @@ function(@FCM_COMMAND_PREFIX@doxygen_add_docs
     COMMENT "Generate ${ARGS_FORMAT} documentation"
   )
 
-  @FCM_COMMAND_PREFIX@get(ENABLE_INSTALL)
-  if(ENABLE_INSTALL)
-    set(docs_component "${FCM_PROJECT_TARGET_PREFIX}docs")
-    @FCM_COMMAND_PREFIX@get(INSTALL_DOC_DIR)
-    install(DIRECTORY
-        "${output}"
-      DESTINATION
-        "${INSTALL_DOC_DIR}"
-      COMPONENT ${docs_component} EXCLUDE_FROM_ALL
-    )
-    @FCM_COMMAND_PREFIX@add_component_target(${docs_component})
-  endif()
+  @FCM_COMMAND_PREFIX@enable_if(ENABLE_INSTALL)
+
+  set(docs_component "${FCM_PROJECT_TARGET_PREFIX}docs")
+  @FCM_COMMAND_PREFIX@get(INSTALL_DOC_DIR)
+  install(DIRECTORY
+      "${output}"
+    DESTINATION
+      "${INSTALL_DOC_DIR}"
+    COMPONENT ${docs_component} EXCLUDE_FROM_ALL
+  )
+  @FCM_COMMAND_PREFIX@add_component_target(${docs_component})
 endfunction()
 
 
 ################################# Doxygen init #################################
+
+@FCM_COMMAND_PREFIX@enable_if(ENABLE_DOCS)
 
 find_package(Doxygen REQUIRED OPTIONAL_COMPONENTS dot)
 

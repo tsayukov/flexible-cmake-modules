@@ -51,12 +51,12 @@ fcm_valgrind_add_unity_memcheck([<unity_target>])
 include_guard(GLOBAL)
 @FCM_COMMAND_PREFIX@internal_variable_init_guard()
 
-@FCM_COMMAND_PREFIX@enable_if(ENABLE_MEMORY_CHECKING)
-
 
 function(@FCM_COMMAND_PREFIX@valgrind_add_memcheck
   target
 )
+  @FCM_COMMAND_PREFIX@enable_if(ENABLE_MEMORY_CHECKING)
+
   @FCM_COMMAND_PREFIX@get_target(${target} FULL_NAME_TO target)
 
   add_custom_target(${target}_memcheck
@@ -77,6 +77,8 @@ function(@FCM_COMMAND_PREFIX@valgrind_add_memcheck
 endfunction()
 
 function(@FCM_COMMAND_PREFIX@valgrind_add_unity_memcheck)
+  @FCM_COMMAND_PREFIX@enable_if(ENABLE_MEMORY_CHECKING)
+
   @FCM_COMMAND_PREFIX@get_project_cache_prefix()
 
   get_property(memcheck_targets
@@ -101,6 +103,8 @@ endfunction()
 
 
 ################################ Valgrind init #################################
+
+@FCM_COMMAND_PREFIX@enable_if(ENABLE_MEMORY_CHECKING)
 
 find_program(VALGRIND_PATH valgrind REQUIRED)
 mark_as_advanced(VALGRIND_PATH)
