@@ -359,13 +359,11 @@ foreach (__lang IN LISTS __languages)
   string(TOLOWER "${__lang}" __lang)
 
   if (__LANG MATCHES "^C(XX)?$")
-
     @FCM_COMMAND_PREFIX@internal_use_lang_standard_at_least(${__lang} ${__LANG})
     @FCM_COMMAND_PREFIX@internal_enable_disable_lang_extensions(${__lang} ${__LANG})
 
     # So far, support only C++ options
     include("compiler/${__LANG}.Options")
-
   endif(__LANG MATCHES "^C(XX)?$")
 
 
@@ -380,11 +378,8 @@ foreach (__lang IN LISTS __languages)
   endif()
 
 
-  @FCM_COMMAND_PREFIX@get(ENABLE_CCACHE)
-  if (ENABLE_CCACHE)
-    if (__LANG MATCHES "^((OBJ)?C(XX)?|ASM.*|CUDA)$")
-      @FCM_COMMAND_PREFIX@use_ccache(${__LANG})
-    endif()
+  if (__LANG MATCHES "^((OBJ)?C(XX)?|ASM.*|CUDA)$")
+    @FCM_COMMAND_PREFIX@use_ccache(${__LANG})
   endif()
 endforeach()
 
