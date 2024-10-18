@@ -214,7 +214,9 @@ template module. By default, it is [Google Benchmark][503].
 Find Google Benchmark [tools][504].
 
 #]=================================================================]#github/wiki
-@FCM_COMMAND_PREFIX@dev_option(ENABLE_BENCHMARKING "Enable benchmarking")
+@FCM_COMMAND_PREFIX@dev_option(ENABLE_BENCHMARKING "Enable benchmarking"
+  IF CMAKE_BUILD_TYPE STREQUAL [[Release]]
+)
 @FCM_COMMAND_PREFIX@option(ENABLE_BENCHMARK_TOOLS "Enable benchmark tools"
   ON IF ENABLE_BENCHMARKING
 )
@@ -245,7 +247,10 @@ template module. By default, it is [`valgrind`][507] via the [`Valgrind`][108]
 template module.
 
 #]=================================================================]#github/wiki
-@FCM_COMMAND_PREFIX@dev_option(ENABLE_MEMORY_CHECKING "Enable memory checking tools")
+@FCM_COMMAND_PREFIX@dev_option(ENABLE_MEMORY_CHECKING
+  "Enable memory checking tools"
+  IF CMAKE_BUILD_TYPE STREQUAL [[Debug]]
+)
 
 #[=================================================================[#github/wiki
 ## ENABLE_DOCS
