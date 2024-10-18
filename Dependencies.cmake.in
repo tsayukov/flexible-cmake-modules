@@ -4,8 +4,9 @@
 
 include_guard(GLOBAL)
 
+########################## The project's dependencies ##########################
 
-@FCM_COMMAND_PREFIX@include("dependencies/Doxygen" TEMPLATE)
+# Add the project's dependencies here
 
 ################################ Developer Mode ################################
 
@@ -14,4 +15,5 @@ include_guard(GLOBAL)
 @FCM_COMMAND_PREFIX@include("dependencies/GoogleTest" TEMPLATE)
 @FCM_COMMAND_PREFIX@include("dependencies/GoogleBenchmark" TEMPLATE)
 @FCM_COMMAND_PREFIX@include("dependencies/ClangFormat" TEMPLATE)
+@FCM_COMMAND_PREFIX@include("dependencies/Doxygen" TEMPLATE)
 # @FCM_COMMAND_PREFIX@include("dependencies/Coverage" TEMPLATE)

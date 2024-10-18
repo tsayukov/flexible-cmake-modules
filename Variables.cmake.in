@@ -12,7 +12,6 @@
   - [ENABLE_INSTALL](#ENABLE_INSTALL)
   - [BUILD_SHARED_LIBS](#BUILD_SHARED_LIBS)
   - [ENABLE_INSTALL_RPATH](#ENABLE_INSTALL_RPATH)
-  - [ENABLE_DOCS](#ENABLE_DOCS)
   - [ENABLE_CCACHE](#ENABLE_CCACHE)
   - [ENABLE_TREATING_INCLUDES_AS_SYSTEM](#ENABLE_TREATING_INCLUDES_AS_SYSTEM)
   - [ENABLE_INTERPROCEDURAL_OPTIMIZATION_RELEASE](#ENABLE_INTERPROCEDURAL_OPTIMIZATION_RELEASE)
@@ -24,6 +23,7 @@
   - [ENABLE_COVERAGE](#ENABLE_COVERAGE)
   - [ENABLE_FORMATTING](#ENABLE_FORMATTING)
   - [ENABLE_MEMORY_CHECKING](#ENABLE_MEMORY_CHECKING)
+  - [ENABLE_DOCS](#ENABLE_DOCS)
   - [CMAKE_EXPORT_COMPILE_COMMANDS](#CMAKE_EXPORT_COMPILE_COMMANDS)
   - [ENABLE_PYTHON_VENV](#ENABLE_PYTHON_VENV)
   - [PYTHON_VENV_DIR](#PYTHON_VENV_DIR)
@@ -129,16 +129,6 @@ if (ENABLE_INSTALL_RPATH AND ENABLE_INSTALL)
     set(CMAKE_INSTALL_RPATH "\$ORIGIN")
   endif()
 endif()
-
-#[=================================================================[#github/wiki
-## ENABLE_DOCS
-
-Enable generating the documentation. The required program is included
-in the `Dependencies` template module. By default, it is [Doxygen][505]
-and [Doxygen Awesome][506] via the [`Doxygen`][107] template module.
-
-#]=================================================================]#github/wiki
-@FCM_COMMAND_PREFIX@option(ENABLE_DOCS "Enable generating documentation" OFF)
 
 #[=================================================================[#github/wiki
 ## ENABLE_CCACHE
@@ -256,6 +246,16 @@ template module.
 
 #]=================================================================]#github/wiki
 @FCM_COMMAND_PREFIX@dev_option(ENABLE_MEMORY_CHECKING "Enable memory checking tools")
+
+#[=================================================================[#github/wiki
+## ENABLE_DOCS
+
+Enable generating the documentation. The required program is included
+in the `Dependencies` template module. By default, it is [Doxygen][505]
+and [Doxygen Awesome][506] via the [`Doxygen`][107] template module.
+
+#]=================================================================]#github/wiki
+@FCM_COMMAND_PREFIX@dev_option(ENABLE_DOCS "Enable generating documentation")
 
 #[=================================================================[#github/wiki
 ## CMAKE_EXPORT_COMPILE_COMMANDS
