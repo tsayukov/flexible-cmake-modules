@@ -109,11 +109,16 @@ fcm_option(MY_OPTION "" ON IF text STREQUAL [[text with whitespaces]])
 Set a developer project [option][302].
 
 ```
-fcm_dev_option(<cache_entry_suffix> "<help_text>")
+fcm_dev_option(<cache_entry_suffix> "<help_text>" [IF <condition>])
 ```
 
-Effectively call
-`fcm_option(<cache_entry_suffix> "<help_text>" <ENABLE_DEVELOPER_MODE>)`.
+Effectively call:
+
+```
+fcm_option(<cache_entry_suffix> "<help_text>"
+           ON IF ENABLE_DEVELOPER_MODE [AND (<condition>)])
+```
+
 See [`ENABLE_DEVELOPER_MODE`][201] for details.
 
 ## fcm_enable_if
@@ -247,11 +252,16 @@ macro(@FCM_COMMAND_PREFIX@dev_option
   cache_entry_suffix
   help_text
 )
-  @FCM_COMMAND_PREFIX@get(ENABLE_DEVELOPER_MODE)
+  cmake_parse_arguments("ARGS" "" "" "IF" ${ARGN})
+
+  if (DEFINED ARGS_IF)
+    set(ARGS_IF AND (${ARGS_IF}))
+  endif()
+
   @FCM_COMMAND_PREFIX@option(
     ${cache_entry_suffix}
     "${help_text}"
-    ${ENABLE_DEVELOPER_MODE}
+    ON IF ENABLE_DEVELOPER_MODE ${ARGS_IF}
   )
 endmacro()
 
