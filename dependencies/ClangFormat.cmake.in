@@ -16,15 +16,15 @@ Enable [`<FCM_PROJECT_CACHE_PREFIX>ENABLE_FORMATTING`][201]
 to use `clang-format`. If `clang-format` cannot be found,
 set `CLANG_FORMAT_PATH` to the path to the binary file of `clang-format`.
 
-## fcm_clang_format_add
+## fcm_clang_format_add_custom_target
 
 Add a `<FCM_PROJECT_TARGET_PREFIX><target_suffix>` custom target to format
 files matching GLOB `<patterns>` in `<directories>`.
 
 ```
-fcm_clang_format_add(<target_suffix>
-                     [DIRECTORIES <directories>...]
-                     [FILES_PATTERNS <patterns>...])
+fcm_clang_format_add_custom_target(<target_suffix>
+                                   [DIRECTORIES <directories>...]
+                                   [FILES_PATTERNS <patterns>...])
 ```
 
 By default, `<directories>` is [`CMAKE_CURRENT_SOURCE_DIR`][301].
@@ -44,7 +44,7 @@ By default, `<patterns>` includes:
 include_guard(GLOBAL)
 
 
-function(@FCM_COMMAND_PREFIX@clang_format_add
+function(@FCM_COMMAND_PREFIX@clang_format_add_custom_target
   target_suffix
 )
   @FCM_COMMAND_PREFIX@enable_if(ENABLE_FORMATTING)

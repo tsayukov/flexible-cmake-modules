@@ -16,14 +16,14 @@ Enable the [`<FCM_PROJECT_CACHE_PREFIX>ENABLE_DOCS`][201] option to use
 [Doxygen][501] (improved by [Doxygen Awesome][502]) as a documentation
 generator via the [`FindDoxygen`][301] module.
 
-## fcm_doxygen_add_docs
+## fcm_doxygen_add_custom_target
 
 Add a target to build the documentation.
 
 ```
-fcm_doxygen_add_docs(<target_suffix> FORMAT <format>
-                     INPUTS <input_files_or_directories>...
-                     [OUTPUT <output_directory>])
+fcm_doxygen_add_custom_target(<target_suffix> FORMAT <format>
+                              INPUTS <input_files_or_directories>...
+                              [OUTPUT <output_directory>])
 ```
 
 Add an `<FCM_PROJECT_TARGET_PREFIX><target_suffix>` target for building
@@ -42,7 +42,7 @@ Usage:
 
 ```cmake
 fcm_include("dependencies/Docs" TEMPLATE)
-fcm_doxygen_add_docs(docs FORMAT html
+fcm_doxygen_add_custom_target(docs FORMAT html
   INPUTS "include" "README.md"
 )
 ```
@@ -62,7 +62,7 @@ include_guard(GLOBAL)
 @FCM_COMMAND_PREFIX@internal_variable_init_guard()
 
 
-function(@FCM_COMMAND_PREFIX@doxygen_add_docs
+function(@FCM_COMMAND_PREFIX@doxygen_add_custom_target
   target_suffix
 )
   @FCM_COMMAND_PREFIX@enable_if(ENABLE_DOCS)
