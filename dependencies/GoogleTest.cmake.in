@@ -1,0 +1,54 @@
+# Flexible CMake Modules
+# ------------------------------------------------------------------------------
+# Author: Pavel Tsayukov
+# Repository: https://github.com/tsayukov/flexible-cmake-modules
+# Distributed under the MIT License. See the accompanying file LICENSE or
+# https://opensource.org/license/mit for details.
+# ------------------------------------------------------------------------------
+#
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# FOR COAUTHORS AND CONTRIBUTORS: fill in your name, contacts, and changes above
+#
+#[=============================================================================[
+  Google Test
+#]=============================================================================]
+
+include_guard(GLOBAL)
+@FCM_COMMAND_PREFIX@internal_variable_init_guard()
+
+
+############################### Google Test init ###############################
+
+@FCM_COMMAND_PREFIX@enable_if(ENABLE_TESTING)
+
+@FCM_COMMAND_PREFIX@use_cxx_standard_at_least(14 NAME "GTest")
+
+find_package(GTest)
+if (NOT GTest_FOUND)
+  @FCM_COMMAND_PREFIX@can_fetch_dependency(GTest)
+
+  @FCM_COMMAND_PREFIX@git_first_hash(__last_version_hash
+    "https://github.com/google/googletest" TAGS DESCEND
+  )
+
+  include(FetchContent)
+  FetchContent_Declare(
+    GTest
+    GIT_REPOSITORY "https://github.com/google/googletest"
+    GIT_TAG ${__last_version_hash}
+  )
+  unset(__last_version_hash)
+
+  # Prevent overriding the parent project's compiler/linker settings
+  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+  set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
+
+  # Set `OFF` if your project's testing doesn't use GMock
+  set(BUILD_GMOCK ON CACHE BOOL "")
+
+  FetchContent_MakeAvailable(GTest)
+endif(NOT GTest_FOUND)
+
+# Get the `gtest_add_tests()` and `gtest_discover_tests()` command
+include(GoogleTest)

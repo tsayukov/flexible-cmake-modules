@@ -1,0 +1,278 @@
+# Flexible CMake Modules
+# ------------------------------------------------------------------------------
+# Author: Pavel Tsayukov
+# Repository: https://github.com/tsayukov/flexible-cmake-modules
+# Distributed under the MIT License. See the accompanying file LICENSE or
+# https://opensource.org/license/mit for details.
+# ------------------------------------------------------------------------------
+#
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# FOR COAUTHORS AND CONTRIBUTORS: fill in your name, contacts, and changes above
+#
+#[=================================================================[#github/wiki
+# Project cache entry
+
+## Table of Contents
+
+- [Introduction][#Introduction]
+- [fcm_get](#fcm_get)
+- [fcm_set_cache_entry](#fcm_set_cache_entry)
+- [fcm_option](#fcm_option)
+- [fcm_dev_option](#fcm_dev_option)
+- [fcm_enable_if](#fcm_enable_if)
+
+## Introduction
+
+To prevent name clashes all project cached entries defined by commands below
+have the `<FCM_PROJECT_CACHE_PREFIX>` prefix getting
+by a [`fcm_get_project_cache_prefix()`][101] call. It is recommended that cached
+entries be named in uppercase letters with underscores.
+
+Usage:
+
+```cmake
+# Set a `<FCM_PROJECT_CACHE_PREFIX>ENABLE_INSTALL` cache entry to `ON`
+# if the following condition is true.
+option(ENABLE_INSTALL "Enable the library installation"
+  ON IF PROJECT_IS_TOP_LEVEL AND NOT CMAKE_SKIP_INSTALL_RULES
+)
+# Also, the corresponding `ENABLE_INSTALL` normal variable is defined
+
+fcm_option(ENABLE_DEVELOPER_MODE "Enable developer mode" OFF)
+fcm_dev_option(ENABLE_TESTING "Enable testing")
+
+# Optional; if you don't write to that variable, it can be omitted
+fcm_get(ENABLE_TESTING)
+
+if (ENABLE_TESTING)
+  add_subdirectory(tests)
+endif()
+```
+
+## fcm_get
+
+Get `<variable>` after resolving its name.
+
+```
+fcm_get(<variable>)
+```
+
+Put into `<variable>`:
+- the value of `<FCM_PROJECT_CACHE_PREFIX><variable>`, if such variable is
+defined;
+- otherwise, the value of `<variable>`, if such variable is defined;
+- otherwise, unset `<variable>`.
+
+## fcm_set_cache_entry
+
+Set a project [cache entry][301].
+
+```
+fcm_set_cache_entry(<cache_entry_suffix> <values>...
+                    CACHE <type> "<docstring>" [FORCE])
+```
+
+Set the `<FCM_PROJECT_CACHE_PREFIX><cache_entry_suffix>` project cache entry
+to `<value>` if there is no such cache entry with the same `<type>` set before
+(also, be aware of [CMP0126][401] for CMake 3.21+). Also,
+a `<cache_entry_suffix>` variable will be defined with the value of the cache
+entry.
+
+## fcm_option
+
+Set a project [option][302].
+
+```
+fcm_option(<cache_entry_suffix> "<help_text>" <value> [IF <condition>])
+```
+
+Set the `<FCM_PROJECT_CACHE_PREFIX><cache_entry_suffix>` project option
+to `<value>`, taking into account optional `<condition>`, if there
+is no such normal variable or cache entry set before (see [CMP0077][402]
+for details). Also, a `<cache_entry_suffix>` variable will be defined with
+the value of the option.
+
+If `<condition>` following `IF` is present, then:
+- if `<condition>` is true, use `<value>`;
+- otherwise, use `NOT <value>`.
+
+[The condition syntax][303] applies to `<condition>`, but quoted strings are not
+fully supported so far. Use [bracket arguments][304] instead of quoted strings:
+
+```cmake
+set(text "text with whitespaces")
+fcm_option(MY_OPTION "" ON IF text STREQUAL [[text with whitespaces]])
+```
+
+## fcm_dev_option
+
+Set a developer project [option][302].
+
+```
+fcm_dev_option(<cache_entry_suffix> "<help_text>" [IF <condition>])
+```
+
+Effectively call:
+
+```
+fcm_option(<cache_entry_suffix> "<help_text>"
+           ON IF ENABLE_DEVELOPER_MODE [AND (<condition>)])
+```
+
+See [`ENABLE_DEVELOPER_MODE`][201] for details.
+
+## fcm_enable_if
+
+Enable the rest of the current listfile if each variable determined after
+the lookup described below is [true][305].
+
+```
+fcm_enable_if(<variable> [<variables>...])
+```
+
+The order of `<variable>` lookup is as follows:
+- if a `<FCM_PROJECT_CACHE_PREFIX><variable>` variable is defined, then use that
+variable;
+- otherwise, use `<variable>` as is.
+
+[101]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_project_cache_prefix
+
+[201]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Variables#ENABLE_DEVELOPER_MODE
+
+[301]: https://cmake.org/cmake/help/latest/command/set.html#set-cache-entry
+[302]: https://cmake.org/cmake/help/latest/command/option.html
+[303]: https://cmake.org/cmake/help/latest/command/if.html#condition-syntax
+[304]: https://cmake.org/cmake/help/latest/manual/cmake-language.7.html#bracket-argument
+[305]: https://cmake.org/cmake/help/latest/command/if.html#variable
+
+[401]: https://cmake.org/cmake/help/latest/policy/CMP0126.html
+[402]: https://cmake.org/cmake/help/latest/policy/CMP0077.html
+
+#]=================================================================]#github/wiki
+
+include_guard(GLOBAL)
+
+# Require "common/FcmConfigVariables"
+
+
+function(@FCM_COMMAND_PREFIX@get
+  variable
+)
+  @FCM_COMMAND_PREFIX@get_project_cache_prefix()
+  @FCM_COMMAND_PREFIX@internal_get(${FCM_PROJECT_CACHE_PREFIX} ${variable} ${variable})
+  if (NOT DEFINED ${variable})
+    unset(${variable} PARENT_SCOPE)
+  else()
+    set(${variable} "${${variable}}" PARENT_SCOPE)
+  endif()
+endfunction()
+
+macro(@FCM_COMMAND_PREFIX@internal_get
+  prefix
+  suffix
+  output_variable
+)
+  if (DEFINED ${prefix}${suffix})
+    set(${output_variable} "${${prefix}${suffix}}")
+  elseif (DEFINED ${suffix})
+    set(${output_variable} "${${suffix}}")
+  else()
+    unset(${output_variable})
+  endif()
+endmacro()
+
+function(@FCM_COMMAND_PREFIX@set_cache_entry
+  cache_entry_suffix
+)
+  list(FIND ARGN "CACHE" index)
+  if (index EQUAL "-1")
+    message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+      "Missing the `CACHE` keyword."
+    )
+    return()
+  endif()
+
+  list(SUBLIST ARGN 0 ${index} values)
+  list(SUBLIST ARGN ${index} -1 parameters)
+  list(LENGTH parameters length)
+  if (length LESS "3")
+    message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+      "Some arguments may be missing: `CACHE <type> \"<docstring>\" [FORCE]`"
+    )
+    return()
+  endif()
+
+  list(GET parameters 1 type)
+  list(GET parameters 2 docstring)
+
+  if (length EQUAL "3")
+    set(parameters "")
+  else()
+    list(SUBLIST parameters 3 -1 parameters)
+  endif()
+
+  @FCM_COMMAND_PREFIX@get_project_cache_prefix()
+  set(cache_entry ${FCM_PROJECT_CACHE_PREFIX}${cache_entry_suffix})
+  set(${cache_entry} "${values}" CACHE ${type} "${docstring}" ${parameters})
+  set(${cache_entry_suffix} "${${cache_entry}}" PARENT_SCOPE)
+endfunction()
+
+function(@FCM_COMMAND_PREFIX@option
+  cache_entry_suffix
+  help_text
+  value
+)
+  cmake_parse_arguments(PARSE_ARGV 3 "ARGS" "" "" "IF")
+
+  @FCM_COMMAND_PREFIX@get_project_cache_prefix()
+  set(cache_entry ${FCM_PROJECT_CACHE_PREFIX}${cache_entry_suffix})
+
+  if (value)
+    set(value ON)
+    set(not_value OFF)
+  else()
+    set(value OFF)
+    set(not_value ON)
+  endif()
+
+  if (DEFINED ARGS_IF)
+    if (${ARGS_IF})
+      option(${cache_entry} "${help_text}" ${value})
+    else()
+      option(${cache_entry} "${help_text}" ${not_value})
+    endif()
+  else()
+    option(${cache_entry} "${help_text}" ${value})
+  endif()
+
+  set(${cache_entry_suffix} ${${cache_entry}} PARENT_SCOPE)
+endfunction()
+
+macro(@FCM_COMMAND_PREFIX@dev_option
+  cache_entry_suffix
+  help_text
+)
+  cmake_parse_arguments("ARGS" "" "" "IF" ${ARGN})
+
+  if (DEFINED ARGS_IF)
+    set(ARGS_IF AND (${ARGS_IF}))
+  endif()
+
+  @FCM_COMMAND_PREFIX@option(
+    ${cache_entry_suffix}
+    "${help_text}"
+    ON IF ENABLE_DEVELOPER_MODE ${ARGS_IF}
+  )
+endmacro()
+
+macro(@FCM_COMMAND_PREFIX@enable_if
+  variable
+)
+  @FCM_COMMAND_PREFIX@get_project_cache_prefix()
+  foreach (var IN ITEMS ${variable} ${ARGN})
+    @FCM_COMMAND_PREFIX@internal_get(${FCM_PROJECT_CACHE_PREFIX} ${var} ${var})
+    if (NOT ${var})
+      return()
+    endif()
+  endforeach()
+endmacro()

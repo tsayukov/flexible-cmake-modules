@@ -1,0 +1,151 @@
+# Flexible CMake Modules
+# ------------------------------------------------------------------------------
+# Author: Pavel Tsayukov
+# Repository: https://github.com/tsayukov/flexible-cmake-modules
+# Distributed under the MIT License. See the accompanying file LICENSE or
+# https://opensource.org/license/mit for details.
+# ------------------------------------------------------------------------------
+#
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# FOR COAUTHORS AND CONTRIBUTORS: fill in your name, contacts, and changes above
+#
+#[=================================================================[#github/wiki
+# Valgrind
+
+Enable the [`<FCM_PROJECT_CACHE_PREFIX>ENABLE_MEMORY_CHECKING`][201] option
+to use [`valgrind`][501]. If `valgrind` cannot be found, pass the path
+to its binary file to the `VALGRIND_PATH` variable.
+
+## fcm_valgrind_add_custom_target
+
+### fcm_valgrind_add_custom_target(FOR)
+
+After [resolving][101] the `<target>` name, create a custom target that runs
+memory checking on the binary file corresponding to `<target>`.
+
+```
+fcm_valgrind_add_custom_target([<custom_target_suffix>] FOR <target>)
+```
+
+If `<custom_target_suffix>` is present, then the custom target's name
+is `<FCM_PROJECT_TARGET_PREFIX><custom_target_suffix>`, otherwise,
+`<target>_memcheck`.
+
+### fcm_valgrind_add_custom_target(UNITY)
+
+Add an `<FCM_PROJECT_TARGET_PREFIX><custom_target_suffix>` custom target that
+runs all memory checkings that were added
+by previous `fcm_valgrind_add_custom_target(FOR)` calls.
+
+```
+fcm_valgrind_add_custom_target(UNITY <custom_target_suffix>)
+```
+
+[101]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-targets#fcm_get_target
+
+[201]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Variables#ENABLE_MEMORY_CHECKING
+
+[501]: https://valgrind.org
+
+#]=================================================================]#github/wiki
+
+include_guard(GLOBAL)
+@FCM_COMMAND_PREFIX@internal_variable_init_guard()
+
+
+function(@FCM_COMMAND_PREFIX@valgrind_add_custom_target)
+  @FCM_COMMAND_PREFIX@enable_if(ENABLE_MEMORY_CHECKING)
+
+  if (ARGC EQUAL "2")
+    if (ARGV0 STREQUAL "FOR")
+      @FCM_COMMAND_PREFIX@get_target(${ARGV1} FULL_NAME_TO target)
+      @FCM_COMMAND_PREFIX@internal_valgrind_add_custom_target_for(${target}
+        ${target}_memcheck
+      )
+    elseif (ARGV0 STREQUAL "UNITY")
+      @FCM_COMMAND_PREFIX@get_project_target_prefix()
+      @FCM_COMMAND_PREFIX@internal_valgrind_add_custom_target_unity(
+        ${FCM_PROJECT_TARGET_PREFIX}${ARGV1}
+      )
+    else()
+      message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+        "Unknown mode: `${ARGV0}`. Support only the `FOR` and `UNITY` modes."
+      )
+    endif()
+  elseif (ARGC EQUAL "3")
+    if (ARGV1 STREQUAL "FOR")
+      @FCM_COMMAND_PREFIX@get_target(${ARGV2} FULL_NAME_TO target)
+      @FCM_COMMAND_PREFIX@get_project_target_prefix()
+      @FCM_COMMAND_PREFIX@internal_valgrind_add_custom_target_for(${target}
+        ${FCM_PROJECT_TARGET_PREFIX}${ARGV0}
+      )
+    else()
+      message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+        "The second argument must be the `FOR` keyword "
+        "in the argument scheme `<custom_target_suffix> FOR <target>`."
+      )
+    endif()
+  else()
+    message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+      "Unknown argument scheme."
+    )
+    return()
+  endif()
+endfunction()
+
+function(@FCM_COMMAND_PREFIX@internal_valgrind_add_custom_target_for
+  target
+  custom_target
+)
+  add_custom_target(${custom_target}
+    COMMAND ${VALGRIND_PATH}
+      --leak-check=yes
+      "$<TARGET_FILE:${target}>"
+  )
+
+  @FCM_COMMAND_PREFIX@get_project_cache_prefix()
+  set_property(DIRECTORY
+      "${PROJECT_SOURCE_DIR}"
+    APPEND PROPERTY
+      ${FCM_PROJECT_CACHE_PREFIX}MEMCHECK_TARGETS ${custom_target}
+  )
+endfunction()
+
+function(@FCM_COMMAND_PREFIX@internal_valgrind_add_custom_target_unity
+  custom_target
+)
+  @FCM_COMMAND_PREFIX@get_project_cache_prefix()
+  get_property(memcheck_targets
+    DIRECTORY
+      "${PROJECT_SOURCE_DIR}"
+    PROPERTY
+      ${FCM_PROJECT_CACHE_PREFIX}MEMCHECK_TARGETS
+  )
+
+  list(TRANSFORM memcheck_targets
+    PREPEND "COMMAND;${CMAKE_COMMAND};--build;${PROJECT_BINARY_DIR};--target;"
+    OUTPUT_VARIABLE commands
+  )
+
+  add_custom_target(${custom_target} ${commands})
+endfunction()
+
+
+################################ Valgrind init #################################
+
+@FCM_COMMAND_PREFIX@enable_if(ENABLE_MEMORY_CHECKING)
+
+find_program(VALGRIND_PATH valgrind REQUIRED)
+mark_as_advanced(VALGRIND_PATH)
+
+if ((CMAKE_C_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS "14")
+    OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "14"))
+  @FCM_COMMAND_PREFIX@get_version(__valgrind_version ${VALGRIND_PATH})
+  if (__valgrind_version VERSION_LESS "3.20")
+    message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+      "Only Valgrind 3.20+ works properly with Clang 14+."
+    )
+    return()
+  endif()
+  unset(__valgrind_version)
+endif()
