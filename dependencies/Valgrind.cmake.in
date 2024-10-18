@@ -16,28 +16,29 @@ Enable the [`<FCM_PROJECT_CACHE_PREFIX>ENABLE_MEMORY_CHECKING`][201] option
 to use [`valgrind`][501]. If `valgrind` cannot be found, pass the path
 to its binary file to the `VALGRIND_PATH` variable.
 
-## Table of Contents
+## fcm_valgrind_add_custom_target
 
-- [fcm_valgrind_add_memcheck](#fcm_valgrind_add_memcheck)
-- [fcm_valgrind_add_unity_memcheck](#fcm_valgrind_add_unity_memcheck)
+### fcm_valgrind_add_custom_target(FOR)
 
-## fcm_valgrind_add_memcheck
-
-After [resolving][101] the `<target>` name, create a `<target>` custom target
-that runs memory checking on the binary file corresponding to `<target>`.
+After [resolving][101] the `<target>` name, create a custom target that runs
+memory checking on the binary file corresponding to `<target>`.
 
 ```
-fcm_valgrind_add_memcheck(<target>)
+fcm_valgrind_add_custom_target([<custom_target_suffix>] FOR <target>)
 ```
 
-## fcm_valgrind_add_unity_memcheck
+If `<custom_target_suffix>` is present, then the custom target's name
+is `<FCM_PROJECT_TARGET_PREFIX><custom_target_suffix>`, otherwise,
+`<target>_memcheck`.
 
-Add `<unity_target>` (by default, `<FCM_PROJECT_TARGET_PREFIX>memcheck`)
-to run all memory checkings that were added by `fcm_valgrind_add_memcheck()`
-calls.
+### fcm_valgrind_add_custom_target(UNITY)
+
+Add an `<FCM_PROJECT_TARGET_PREFIX><custom_target_suffix>` custom target that
+runs all memory checkings that were added
+by previous `fcm_valgrind_add_custom_target(FOR)` calls.
 
 ```
-fcm_valgrind_add_unity_memcheck([<unity_target>])
+fcm_valgrind_add_custom_target(UNITY <custom_target_suffix>)
 ```
 
 [101]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-targets#fcm_get_target
@@ -52,53 +53,81 @@ include_guard(GLOBAL)
 @FCM_COMMAND_PREFIX@internal_variable_init_guard()
 
 
-function(@FCM_COMMAND_PREFIX@valgrind_add_memcheck
-  target
-)
+function(@FCM_COMMAND_PREFIX@valgrind_add_custom_target)
   @FCM_COMMAND_PREFIX@enable_if(ENABLE_MEMORY_CHECKING)
 
-  @FCM_COMMAND_PREFIX@get_target(${target} FULL_NAME_TO target)
+  if (ARGC EQUAL "2")
+    if (ARGV0 STREQUAL "FOR")
+      @FCM_COMMAND_PREFIX@get_target(${ARGV1} FULL_NAME_TO target)
+      @FCM_COMMAND_PREFIX@internal_valgrind_add_custom_target_for(${target}
+        ${target}_memcheck
+      )
+    elseif (ARGV0 STREQUAL "UNITY")
+      @FCM_COMMAND_PREFIX@get_project_target_prefix()
+      @FCM_COMMAND_PREFIX@internal_valgrind_add_custom_target_unity(
+        ${FCM_PROJECT_TARGET_PREFIX}${ARGV1}
+      )
+    else()
+      message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+        "Unknown mode: `${ARGV0}`. Support only the `FOR` and `UNITY` modes."
+      )
+    endif()
+  elseif (ARGC EQUAL "3")
+    if (ARGV1 STREQUAL "FOR")
+      @FCM_COMMAND_PREFIX@get_target(${ARGV2} FULL_NAME_TO target)
+      @FCM_COMMAND_PREFIX@get_project_target_prefix()
+      @FCM_COMMAND_PREFIX@internal_valgrind_add_custom_target_for(${target}
+        ${FCM_PROJECT_TARGET_PREFIX}${ARGV0}
+      )
+    else()
+      message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+        "The second argument must be the `FOR` keyword "
+        "in the argument scheme `<custom_target_suffix> FOR <target>`."
+      )
+    endif()
+  else()
+    message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+      "Unknown argument scheme."
+    )
+    return()
+  endif()
+endfunction()
 
-  add_custom_target(${target}_memcheck
+function(@FCM_COMMAND_PREFIX@internal_valgrind_add_custom_target_for
+  target
+  custom_target
+)
+  add_custom_target(${custom_target}
     COMMAND ${VALGRIND_PATH}
       --leak-check=yes
       "$<TARGET_FILE:${target}>"
-    WORKING_DIRECTORY
-      "${PROJECT_BINARY_DIR}"
   )
 
   @FCM_COMMAND_PREFIX@get_project_cache_prefix()
   set_property(DIRECTORY
       "${PROJECT_SOURCE_DIR}"
     APPEND PROPERTY
-      ${FCM_PROJECT_CACHE_PREFIX}MEMCHECK_TARGETS
-      ${target}_memcheck
+      ${FCM_PROJECT_CACHE_PREFIX}MEMCHECK_TARGETS ${custom_target}
   )
 endfunction()
 
-function(@FCM_COMMAND_PREFIX@valgrind_add_unity_memcheck)
-  @FCM_COMMAND_PREFIX@enable_if(ENABLE_MEMORY_CHECKING)
-
+function(@FCM_COMMAND_PREFIX@internal_valgrind_add_custom_target_unity
+  custom_target
+)
   @FCM_COMMAND_PREFIX@get_project_cache_prefix()
-
   get_property(memcheck_targets
     DIRECTORY
       "${PROJECT_SOURCE_DIR}"
     PROPERTY
-      ${FCM_PROJECT_TARGET_PREFIX}MEMCHECK_TARGETS
+      ${FCM_PROJECT_CACHE_PREFIX}MEMCHECK_TARGETS
   )
 
-  if (ARGC EQUAL "0")
-    set(unity_target ${FCM_PROJECT_TARGET_PREFIX}memcheck)
-  else()
-    set(unity_target ${ARGV0})
-  endif()
-
-  add_custom_target(${unity_target}
-    COMMAND ${CMAKE_COMMAND}
-      --build "${PROJECT_BINARY_DIR}"
-      --target ${memcheck_targets}
+  list(TRANSFORM memcheck_targets
+    PREPEND "COMMAND;${CMAKE_COMMAND};--build;${PROJECT_BINARY_DIR};--target;"
+    OUTPUT_VARIABLE commands
   )
+
+  add_custom_target(${custom_target} ${commands})
 endfunction()
 
 
