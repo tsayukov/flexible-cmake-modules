@@ -1,0 +1,399 @@
+# Project cached entries
+# ------------------------------------------------------------------------------
+# This template listfile is intended for editing existing cached variables
+# or/and adding additional ones
+#[=================================================================[#github/wiki
+# Variables
+
+## Table of Contents
+
+- Project options:
+  - [FETCH_DEPENDENCIES](#FETCH_DEPENDENCIES)
+  - [ENABLE_INSTALL](#ENABLE_INSTALL)
+  - [BUILD_SHARED_LIBS](#BUILD_SHARED_LIBS)
+  - [ENABLE_INSTALL_RPATH](#ENABLE_INSTALL_RPATH)
+  - [ENABLE_CCACHE](#ENABLE_CCACHE)
+  - [ENABLE_TREATING_INCLUDES_AS_SYSTEM](#ENABLE_TREATING_INCLUDES_AS_SYSTEM)
+  - [ENABLE_INTERPROCEDURAL_OPTIMIZATION_RELEASE](#ENABLE_INTERPROCEDURAL_OPTIMIZATION_RELEASE)
+- Developer options:
+  - [ENABLE_DEVELOPER_MODE](#ENABLE_DEVELOPER_MODE)
+  - [ENABLE_TESTING](#ENABLE_TESTING)
+  - [ENABLE_BENCHMARKING](#ENABLE_BENCHMARKING)
+  - [ENABLE_BENCHMARK_TOOLS](#ENABLE_BENCHMARK_TOOLS)
+  - [ENABLE_COVERAGE](#ENABLE_COVERAGE)
+  - [ENABLE_FORMATTING](#ENABLE_FORMATTING)
+  - [ENABLE_MEMORY_CHECKING](#ENABLE_MEMORY_CHECKING)
+  - [ENABLE_DOCS](#ENABLE_DOCS)
+  - [CMAKE_EXPORT_COMPILE_COMMANDS](#CMAKE_EXPORT_COMPILE_COMMANDS)
+  - [ENABLE_PYTHON_VENV](#ENABLE_PYTHON_VENV)
+  - [PYTHON_VENV_DIR](#PYTHON_VENV_DIR)
+- Project cached entries:
+  - [PACKAGE_NAME](#PACKAGE_NAME)
+  - [PACKAGE_EXPORT_TARGET_NAME](#PACKAGE_EXPORT_TARGET_NAME)
+  - [INSTALL_CMAKE_DIR](#INSTALL_CMAKE_DIR)
+  - [INSTALL_LICENSE_DIR](#INSTALL_LICENSE_DIR)
+  - [INSTALL_DOC_DIR](#INSTALL_DOC_DIR)
+
+#]=================================================================]#github/wiki
+
+include_guard(GLOBAL)
+
+
+# Get `PROJECT_IS_TOP_LEVEL`
+@FCM_COMMAND_PREFIX@get_project_is_top_level()
+
+
+############################### Project options ################################
+
+#[=================================================================[#github/wiki
+## FETCH_DEPENDENCIES
+
+Allow fetching all external dependencies locally, e.g., using
+the [`FetchContent`][307] or [`ExternalProject`][308] modules and downloading
+external sources into the binary directory, except for those that
+are not allowed explicitly by setting
+`<FCM_PROJECT_CACHE_PREFIX>FETCH_<dependency_name>` where `<dependency_name>`
+is just a name using by a [`find_package()`][309] call. To learn how to manage
+external dependencies, see [this module][105].
+
+#]=================================================================]#github/wiki
+@FCM_COMMAND_PREFIX@option(FETCH_DEPENDENCIES "Fetch external dependencies" OFF)
+
+#[=================================================================[#github/wiki
+## ENABLE_INSTALL
+
+Prefer that the install rules are available if the project is on the top level,
+e.g., a regular project clone, building, and installing or using
+`ExternalProject`. Otherwise, neither when using `add_subdirectory` nor when
+using `FetchContent` is usually expected to generate install rules.
+
+#]=================================================================]#github/wiki
+@FCM_COMMAND_PREFIX@option(ENABLE_INSTALL "Enable the project installation"
+  ON IF PROJECT_IS_TOP_LEVEL AND NOT CMAKE_SKIP_INSTALL_RULES
+)
+
+#[=================================================================[#github/wiki
+## BUILD_SHARED_LIBS
+
+Set project-specific [`BUILD_SHARED_LIBS`][301], so if an outer project that
+included this project as a subproject sets its own `BUILD_SHARED_LIBS`,
+this won't have an effect. The outer project can control this project's behavior
+regarding the type of libraries by setting
+`<FCM_PROJECT_CACHE_PREFIX>BUILD_SHARED_LIBS` before this project is included.
+
+#]=================================================================]#github/wiki
+@FCM_COMMAND_PREFIX@option(BUILD_SHARED_LIBS
+  "Treat libraries as shared by default" OFF
+)
+
+#[=================================================================[#github/wiki
+## ENABLE_EXPORT_HEADER
+
+Enable to make your library be used as a shared library or executable with
+plugins. Otherwise, set it to `OFF`, e.g., if you develop a header-only library
+or regular executable (without the `ENABLE_EXPORTS` property set).
+See the [`GenerateExportHeader`][302] module
+and [`fcm_generate_export_header()`][101] command to learn how to generate
+export headers.
+
+#]=================================================================]#github/wiki
+@FCM_COMMAND_PREFIX@option(ENABLE_EXPORT_HEADER
+  "Enable creation of an export header" ON
+)
+if (ENABLE_EXPORT_HEADER)
+  include(GenerateExportHeader)
+endif()
+
+#[=================================================================[#github/wiki
+## ENABLE_INSTALL_RPATH
+
+Add the rpath, such as is set for [`CMAKE_INSTALL_RPATH`][303] below, to all
+installed shared libraries or executables. It may be useful for platforms that
+support rpath, when shared libraries or executables have dependencies that is
+distributed with the package itself and can be installed in a special place
+unknown for the dynamic loader.
+E.g., in Linux, the rpath set to `$ORIGIN` means that the dynamic loader will
+be looking for dependent shared libraries in the same place where the origin
+installed shared library or executable is located. You can add other paths,
+e.g., "\$ORIGIN/../lib".
+See [`INSTALL_RPATH`][304] for details.
+
+#]=================================================================]#github/wiki
+@FCM_COMMAND_PREFIX@option(ENABLE_INSTALL_RPATH
+  "Enable adding rpath during installation" OFF
+)
+if (ENABLE_INSTALL_RPATH AND ENABLE_INSTALL)
+  if (APPLE)
+    set(CMAKE_INSTALL_RPATH "@loader_path")
+  elseif (UNIX)
+    set(CMAKE_INSTALL_RPATH "\$ORIGIN")
+  endif()
+endif()
+
+#[=================================================================[#github/wiki
+## ENABLE_CCACHE
+
+If set, try to find [`ccache`][501] for fast recompilation.
+See the [`Ccache`][102] module for details. It is useless for small project
+to enable `ccache`.
+
+#]=================================================================]#github/wiki
+@FCM_COMMAND_PREFIX@option(ENABLE_CCACHE "Enable ccache" OFF)
+
+#[=================================================================[#github/wiki
+## ENABLE_TREATING_INCLUDES_AS_SYSTEM
+
+Enable treating the project's include directories as system via passing the
+`SYSTEM` option to the [`target_include_directories()`][305] command inside the
+[`fcm_target_include_directories`][103] command. This may have effects such as
+suppressing warnings or skipping the contained headers in dependency
+calculations (see compiler documentation).
+
+#]=================================================================]#github/wiki
+@FCM_COMMAND_PREFIX@option(ENABLE_TREATING_INCLUDES_AS_SYSTEM
+  "Use the `SYSTEM` option for the project's includes, compilers may disable warnings"
+  ON IF (NOT PROJECT_IS_TOP_LEVEL)
+)
+
+#[=================================================================[#github/wiki
+## ENABLE_INTERPROCEDURAL_OPTIMIZATION_RELEASE
+
+Enable interprocedural optimization for the project's targets in the Release
+build if the compiler supports IPO.
+
+#]=================================================================]#github/wiki
+@FCM_COMMAND_PREFIX@option(ENABLE_INTERPROCEDURAL_OPTIMIZATION_RELEASE
+  "Enable IPO for the project's targets in the Release build"
+  ON IF PROJECT_IS_TOP_LEVEL AND CMAKE_BUILD_TYPE STREQUAL [[Release]]
+)
+
+
+############################## Developer options ###############################
+
+#[=================================================================[#github/wiki
+## ENABLE_DEVELOPER_MODE
+
+Enable the developer mode that causes enabling testing, benchmarking,
+formatting, etc, until some of those options are not turned off
+manually. If the developer mode is enabled and [`PROJECT_IS_TOP_LEVEL`][306]
+is false, raise a warning, because this mode is intended for the project's
+developers, not consumers.
+
+Required libraries and programs are included and initialized
+in the `Dependencies` template module. The user should include this module
+after all project's targets are defined.
+
+#]=================================================================]#github/wiki
+@FCM_COMMAND_PREFIX@option(ENABLE_DEVELOPER_MODE "Enable developer mode" OFF)
+if (NOT PROJECT_IS_TOP_LEVEL AND ENABLE_DEVELOPER_MODE)
+  message(AUTHOR_WARNING
+    "Developer mode is intended for developers of \"${PROJECT_NAME}\"."
+  )
+endif()
+
+#[=================================================================[#github/wiki
+## ENABLE_TESTING
+
+Enable testing. The required library is included in the `Dependencies`
+template module. By default, it is [Google Test][502].
+
+#]=================================================================]#github/wiki
+@FCM_COMMAND_PREFIX@dev_option(ENABLE_TESTING "Enable testing")
+
+#[=================================================================[#github/wiki
+## ENABLE_BENCHMARKING
+
+Enable benchmarking. The required library is included in the `Dependencies`
+template module. By default, it is [Google Benchmark][503].
+
+## ENABLE_BENCHMARK_TOOLS
+
+Find Google Benchmark [tools][504].
+
+#]=================================================================]#github/wiki
+@FCM_COMMAND_PREFIX@dev_option(ENABLE_BENCHMARKING "Enable benchmarking"
+  IF CMAKE_BUILD_TYPE STREQUAL [[Release]]
+)
+@FCM_COMMAND_PREFIX@option(ENABLE_BENCHMARK_TOOLS "Enable benchmark tools"
+  ON IF ENABLE_BENCHMARKING
+)
+
+if (ENABLE_TESTING OR ENABLE_BENCHMARKING)
+  enable_testing()
+endif()
+
+#[=================================================================[#github/wiki
+## ENABLE_COVERAGE
+
+TODO: add description
+
+#]=================================================================]#github/wiki
+@FCM_COMMAND_PREFIX@dev_option(ENABLE_COVERAGE "Enable code coverage testing")
+
+#[=================================================================[#github/wiki
+## ENABLE_FORMATTING
+
+Enable formatting. The required program is included in the `Dependencies`
+template module. By default, it is [`clang-format`][508]
+via the [`ClangFormat`][109] template module.
+
+#]=================================================================]#github/wiki
+@FCM_COMMAND_PREFIX@dev_option(ENABLE_FORMATTING "Enable code formatting")
+
+#[=================================================================[#github/wiki
+## ENABLE_MEMORY_CHECKING
+
+Enable memory checking. The required program is included in the `Dependencies`
+template module. By default, it is [`valgrind`][507] via the [`Valgrind`][108]
+template module.
+
+#]=================================================================]#github/wiki
+@FCM_COMMAND_PREFIX@dev_option(ENABLE_MEMORY_CHECKING
+  "Enable memory checking tools"
+  IF CMAKE_BUILD_TYPE STREQUAL [[Debug]]
+)
+
+#[=================================================================[#github/wiki
+## ENABLE_DOCS
+
+Enable generating the documentation. The required program is included
+in the `Dependencies` template module. By default, it is [Doxygen][505]
+and [Doxygen Awesome][506] via the [`Doxygen`][107] template module.
+
+#]=================================================================]#github/wiki
+@FCM_COMMAND_PREFIX@dev_option(ENABLE_DOCS "Enable generating documentation")
+
+#[=================================================================[#github/wiki
+## CMAKE_EXPORT_COMPILE_COMMANDS
+
+For Debug build in the developer mode, generate `compile_commands.json` and
+may create a symbolic link in the `${PROJECT_SOURCE_DIR}/build` directory to it.
+See the [`create_symlink_to_compile_commands()`][104] command for details.
+
+#]=================================================================]#github/wiki
+if (ENABLE_DEVELOPER_MODE)
+  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+  if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    @FCM_COMMAND_PREFIX@create_symlink_to_compile_commands()
+  endif()
+endif()
+
+#[=================================================================[#github/wiki
+## ENABLE_PYTHON_VENV
+
+Enable creating of Python virtual environment.
+The [`dependencies/PythonVenv`][106] template module is included
+in the `Dependencies` template module.
+
+## PYTHON_VENV_DIR
+
+Set the Python virtual environment directory.
+
+#]=================================================================]#github/wiki
+@FCM_COMMAND_PREFIX@option(ENABLE_PYTHON_VENV
+  "Enable creating of Python virtual environment"
+  # Specify other conditions, if any
+  ON IF ENABLE_BENCHMARK_TOOLS
+)
+@FCM_COMMAND_PREFIX@set_cache_entry(PYTHON_VENV_DIR
+  "${PROJECT_SOURCE_DIR}/.venv" CACHE PATH
+  "Python virtual environment directory"
+)
+
+
+############################ Project cached entries ############################
+
+#[=================================================================[#github/wiki
+## PACKAGE_NAME
+
+The package name used by a [`find_package()`][309] call.
+
+## PACKAGE_EXPORT_TARGET_NAME
+
+The name without extension of a file exporting targets for consuming projects.
+
+## INSTALL_CMAKE_DIR
+
+The installation directory for CMake configuration files.
+
+## INSTALL_LICENSE_DIR
+
+The installation directory for the LICENSE file.
+
+## INSTALL_DOC_DIR
+
+The installation directory for the documentation.
+
+#]=================================================================]#github/wiki
+if (ENABLE_INSTALL)
+  # Provides install directory variables as defined by the GNU Coding Standards.
+  # See: https://www.gnu.org/prep/standards/html_node/Directory-Variables.html
+  include(GNUInstallDirs)
+
+  @FCM_COMMAND_PREFIX@set_cache_entry(PACKAGE_NAME
+    "${PROJECT_NAME}" CACHE STRING
+    "The package name used by a `find_package()` call"
+  )
+
+  @FCM_COMMAND_PREFIX@set_cache_entry(PACKAGE_EXPORT_TARGET_NAME
+    "${PACKAGE_NAME}Targets" CACHE STRING
+    "Name without extension of a file exporting targets for dependent projects"
+  )
+
+  @FCM_COMMAND_PREFIX@set_cache_entry(INSTALL_CMAKE_DIR
+    "${CMAKE_INSTALL_DATAROOTDIR}/${PACKAGE_NAME}/cmake" CACHE STRING
+    "Installation directory for CMake configuration files"
+  )
+
+  @FCM_COMMAND_PREFIX@set_cache_entry(INSTALL_LICENSE_DIR
+    "${CMAKE_INSTALL_DATAROOTDIR}/${PACKAGE_NAME}" CACHE STRING
+    "Installation directory for the LICENSE file"
+  )
+
+  if (ENABLE_DOCS)
+    @FCM_COMMAND_PREFIX@set_cache_entry(INSTALL_DOC_DIR
+      "${CMAKE_INSTALL_DATAROOTDIR}/${PACKAGE_NAME}/doc" CACHE STRING
+      "Installation directory for documentation"
+    )
+  endif()
+endif(ENABLE_INSTALL)
+
+
+############################ Variable init guard ###############################
+
+# For internal use: prevent processing listfiles before including `Variables`
+function(@FCM_COMMAND_PREFIX@internal_variable_init_guard)
+  # Do nothing, just check if this function exists
+endfunction()
+
+#[=================================================================[#github/wiki
+[101]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-targets#fcm_generate_export_header
+[102]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Ccache
+[103]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-targets#fcm_target_include_directories
+[104]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Debugging#create_symlink_to_compile_commands
+[105]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Dependency-management
+[106]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Python-virtual-environment
+[107]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Doxygen
+[108]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Valgrind
+[109]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Clang-format
+
+[301]: https://cmake.org/cmake/help/latest/variable/BUILD_SHARED_LIBS.html
+[302]: https://cmake.org/cmake/help/latest/module/GenerateExportHeader.html
+[303]: https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_RPATH.html
+[304]: https://cmake.org/cmake/help/latest/prop_tgt/INSTALL_RPATH.html
+[305]: https://cmake.org/cmake/help/latest/command/target_include_directories.html
+[306]: https://cmake.org/cmake/help/latest/variable/PROJECT_IS_TOP_LEVEL.html
+[307]: https://cmake.org/cmake/help/latest/module/FetchContent.html
+[308]: https://cmake.org/cmake/help/latest/module/ExternalProject.html
+[309]: https://cmake.org/cmake/help/latest/command/find_package.html
+
+[501]: https://ccache.dev
+[502]: https://github.com/google/googletest
+[503]: https://github.com/google/benchmark
+[504]: https://github.com/google/benchmark/blob/main/docs/tools.md
+[505]: https://www.doxygen.nl
+[506]: https://jothepro.github.io/doxygen-awesome-css
+[507]: https://valgrind.org
+[508]: https://clang.llvm.org/docs/ClangFormat.html
+
+#]=================================================================]#github/wiki

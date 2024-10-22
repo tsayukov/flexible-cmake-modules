@@ -1,0 +1,19 @@
+#[=============================================================================[
+  External dependencies
+#]=============================================================================]
+
+include_guard(GLOBAL)
+
+########################## The project's dependencies ##########################
+
+# Add the project's dependencies here
+
+################################ Developer Mode ################################
+
+@FCM_COMMAND_PREFIX@include("dependencies/PythonVenv" TEMPLATE)
+@FCM_COMMAND_PREFIX@include("dependencies/Valgrind" TEMPLATE)
+@FCM_COMMAND_PREFIX@include("dependencies/GoogleTest" TEMPLATE)
+@FCM_COMMAND_PREFIX@include("dependencies/GoogleBenchmark" TEMPLATE)
+@FCM_COMMAND_PREFIX@include("dependencies/ClangFormat" TEMPLATE)
+@FCM_COMMAND_PREFIX@include("dependencies/Doxygen" TEMPLATE)
+# @FCM_COMMAND_PREFIX@include("dependencies/Coverage" TEMPLATE)

@@ -1,0 +1,566 @@
+# Flexible CMake Modules
+# ------------------------------------------------------------------------------
+# Author: Pavel Tsayukov
+# Repository: https://github.com/tsayukov/flexible-cmake-modules
+# Distributed under the MIT License. See the accompanying file LICENSE or
+# https://opensource.org/license/mit for details.
+# ------------------------------------------------------------------------------
+#
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# FOR COAUTHORS AND CONTRIBUTORS: fill in your name, contacts, and changes above
+#
+#[=================================================================[#github/wiki
+# Project targets
+
+## Table of Contents
+
+- [Introduction](#Introduction)
+- [fcm_get_target](#fcm_get_target)
+- [fcm_add_library](#fcm_add_library)
+- [fcm_add_executable](#fcm_add_executable)
+- [fcm_generate_export_header](#fcm_generate_export_header)
+- [fcm_target_compile_definitions](#fcm_target_compile_definitions)
+- [fcm_target_compile_features](#fcm_target_compile_features)
+- [fcm_target_compile_options](#fcm_target_compile_options)
+- [fcm_target_include_directories](#fcm_target_include_directories)
+- [fcm_target_link_directories](#fcm_target_link_directories)
+- [fcm_target_link_libraries](#fcm_target_link_libraries)
+- [fcm_target_link_options](#fcm_target_link_options)
+- [fcm_target_precompile_headers](#fcm_target_precompile_headers)
+- [fcm_target_sources](#fcm_target_sources)
+
+# Introduction
+
+To prevent name clashes all project targets and its user-defined properties
+defined by commands below have the `<FCM_PROJECT_TARGET_PREFIX>` prefix getting
+by a [`fcm_get_project_target_prefix()`][101] call
+and the `<FCM_PROJECT_CACHE_PREFIX>` prefix getting
+by a [`fcm_get_project_cache_prefix`][102] call accordingly. It is recommended
+that targets be named in lowercase letters with underscore. On the contrary,
+it is recommended that user-defined properties be named in uppercase letters
+with underscores.
+
+Usage:
+
+```cmake
+project(my-library CXX)
+
+# Set `FCM_PROJECT_TARGET_PREFIX` to `my_library_`
+include(cmake/FcmInit.cmake)
+
+# Define a `my_library_interface_lib` library
+fcm_add_library(interface_lib INTERFACE)
+fcm_target_include_directories(interface_lib
+  INTERFACE "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
+)
+
+# Define a `my_library_main` executable
+fcm_add_executable(main)
+fcm_target_link_libraries(main
+  # without the namespace it will be looking for just `interface_lib`
+  PRIVATE my_library::interface_lib
+)
+fcm_target_sources(main
+  PRIVATE src/main.cpp
+)
+
+fcm_get_target(interface_lib FULL_NAME_TO target SUFFIX_TO suffix)
+# target STREQUAL "my_library_interface_lib"
+# suffix STREQUAL "interface_lib"
+```
+
+Let's say that `<namespace>` is non-empty `<FCM_PROJECT_TARGET_PREFIX>` without
+the trailing underscore. Then each project target also
+has an `<namespace>::<target_suffix>` alias and its `EXPORT_NAME` property
+set to `<target_suffix>`. It is nessecary in order to use the command below
+to export the target as `<namespace>::<target_suffix>`:
+
+```cmake
+install(TARGETS <namespace>::<target_suffix> ...)
+install(EXPORT ... NAMESPASE <namespace>::)
+```
+
+When a consuming project gets this project via a `find_package()` call it uses
+exported targets, e.g., `<namespace>::<target_suffix>` that defined
+by `install(EXPORT ... NAMESPACE <target_suffix>::)`.
+But if the consuming project gets this project via the `FetchContent` module or
+a `add_subdirectory()` call, then it has to use `<namespace>_<target_suffix>`
+until this project adds an alias definition:
+
+```cmake
+add_library(<namespace>::<target_suffix> ALIAS <namespace>_<target_suffix>)
+```
+
+Summing up, changing the method of getting this project won't cause to change
+the command usage below in any of these cases:
+
+```cmake
+target_link_libraries(<consuming_target> ... <namespace>::<target_suffix>)
+```
+
+## fcm_get_target
+
+Resolve a target name and its suffix.
+
+```
+fcm_get_target(<target>
+               [FULL_NAME_TO <output_full_name_variable>]
+               [SUFFIX_TO <output_suffix_variable>])
+```
+
+The order of `<target>` lookup is as follows:
+- if the `<FCM_PROJECT_TARGET_PREFIX><target>` target exists, then
+  put `<prefix><target>` into `<output_full_name_variable>` and put `<target>`
+  into `<output_suffix_variable>`, if any;
+- otherwise, if the `<target>` target exists, then put `<target>` into both
+  `<output_full_name_variable>` and `<output_suffix_variable>`, if any.
+- otherwise, raise an error.
+
+## fcm_add_library
+
+Add a project [library][309] target.
+
+```
+fcm_add_library(<target_suffix> [EXCLUDE_FROM_INSTALL]
+                [<add_library_arguments>...])
+```
+
+Add the `<FCM_PROJECT_TARGET_PREFIX><target_suffix>` project library target.
+All other arguments of the `add_library()` command are passed at the end.
+
+If `FCM_PROJECT_TARGET_PREFIX` has a `<prefix>_` form, then
+add a `<prefix>::<target_suffix>` [alias][310].
+
+Set the [`EXPORT_NAME`][304] and [`OUTPUT_NAME`][306] target properties
+to `<target_suffix>`.
+
+If the target is a shared library, also set the following target properties:
+- [`SOVERSION`][307] to [`PROJECT_VERSION_MAJOR`][302]'s value;
+- [`VERSION`][308] to [`PROJECT_VERSION`][303]'s value.
+
+Pass the `EXCLUDE_FROM_INSTALL` option to exclude the target from installation
+via [`fcm_install(TARGETS)`][103].
+
+Set the [`INTERPROCEDURAL_OPTIMIZATION_RELEASE`][322] target property
+if [`<FCM_PROJECT_CACHE_PREFIX>ENABLE_INTERPROCEDURAL_OPTIMIZATION_RELEASE`][202]
+is enabled and the compiler supports IPO.
+
+## fcm_add_executable
+
+Add a project [executable][311] target.
+
+```
+fcm_add_executable(<target_suffix> [EXCLUDE_FROM_INSTALL]
+                   [<add_executable_arguments>...])
+```
+
+Add the `<FCM_PROJECT_TARGET_PREFIX><target_suffix>` project executable target.
+All other arguments of the `add_executable()` command are passed at the end.
+
+If `FCM_PROJECT_TARGET_PREFIX` has a `<prefix>_` form, then
+add a `<prefix>::<target_suffix>` [alias][312].
+
+Set the [`EXPORT_NAME`][304] and [`OUTPUT_NAME`][306] target properties
+to `<target_suffix>`.
+
+Pass the `EXCLUDE_FROM_INSTALL` option to exclude the target from installation
+via [`fcm_install(TARGETS)`][103].
+
+Set the [`INTERPROCEDURAL_OPTIMIZATION_RELEASE`][322] target property
+if [`<FCM_PROJECT_CACHE_PREFIX>ENABLE_INTERPROCEDURAL_OPTIMIZATION_RELEASE`][202]
+is enabled and the compiler supports IPO.
+
+## fcm_generate_export_header
+
+An extended version of the [`generate_export_header()`][301] command.
+
+```
+fcm_generate_export_header(<target>
+                           [BASE_INCLUDE_DIRECTORY <include_dir>]
+                           [<generate_export_header_arguments>...])
+```
+
+Make the `generate_export_header()` call on `<target>` after resolving
+the target name and its suffix
+via [`fcm_get_target()`](#fcm_get_target).
+
+Also, populate the `INTERFACE_INCLUDE_DIRECTORIES` and `INCLUDE_DIRECTORIES`
+target properties by `<include_dir>` following `BASE_INCLUDE_DIRECTORY`,
+otherwise, use the [`BINARY_DIR`][305] target property. If `<include_dir>`
+is a relative path, then prepend it with `BINARY_DIR`.
+Set `<include_dir>` as the `<FCM_PROJECT_CACHE_PREFIX>EXPORT_HEADER_DIR`
+target property's value, so the export header can be installed
+via the [`fcm_install(EXPORT_HEADERS)`][104] command.
+
+If `BASE_NAME` is not defined, use the target suffix by default.
+
+## fcm_target_compile_definitions
+
+Make the [`target_compile_definitions()`][313] call on `<target>` after
+resolving the target name via [`fcm_get_target()`](#fcm_get_target).
+
+```
+fcm_target_compile_definitions(<target> <target_compile_definitions_arguments>...)
+```
+
+## fcm_target_compile_features
+
+Make the [`target_compile_features()`][314] call on `<target>` after resolving
+the target name via [`fcm_get_target()`](#fcm_get_target).
+
+```
+fcm_target_compile_features(<target> <target_compile_features_arguments>...)
+```
+
+## fcm_target_compile_options
+
+Make the [`target_compile_options()`][315] call on `<target>` after resolving
+the target name via [`fcm_get_target()`](#fcm_get_target).
+
+```
+fcm_target_compile_options(<target> <target_compile_options_arguments>...)
+```
+
+## fcm_target_include_directories
+
+Make the [`target_include_directories()`][316] call on `<target>` after
+resolving the target name via [`fcm_get_target()`](#fcm_get_target).
+
+```
+fcm_target_include_directories(<target> <target_include_directories_arguments>...)
+```
+
+If [`ENABLE_TREATING_INCLUDES_AS_SYSTEM`][201] is set, then pass the `SYSTEM`
+option.
+
+## fcm_target_link_directories
+
+Make the [`target_link_directories()`][317] call on `<target>` after resolving
+the target name via [`fcm_get_target()`](#fcm_get_target).
+
+```
+fcm_target_link_directories(<target> <target_link_directories_arguments>...)
+```
+
+## fcm_target_link_libraries
+
+Make the [`target_link_libraries()`][318] call on `<target>` after resolving
+the target name via [`fcm_get_target()`](#fcm_get_target).
+
+```
+fcm_target_link_libraries(<target> <target_link_libraries_arguments>...)
+```
+
+## fcm_target_link_options
+
+Make the [`target_link_options()`][319] call on `<target>` after resolving
+the target name via [`fcm_get_target()`](#fcm_get_target).
+
+```
+fcm_target_link_options(<target> <target_link_options_arguments>...)
+```
+
+## fcm_target_precompile_headers
+
+Make the [`target_precompile_headers()`][320] call on `<target>` after resolving
+the target name via [`fcm_get_target()`](#fcm_get_target).
+
+```
+fcm_target_precompile_headers(<target> <target_precompile_headers_arguments>...)
+```
+
+## fcm_target_sources
+
+Make the [`target_sources()`][321] call on `<target>` after resolving
+the target name via [`fcm_get_target()`](#fcm_get_target).
+
+```
+fcm_target_sources(<target> <target_sources_arguments>...)
+```
+
+[101]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_project_target_prefix
+[102]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_project_cache_prefix
+[103]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Install#fcm_install(TARGETS)
+[104]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Install#fcm_install(EXPORT_HEADERS)
+
+[201]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Variables#ENABLE_TREATING_INCLUDES_AS_SYSTEM
+[202]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Variables#ENABLE_INTERPROCEDURAL_OPTIMIZATION_RELEASE
+
+[301] https://cmake.org/cmake/help/latest/module/GenerateExportHeader.html
+[302] https://cmake.org/cmake/help/latest/variable/PROJECT_VERSION_MAJOR.html
+[303] https://cmake.org/cmake/help/latest/variable/PROJECT_VERSION.html
+[304] https://cmake.org/cmake/help/latest/prop_tgt/EXPORT_NAME.html
+[305] https://cmake.org/cmake/help/latest/prop_tgt/BINARY_DIR.html
+[306] https://cmake.org/cmake/help/latest/prop_tgt/OUTPUT_NAME.html
+[307] https://cmake.org/cmake/help/latest/prop_tgt/SOVERSION.html
+[308] https://cmake.org/cmake/help/latest/prop_tgt/VERSION.html
+[309] https://cmake.org/cmake/help/latest/command/add_library.html
+[310] https://cmake.org/cmake/help/latest/command/add_library.html#alias
+[311] https://cmake.org/cmake/help/latest/command/add_executable.html
+[312] https://cmake.org/cmake/help/latest/command/add_executable.html#alias-executables
+[313] https://cmake.org/cmake/help/latest/command/target_compile_definitions.html
+[314] https://cmake.org/cmake/help/latest/command/target_compile_features.html
+[315] https://cmake.org/cmake/help/latest/command/target_compile_options.html
+[316] https://cmake.org/cmake/help/latest/command/target_include_directories.html
+[317] https://cmake.org/cmake/help/latest/command/target_link_directories.html
+[318] https://cmake.org/cmake/help/latest/command/target_link_libraries.html
+[319] https://cmake.org/cmake/help/latest/command/target_link_options.html
+[320] https://cmake.org/cmake/help/latest/command/target_precompile_headers.html
+[321] https://cmake.org/cmake/help/latest/command/target_sources.html
+[322]: https://cmake.org/cmake/help/latest/prop_tgt/INTERPROCEDURAL_OPTIMIZATION_CONFIG.html
+
+#]=================================================================]#github/wiki
+
+include_guard(GLOBAL)
+
+# Require "common/FcmConfigVariables"
+# Require "common/ParseArgs"
+
+
+function(@FCM_COMMAND_PREFIX@get_target
+  target
+)
+  cmake_parse_arguments(PARSE_ARGV 1 "ARGS"
+    ""
+    "FULL_NAME_TO;SUFFIX_TO"
+    ""
+  )
+
+  @FCM_COMMAND_PREFIX@get_project_target_prefix()
+  if (TARGET "${FCM_PROJECT_TARGET_PREFIX}${target}")
+    set(full_name ${FCM_PROJECT_TARGET_PREFIX}${target})
+  elseif (NOT TARGET "${target}")
+    message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+      "Neither the \"${FCM_PROJECT_TARGET_PREFIX}${target}\" nor \"${target}\" "
+      "target exists."
+    )
+    return()
+  else()
+    set(full_name ${target})
+  endif()
+
+  if (DEFINED ARGS_FULL_NAME_TO)
+    set(${ARGS_FULL_NAME_TO} ${full_name} PARENT_SCOPE)
+  endif()
+
+  if (DEFINED ARGS_SUFFIX_TO)
+    set(${ARGS_SUFFIX_TO} ${target} PARENT_SCOPE)
+  endif()
+endfunction()
+
+function(@FCM_COMMAND_PREFIX@add_library
+  target_suffix
+)
+  @FCM_COMMAND_PREFIX@parse_and_remove_arguments_from(ARGN
+    __OPTIONS__ "EXCLUDE_FROM_INSTALL"
+  )
+
+  @FCM_COMMAND_PREFIX@get_project_target_prefix()
+  set(target ${FCM_PROJECT_TARGET_PREFIX}${target_suffix})
+
+  add_library(${target} ${ARGN})
+
+  if (NOT FCM_PROJECT_TARGET_PREFIX STREQUAL "")
+    string(REGEX REPLACE "_$" "" namespace ${FCM_PROJECT_TARGET_PREFIX})
+    add_library(${namespace}::${target_suffix} ALIAS ${target})
+  endif()
+
+  set_target_properties(${target}
+    PROPERTIES
+      EXPORT_NAME ${target_suffix}
+      OUTPUT_NAME ${target_suffix}
+  )
+
+  get_target_property(target_type ${target} TYPE)
+  if (target_type STREQUAL "SHARED_LIBRARY")
+    set_target_properties(${target}
+      PROPERTIES
+        SOVERSION ${PROJECT_VERSION_MAJOR}
+        VERSION ${PROJECT_VERSION}
+    )
+  endif()
+
+  @FCM_COMMAND_PREFIX@get(ENABLE_INSTALL)
+  if (ENABLE_INSTALL AND NOT ARGS_EXCLUDE_FROM_INSTALL)
+    @FCM_COMMAND_PREFIX@get_project_cache_prefix()
+    set_property(DIRECTORY
+        "${PROJECT_SOURCE_DIR}"
+      APPEND PROPERTY
+        ${FCM_PROJECT_CACHE_PREFIX}INSTALL_PROJECT_TARGETS ${target}
+    )
+  endif()
+
+  @FCM_COMMAND_PREFIX@get(INTERPROCEDURAL_OPTIMIZATION_RELEASE)
+  if (INTERPROCEDURAL_OPTIMIZATION_RELEASE)
+    set_target_properties(${target}
+      PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE ON
+    )
+  endif()
+endfunction()
+
+function(@FCM_COMMAND_PREFIX@add_executable
+  target_suffix
+)
+  @FCM_COMMAND_PREFIX@parse_and_remove_arguments_from(ARGN
+    __OPTIONS__ "EXCLUDE_FROM_INSTALL"
+  )
+
+  @FCM_COMMAND_PREFIX@get_project_target_prefix()
+  set(target ${FCM_PROJECT_TARGET_PREFIX}${target_suffix})
+
+  add_executable(${target} ${ARGN})
+
+  if (NOT FCM_PROJECT_TARGET_PREFIX STREQUAL "")
+    string(REGEX REPLACE "_$" "" namespace ${FCM_PROJECT_TARGET_PREFIX})
+    add_executable(${namespace}::${target_suffix} ALIAS ${target})
+  endif()
+
+  set_target_properties(${target}
+    PROPERTIES
+      EXPORT_NAME ${target_suffix}
+      OUTPUT_NAME ${target_suffix}
+  )
+
+  @FCM_COMMAND_PREFIX@get(ENABLE_INSTALL)
+  if (ENABLE_INSTALL AND NOT ARGS_EXCLUDE_FROM_INSTALL)
+    @FCM_COMMAND_PREFIX@get_project_cache_prefix()
+    set_property(DIRECTORY
+        "${PROJECT_SOURCE_DIR}"
+      APPEND PROPERTY
+        ${FCM_PROJECT_CACHE_PREFIX}INSTALL_PROJECT_TARGETS ${target}
+    )
+  endif()
+
+  @FCM_COMMAND_PREFIX@get(INTERPROCEDURAL_OPTIMIZATION_RELEASE)
+  if (INTERPROCEDURAL_OPTIMIZATION_RELEASE)
+    set_target_properties(${target}
+      PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE ON
+    )
+  endif()
+endfunction()
+
+function(@FCM_COMMAND_PREFIX@generate_export_header
+  target
+)
+  if (NOT ENABLE_EXPORT_HEADER)
+    return()
+  endif()
+
+  @FCM_COMMAND_PREFIX@parse_and_remove_arguments_from(ARGN
+    __ONE_VALUE_KEYS__
+    # parameters of the `generate_export_header`
+      BASE_NAME
+      EXPORT_FILE_NAME
+    # custom parameters
+      BASE_INCLUDE_DIRECTORY
+  )
+
+  @FCM_COMMAND_PREFIX@get_target(${target}
+    FULL_NAME_TO target
+    SUFFIX_TO target_suffix
+  )
+
+  if (NOT DEFINED ARGS_BASE_NAME)
+    set(ARGS_BASE_NAME ${target_suffix})
+  endif()
+
+  get_target_property(binary_dir ${target} BINARY_DIR)
+
+  if (NOT DEFINED ARGS_BASE_INCLUDE_DIRECTORY)
+    set(ARGS_BASE_INCLUDE_DIRECTORY "${binary_dir}")
+  elseif (NOT IS_ABSOLUTE "${ARGS_BASE_INCLUDE_DIRECTORY}")
+    set(ARGS_BASE_INCLUDE_DIRECTORY "${binary_dir}/${ARGS_BASE_INCLUDE_DIRECTORY}")
+  endif()
+
+  if (NOT DEFINED ARGS_EXPORT_FILE_NAME)
+    string(TOLOWER "${ARGS_BASE_NAME}" base_name_lower)
+    set(ARGS_EXPORT_FILE_NAME "${binary_dir}/${base_name_lower}_export.h")
+  elseif (NOT IS_ABSOLUTE "${ARGS_EXPORT_FILE_NAME}")
+    set(ARGS_EXPORT_FILE_NAME "${ARGS_BASE_INCLUDE_DIRECTORY}/${ARGS_EXPORT_FILE_NAME}")
+  endif()
+
+  generate_export_header(${target}
+    BASE_NAME ${ARGS_BASE_NAME}
+    EXPORT_FILE_NAME "${ARGS_EXPORT_FILE_NAME}"
+    ${ARGN}
+  )
+
+  @FCM_COMMAND_PREFIX@target_include_directories(${target}
+    PUBLIC
+      "$<BUILD_INTERFACE:${ARGS_BASE_INCLUDE_DIRECTORY}>"
+  )
+
+  @FCM_COMMAND_PREFIX@get_project_cache_prefix()
+  set_target_properties(${target}
+    PROPERTIES
+      ${FCM_PROJECT_CACHE_PREFIX}EXPORT_HEADER_DIR "${ARGS_BASE_INCLUDE_DIRECTORY}"
+  )
+endfunction()
+
+function(@FCM_COMMAND_PREFIX@target_compile_definitions
+  target
+)
+  @FCM_COMMAND_PREFIX@get_target(${target} FULL_NAME_TO target)
+  target_compile_definitions(${target} ${ARGN})
+endfunction()
+
+function(@FCM_COMMAND_PREFIX@target_compile_features
+  target
+)
+  @FCM_COMMAND_PREFIX@get_target(${target} FULL_NAME_TO target)
+  target_compile_features(${target} ${ARGN})
+endfunction()
+
+function(@FCM_COMMAND_PREFIX@target_compile_options
+  target
+)
+  @FCM_COMMAND_PREFIX@get_target(${target} FULL_NAME_TO target)
+  target_compile_options(${target} ${ARGN})
+endfunction()
+
+function(@FCM_COMMAND_PREFIX@target_include_directories
+  target
+)
+  @FCM_COMMAND_PREFIX@get_target(${target} FULL_NAME_TO target)
+  if (ENABLE_TREATING_INCLUDES_AS_SYSTEM)
+    set(warning_guards "SYSTEM")
+  else()
+    set(warning_guards "")
+  endif()
+  target_include_directories(${target} ${warning_guards} ${ARGN})
+endfunction()
+
+function(@FCM_COMMAND_PREFIX@target_link_directories
+  target
+)
+  @FCM_COMMAND_PREFIX@get_target(${target} FULL_NAME_TO target)
+  target_link_directories(${target} ${ARGN})
+endfunction()
+
+function(@FCM_COMMAND_PREFIX@target_link_libraries
+  target
+)
+  @FCM_COMMAND_PREFIX@get_target(${target} FULL_NAME_TO target)
+  target_link_libraries(${target} ${ARGN})
+endfunction()
+
+function(@FCM_COMMAND_PREFIX@target_link_options
+  target
+)
+  @FCM_COMMAND_PREFIX@get_target(${target} FULL_NAME_TO target)
+  target_link_options(${target} ${ARGN})
+endfunction()
+
+function(@FCM_COMMAND_PREFIX@target_precompile_headers
+  target
+)
+  @FCM_COMMAND_PREFIX@get_target(${target} FULL_NAME_TO target)
+  target_precompile_headers(${target} ${ARGN})
+endfunction()
+
+function(@FCM_COMMAND_PREFIX@target_sources
+  target
+)
+  @FCM_COMMAND_PREFIX@get_target(${target} FULL_NAME_TO target)
+  target_sources(${target} ${ARGN})
+endfunction()

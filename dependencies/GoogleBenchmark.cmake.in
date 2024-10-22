@@ -1,0 +1,91 @@
+# Flexible CMake Modules
+# ------------------------------------------------------------------------------
+# Author: Pavel Tsayukov
+# Repository: https://github.com/tsayukov/flexible-cmake-modules
+# Distributed under the MIT License. See the accompanying file LICENSE or
+# https://opensource.org/license/mit for details.
+# ------------------------------------------------------------------------------
+#
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# FOR COAUTHORS AND CONTRIBUTORS: fill in your name, contacts, and changes above
+#
+#[=============================================================================[
+  Google Benchmark
+#]=============================================================================]
+
+include_guard(GLOBAL)
+@FCM_COMMAND_PREFIX@internal_variable_init_guard()
+
+
+############################ Google Benchmark init #############################
+
+@FCM_COMMAND_PREFIX@enable_if(ENABLE_BENCHMARKING)
+
+@FCM_COMMAND_PREFIX@use_cxx_standard_at_least(11 NAME "Google benchmark")
+
+find_package(benchmark)
+set(BENCHMARK_TOOLS_HINTS "/usr/share/benchmark")
+if (NOT benchmark_FOUND)
+  @FCM_COMMAND_PREFIX@can_fetch_dependency(benchmark)
+
+  @FCM_COMMAND_PREFIX@use_cxx_standard_at_least(14 NAME "Google benchmark (building)")
+
+  @FCM_COMMAND_PREFIX@git_first_hash(__last_version_hash
+    "https://github.com/google/benchmark" TAGS DESCEND
+  )
+
+  include(FetchContent)
+  FetchContent_Declare(
+    benchmark
+    GIT_REPOSITORY "https://github.com/google/benchmark"
+    GIT_TAG ${__last_version_hash}
+  )
+  unset(__last_version_hash)
+
+  set(BENCHMARK_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
+  set(BENCHMARK_INSTALL_DOCS OFF CACHE BOOL "" FORCE)
+  set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE BOOL "" FORCE)
+
+  FetchContent_MakeAvailable(benchmark)
+  list(APPEND BENCHMARK_TOOLS_HINTS "${benchmark_SOURCE_DIR}/tools")
+endif(NOT benchmark_FOUND)
+
+
+######################### Google Benchmark Tools init ##########################
+
+@FCM_COMMAND_PREFIX@enable_if(ENABLE_BENCHMARK_TOOLS ENABLE_PYTHON_VENV)
+
+find_path(BENCHMARK_TOOLS
+  NAMES "compare.py"
+  HINTS ${BENCHMARK_TOOLS_HINTS}
+)
+unset(BENCHMARK_TOOLS_HINTS)
+mark_as_advanced(BENCHMARK_TOOLS)
+
+if (NOT BENCHMARK_TOOLS)
+  message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
+    "Google Benchmark tools is not found."
+  )
+  return()
+endif()
+
+@FCM_COMMAND_PREFIX@init_python_venv()
+
+@FCM_COMMAND_PREFIX@get(BENCHMARK_TOOLS_DEPENDENCIES_ARE_INSTALLED)
+if (NOT BENCHMARK_TOOLS_DEPENDENCIES_ARE_INSTALLED)
+  message(STATUS "Installing Google Benchmark tools' dependencies")
+  execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install --quiet
+    -r "${BENCHMARK_TOOLS}/requirements.txt"
+  )
+  # Even though, `requirements.txt` doesn't have `pandas`,
+  # `compare.py` still requires it
+  execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install --quiet
+    wheel
+    pandas
+  )
+  message(STATUS "Installing Google Benchmark tools' dependencies - done")
+
+  @FCM_COMMAND_PREFIX@set_cache_entry(BENCHMARK_TOOLS_DEPENDENCIES_ARE_INSTALLED
+    ON CACHE INTERNAL ""
+  )
+endif()
