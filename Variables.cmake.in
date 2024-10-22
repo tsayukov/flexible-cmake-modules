@@ -164,7 +164,7 @@ build if the compiler supports IPO.
 #]=================================================================]#github/wiki
 @FCM_COMMAND_PREFIX@option(ENABLE_INTERPROCEDURAL_OPTIMIZATION_RELEASE
   "Enable IPO for the project's targets in the Release build"
-  ON IF CMAKE_BUILD_TYPE STREQUAL [[Release]]
+  ON IF PROJECT_IS_TOP_LEVEL AND CMAKE_BUILD_TYPE STREQUAL [[Release]]
 )
 
 
