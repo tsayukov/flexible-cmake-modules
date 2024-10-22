@@ -199,9 +199,6 @@ template module. By default, it is [Google Test][502].
 
 #]=================================================================]#github/wiki
 @FCM_COMMAND_PREFIX@dev_option(ENABLE_TESTING "Enable testing")
-if (ENABLE_TESTING)
-  enable_testing()
-endif()
 
 #[=================================================================[#github/wiki
 ## ENABLE_BENCHMARKING
@@ -220,6 +217,10 @@ Find Google Benchmark [tools][504].
 @FCM_COMMAND_PREFIX@option(ENABLE_BENCHMARK_TOOLS "Enable benchmark tools"
   ON IF ENABLE_BENCHMARKING
 )
+
+if (ENABLE_TESTING OR ENABLE_BENCHMARKING)
+  enable_testing()
+endif()
 
 #[=================================================================[#github/wiki
 ## ENABLE_COVERAGE
