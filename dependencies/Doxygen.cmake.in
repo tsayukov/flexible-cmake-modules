@@ -135,7 +135,7 @@ get_target_property(DOXYGEN_EXECUTABLE Doxygen::doxygen IMPORTED_LOCATION)
 set(DOXYGEN_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/docs")
 
 # Build related configuration options
-set(DOXYGEN_EXTRACT_ALL YES)
+set(DOXYGEN_EXTRACT_ALL NO)
 
 # Configuration options related to the input files
 set(DOXYGEN_RECURSIVE YES)
