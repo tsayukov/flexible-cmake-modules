@@ -28,12 +28,45 @@ macro(test_enable_catch_fatal_error)
   set(__FCM_DEBUG_CATCH_FATAL_ERROR__ "__FCM_DEBUG_CATCH_FATAL_ERROR__")
 endmacro()
 
-function(test_pop_error_message)
-  # TODO: impl
+function(test_push_error_message
+  text
+)
+  set_property(DIRECTORY
+      "${PROJECT_SOURCE_DIR}"
+    PROPERTY
+      TEST_FCM_ERROR_MESSAGE "${text}"
+  )
 endfunction()
 
+macro(test_pop_error_message
+  output_variable
+)
+  get_property(${output_variable}
+    DIRECTORY "${PROJECT_SOURCE_DIR}"
+    PROPERTY TEST_FCM_ERROR_MESSAGE
+  )
+  set_property(DIRECTORY
+      "${PROJECT_SOURCE_DIR}"
+    PROPERTY
+      TEST_FCM_ERROR_MESSAGE ""
+  )
+endmacro()
+
 macro(message)
-  # TODO: impl
+  if ("${ARGC}" GREATER "2")
+    if ("${ARGV0}" STREQUAL "FATAL_ERROR"
+          AND "${ARGV1}" STREQUAL "__FCM_DEBUG_CATCH_FATAL_ERROR__")
+      set(__ARGV ${ARGV})
+      list(SUBLIST __ARGV 2 -1 __ARGV)
+      list(JOIN __ARGV "" __ARGV)
+      test_push_error_message("${__ARGV}")
+      unset(__ARGV)
+    else()
+      _message(${ARGV})
+    endif()
+  else()
+    _message(${ARGV})
+  endif()
 endmacro()
 
 ################################ Init variables ################################
