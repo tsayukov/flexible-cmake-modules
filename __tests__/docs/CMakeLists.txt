@@ -13,8 +13,6 @@
   Generation the FCM's documentation
 #]=============================================================================]
 
-enable_testing()
-
 find_package(Python3 REQUIRED)
 
 file(GLOB_RECURSE cmake_modules LIST_DIRECTORIES false

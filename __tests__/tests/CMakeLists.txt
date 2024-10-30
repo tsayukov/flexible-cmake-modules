@@ -13,6 +13,4 @@
   Testing CMake modules
 #]=============================================================================]
 
-enable_testing()
-
 # TODO: add tests

@@ -19,6 +19,8 @@ project(Testing NONE)
 
 include(cmake/TestUtils.cmake)
 
+enable_testing()
+
 if (ENABLE_TESTING)
   add_subdirectory(tests)
 endif()
