@@ -1,0 +1,61 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "common",
+      "hidden": true,
+      "warnings": {
+        "dev": true,
+        "deprecated": true,
+        "uninitialized": true,
+        "unusedCli": true,
+        "systemVars": false
+      },
+      "errors": {
+        "dev": true,
+        "deprecated": true
+      }
+    },
+    {
+      "name": "tests",
+      "displayName": "Testing FCM",
+      "inherits": "common",
+      "binaryDir": "${sourceDir}/build/tests",
+      "cacheVariables": {
+        "ENABLE_TESTING": "ON"
+      }
+    },
+    {
+      "name": "docs",
+      "displayName": "Generating the FCM documentation",
+      "inherits": "common",
+      "binaryDir": "${sourceDir}/build/docs",
+      "cacheVariables": {
+        "ENABLE_DOCS": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "docs",
+      "displayName": "Generating the FCM documentation",
+      "configurePreset": "docs",
+      "targets": "docs"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "tests",
+      "displayName": "Testing FCM",
+      "configurePreset": "tests",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
+}
