@@ -25,7 +25,7 @@
       "name": "tests",
       "displayName": "Testing FCM",
       "inherits": "common",
-      "binaryDir": "${sourceDir}/build/tests",
+      "binaryDir": "${sourceDir}/build-tests",
       "cacheVariables": {
         "ENABLE_TESTING": "ON"
       }
@@ -34,7 +34,7 @@
       "name": "docs",
       "displayName": "Generating the FCM documentation",
       "inherits": "common",
-      "binaryDir": "${sourceDir}/build/docs",
+      "binaryDir": "${sourceDir}/build-docs",
       "cacheVariables": {
         "ENABLE_DOCS": "ON"
       }
