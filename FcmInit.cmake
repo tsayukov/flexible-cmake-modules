@@ -103,17 +103,17 @@ its value is a project name in upper case, converted to a proper C identifier.
 To get the prefix, call the [`fcm_get_project_cache_prefix()`][109] command
 and use the `FCM_PROJECT_CACHE_PREFIX` variable.
 
-[101] https://github.com/tsayukov/flexible-cmake-modules/wiki/fcm_include
-[102] https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-targets#fcm_add_library
-[103] https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-targets#fcm_add_executable
-[104] https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-cache#fcm_set_cache_entry
-[105] https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-cache#fcm_option
-[106] https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-cache#fcm_dev_option
-[107] https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_command_prefixes
-[108] https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_project_target_prefix
-[109] https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_project_cache_prefix
+[101]: https://github.com/tsayukov/flexible-cmake-modules/wiki/fcm_include
+[102]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-targets#fcm_add_library
+[103]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-targets#fcm_add_executable
+[104]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-cache#fcm_set_cache_entry
+[105]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-cache#fcm_option
+[106]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-cache#fcm_dev_option
+[107]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_command_prefixes
+[108]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_project_target_prefix
+[109]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Getters-of-FCM-Configuration-Variables#fcm_get_project_cache_prefix
 
-[301] https://cmake.org/cmake/help/latest/command/string.html#make-c-identifier
+[301]: https://cmake.org/cmake/help/latest/command/string.html#make-c-identifier
 
 #]=================================================================]#github/wiki
 
