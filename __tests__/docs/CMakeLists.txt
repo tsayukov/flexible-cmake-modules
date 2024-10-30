@@ -21,7 +21,8 @@ file(GLOB_RECURSE cmake_modules LIST_DIRECTORIES false
 )
 list(FILTER cmake_modules EXCLUDE REGEX "^${TEST_FCM_ROOT_DIR}/__tests__")
 
-file(TO_NATIVE_PATH "${PROJECT_BINARY_DIR}/flexible-cmake-modules.wiki" wiki_native_path)
+set(wiki_repository "flexible-cmake-modules.wiki")
+file(TO_NATIVE_PATH "${PROJECT_BINARY_DIR}/${wiki_repository}" wiki_native_path)
 
 set(count 0)
 foreach (module_path IN LISTS cmake_modules)
@@ -48,7 +49,7 @@ cmake_host_system_information(RESULT nproc QUERY "NUMBER_OF_LOGICAL_CORES")
 add_custom_target(docs
   COMMAND ${CMAKE_COMMAND} -E ${remove_command} ${wiki_native_path}
   COMMAND ${GIT_EXECUTABLE} clone
-    https://github.com/tsayukov/flexible-cmake-modules.wiki.git
+    https://github.com/tsayukov/${wiki_repository}.git
     ${wiki_native_path}
   COMMAND ${CMAKE_COMMAND} -E copy
     ${CMAKE_CURRENT_SOURCE_DIR}/Home.md
