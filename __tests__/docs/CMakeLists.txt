@@ -24,19 +24,14 @@ list(FILTER cmake_modules EXCLUDE REGEX "^${TEST_FCM_ROOT_DIR}/__tests__")
 set(wiki_repository "flexible-cmake-modules.wiki")
 file(TO_NATIVE_PATH "${PROJECT_BINARY_DIR}/${wiki_repository}" wiki_native_path)
 
-set(count 0)
 foreach (module_path IN LISTS cmake_modules)
+  file(RELATIVE_PATH module_name "${TEST_FCM_ROOT_DIR}" "${module_path}")
   file(TO_NATIVE_PATH "${module_path}" module_native_path)
-  math(EXPR count "${count} + 1")
-  add_test(NAME docs.${count}
+  add_test(NAME docs.${module_name}
     COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/generate.py"
       "${wiki_native_path}" "${module_native_path}"
   )
 endforeach()
-
-unset(count)
-unset(cmake_modules)
-unset(module_native_path)
 
 if (CMAKE_VERSION VERSION_LESS "3.17")
   set(remove_command "remove_directory")
