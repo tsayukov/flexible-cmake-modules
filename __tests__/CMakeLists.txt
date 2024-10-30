@@ -19,5 +19,10 @@ project(Testing NONE)
 
 include(cmake/TestUtils.cmake)
 
-add_subdirectory(tests)
-add_subdirectory(docs)
+if (ENABLE_TESTING)
+  add_subdirectory(tests)
+endif()
+
+if (ENABLE_DOCS)
+  add_subdirectory(docs)
+endif()
