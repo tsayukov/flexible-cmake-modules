@@ -71,4 +71,11 @@ endmacro()
 
 ################################ Init variables ################################
 
-# TODO: impl
+find_package(Git REQUIRED)
+
+execute_process(COMMAND
+    ${GIT_EXECUTABLE} rev-parse --show-toplevel
+  WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+  OUTPUT_VARIABLE TEST_FCM_ROOT_DIR
+)
+string(STRIP "${TEST_FCM_ROOT_DIR}" TEST_FCM_ROOT_DIR)
