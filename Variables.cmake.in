@@ -266,16 +266,17 @@ and [Doxygen Awesome][506] via the [`Doxygen`][107] template module.
 #[=================================================================[#github/wiki
 ## CMAKE_EXPORT_COMPILE_COMMANDS
 
-For Debug build in the developer mode, generate `compile_commands.json` and
-may create a symbolic link in the `${PROJECT_SOURCE_DIR}/build` directory to it.
-See the [`create_symlink_to_compile_commands()`][104] command for details.
+For the current build in the developer mode, generate `compile_commands.json`
+and may create a symbolic link in the `${PROJECT_SOURCE_DIR}/build` directory
+to it. See the [`create_symlink_to_compile_commands()`][104] command
+for details.
 
 #]=================================================================]#github/wiki
-if (ENABLE_DEVELOPER_MODE)
-  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-  if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    @FCM_COMMAND_PREFIX@create_symlink_to_compile_commands()
-  endif()
+@FCM_COMMAND_PREFIX@dev_option(CMAKE_EXPORT_COMPILE_COMMANDS
+  "Generate `compile_commands.json`"
+)
+if (CMAKE_EXPORT_COMPILE_COMMANDS)
+  @FCM_COMMAND_PREFIX@create_symlink_to_compile_commands()
 endif()
 
 #[=================================================================[#github/wiki
