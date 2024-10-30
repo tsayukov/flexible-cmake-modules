@@ -14,8 +14,16 @@
 
 ## Table of Contents
 
+- [fcm_create_symlink_to_compile_commands](#fcm_create_symlink_to_compile_commands)
 - [fcm_get_version](#fcm_get_version)
 - [fcm_git_first_hash](#fcm_git_first_hash)
+
+## fcm_create_symlink_to_compile_commands
+
+Create a symbolic link in the [`PROJECT_SOURCE_DIR`][301]`/build/` directory
+to `compile_commands.json` if `PROJECT_SOURCE_DIR/build/` itself
+is not [`PROJECT_BINARY_DIR`][302]. See [`CMAKE_EXPORT_COMPILE_COMMANDS`][303]
+for details.
 
 ## fcm_get_version
 
@@ -63,12 +71,26 @@ fcm_git_first_hash(last_version_hash
 )
 ```
 
+[301]: https://cmake.org/cmake/help/latest/variable/PROJECT_SOURCE_DIR.html
+[302]: https://cmake.org/cmake/help/latest/variable/PROJECT_BINARY_DIR.html
+[303]: https://cmake.org/cmake/help/latest/variable/CMAKE_EXPORT_COMPILE_COMMANDS.html
+
 [501]: https://git-scm.com/docs/git-ls-remote
 
 #]=================================================================]#github/wiki
 
 include_guard(GLOBAL)
 
+
+function(@FCM_COMMAND_PREFIX@create_symlink_to_compile_commands)
+  if (NOT PROJECT_BINARY_DIR STREQUAL "${PROJECT_SOURCE_DIR}/build")
+    file(MAKE_DIRECTORY "${PROJECT_SOURCE_DIR}/build")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
+      "${PROJECT_BINARY_DIR}/compile_commands.json"
+      "${PROJECT_SOURCE_DIR}/build/compile_commands.json"
+    )
+  endif()
+endfunction()
 
 function(@FCM_COMMAND_PREFIX@get_version
   output_variable

@@ -370,7 +370,7 @@ endfunction()
 [101]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-targets#fcm_generate_export_header
 [102]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Ccache
 [103]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-targets#fcm_target_include_directories
-[104]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Debugging#create_symlink_to_compile_commands
+[104]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Miscellaneous#create_symlink_to_compile_commands
 [105]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Dependency-management
 [106]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Python-virtual-environment
 [107]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Doxygen
