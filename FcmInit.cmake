@@ -103,7 +103,7 @@ its value is a project name in upper case, converted to a proper C identifier.
 To get the prefix, call the [`fcm_get_project_cache_prefix()`][109] command
 and use the `FCM_PROJECT_CACHE_PREFIX` variable.
 
-[101]: https://github.com/tsayukov/flexible-cmake-modules/wiki/fcm_include
+[101]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Include-command-and-templates#fcm_include
 [102]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-targets#fcm_add_library
 [103]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-targets#fcm_add_executable
 [104]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Project-cache#fcm_set_cache_entry
