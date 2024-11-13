@@ -23,7 +23,8 @@ Add a target to build the documentation.
 ```
 fcm_doxygen_add_custom_target(<target_suffix> FORMAT <format>
                               INPUTS <input_files_or_directories>...
-                              [OUTPUT <output_directory>])
+                              [OUTPUT <output_directory>]
+                              [EXCLUDE_PATTERNS <patterns>...])
 ```
 
 Add an `<FCM_PROJECT_TARGET_PREFIX><target_suffix>` target for building
@@ -33,6 +34,10 @@ in `<output_directory>`. By default, `<output_directory>`
 is `${DOXYGEN_OUTPUT_DIRECTORY}/<format>`. If `<output_directory>`
 is not an absolute path, prepend it with `${DOXYGEN_OUTPUT_DIRECTORY}`.
 See supported [formats][503].
+
+Specify glob patterns after the `EXCLUDE_PATTERNS` key to exclude matching
+source files.
+
 Also, generate install rules for documentation,
 add an `<FCM_PROJECT_TARGET_PREFIX>docs` install component,
 and an `install_<FCM_PROJECT_TARGET_PREFIX>docs` custom target to install
@@ -67,7 +72,11 @@ function(@FCM_COMMAND_PREFIX@doxygen_add_custom_target
 )
   @FCM_COMMAND_PREFIX@enable_if(ENABLE_DOCS)
 
-  cmake_parse_arguments(PARSE_ARGV 1 "ARGS" "" "FORMAT;OUTPUT" "INPUTS")
+  cmake_parse_arguments(PARSE_ARGV 1 "ARGS"
+    ""
+    "FORMAT;OUTPUT"
+    "INPUTS;EXCLUDE_PATTERNS"
+  )
 
   if (NOT DEFINED ARGS_INPUTS)
     message(FATAL_ERROR ${__FCM_DEBUG_CATCH_FATAL_ERROR__}
@@ -97,6 +106,7 @@ function(@FCM_COMMAND_PREFIX@doxygen_add_custom_target
 
   set(DOXYGEN_GENERATE_${ARGS_FORMAT} YES)
   set(DOXYGEN_${ARGS_FORMAT}_OUTPUT "${output}")
+  set(DOXYGEN_EXCLUDE_PATTERNS ${ARGS_EXCLUDE_PATTERNS})
 
   @FCM_COMMAND_PREFIX@get_project_target_prefix()
   doxygen_add_docs(
