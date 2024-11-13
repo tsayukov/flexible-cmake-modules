@@ -225,10 +225,14 @@ endif()
 #[=================================================================[#github/wiki
 ## ENABLE_COVERAGE
 
-TODO: add description
+Enable code coverage testing. The required program is included
+in the `Dependencies` template module. By default, it is [`lcov`][509]
+via the [`Lcov`][110] template module.
 
 #]=================================================================]#github/wiki
-@FCM_COMMAND_PREFIX@dev_option(ENABLE_COVERAGE "Enable code coverage testing")
+@FCM_COMMAND_PREFIX@dev_option(ENABLE_COVERAGE "Enable code coverage testing"
+  IF CMAKE_BUILD_TYPE STREQUAL [[Debug]]
+)
 
 #[=================================================================[#github/wiki
 ## ENABLE_FORMATTING
@@ -377,6 +381,7 @@ endfunction()
 [107]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Doxygen
 [108]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Valgrind
 [109]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Clang-format
+[110]: https://github.com/tsayukov/flexible-cmake-modules/wiki/Lcov
 
 [301]: https://cmake.org/cmake/help/latest/variable/BUILD_SHARED_LIBS.html
 [302]: https://cmake.org/cmake/help/latest/module/GenerateExportHeader.html
@@ -396,5 +401,6 @@ endfunction()
 [506]: https://jothepro.github.io/doxygen-awesome-css
 [507]: https://valgrind.org
 [508]: https://clang.llvm.org/docs/ClangFormat.html
+[509]: https://github.com/linux-test-project/lcov
 
 #]=================================================================]#github/wiki
